@@ -1,7 +1,7 @@
 #include <iostream>
 #include "Lexer/Lexer.h"
 #include "Parser/Parser.h"
-//#include "Visitor/XML_Visitor.h"
+#include "Visitor/XML_Visitor.h"
 //#include "Visitor/Semantic_Visitor.h"
 //#include "Visitor/Interpreter_Visitor.h"
 
@@ -141,22 +141,22 @@ int main(int argc, char **argv) {
 
         parser::Parser parser(lexer.tokens);
         auto programNode = std::shared_ptr<parser::ASTProgramNode>(parser.parseProgram());
+    }else if (std::string("-x") == argv[1]) {
+//        std::cout << "TESTING XML Generator" << std::endl;
+
+        lexer::Lexer lexer;
+        lexer.extractLexemes(_program_2);
+
+        parser::Parser parser(lexer.tokens);
+        auto programNode = std::shared_ptr<parser::ASTProgramNode>(parser.parseProgram());
+
+        visitor::XMLVisitor xmlVisitor;
+        auto *programNode1 = new parser::ASTProgramNode(programNode);
+        xmlVisitor.visit(programNode1);
+
+        delete programNode1;
     }
-//    else if (std::string("-x") == argv[1]){
-////        std::cout << "TESTING XML Generator" << std::endl;
-//
-//        lexer::Lexer lexer;
-//        lexer.extractLexemes(_program_2);
-//
-//        parser::Parser parser(lexer.tokens);
-//        auto programNode = std::shared_ptr<parser::ASTProgramNode>(parser.parseProgram());
-//
-//        visitor::XMLVisitor xmlVisitor;
-//        auto *programNode1 = new parser::ASTProgramNode(programNode);
-//        xmlVisitor.visit(programNode1);
-//
-//        delete programNode1;
-//    }else if (std::string("-s") == argv[1]){
+//    else if (std::string("-s") == argv[1]){
 ////        std::cout << "TESTING Semantic Analyzer" << std::endl;
 //
 //        lexer::Lexer lexer;
