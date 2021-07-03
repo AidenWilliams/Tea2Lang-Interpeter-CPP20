@@ -19,7 +19,7 @@ namespace parser {
         std::vector<lexer::Token> tokens;
     public:
         explicit Parser(std::vector<lexer::Token> tokens) : tokens(tokens) {
-            // Initialise the currentToken and pointer for the next token
+            // Initialise the currentToken and nextToken
             currentToken = tokens.front();
             nextToken = tokens.at(1);
             currentLoc = 0;

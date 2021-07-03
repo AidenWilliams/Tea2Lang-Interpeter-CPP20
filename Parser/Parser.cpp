@@ -10,7 +10,8 @@ namespace parser {
         // Move window by step
         currentLoc += step;
         currentToken = tokens.at(currentLoc);
-        nextToken = tokens.at(1 + currentLoc);
+        if(tokens.begin() + (1 + currentLoc) != tokens.end())
+            nextToken = tokens.at(1 + currentLoc);
     }
 
     std::shared_ptr<ASTProgramNode> Parser::parseProgram(bool block) {
