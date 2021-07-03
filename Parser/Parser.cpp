@@ -291,6 +291,7 @@ namespace parser {
             case lexer::TOK_STRING_TYPE:
             case lexer::TOK_CHAR_TYPE:
             case lexer::TOK_AUTO_TYPE:
+            case lexer::TOK_IDENTIFIER: // structs
                 return currentToken.value;
             default:
                 throw std::runtime_error("Expected type after ':' on line "
@@ -308,11 +309,15 @@ namespace parser {
                 // An identifier can either be a Function call or an assignment
             case lexer::TOK_IDENTIFIER:
                 // If next token is '(' then we found a Function call
-                if (nextLoc[0].type == lexer::TOK_OPENING_CURVY)
+                if (nextLoc[0].type == lexer::TOK_OPENING_CURVY) {
                     return std::make_shared<ASTSFunctionCallNode>(parseFunctionCall(true));
-                else {
+                // If next token is '=' or '[' then we found a Assignment
+                }else if(nextLoc[0].type == lexer::TOK_EQUALS || nextLoc[0].type == lexer::TOK_OPENING_SQUARE) {
                     // if not, its should be an Assignment
                     return parseAssignment();
+                // else this is a declaration of a struct returning function
+                }else{
+                    return parseFunctionDeclaration();
                 }
                 // Print case
             case lexer::TOK_PRINT:
@@ -720,12 +725,8 @@ namespace parser {
         if (currentToken.type != lexer::TOK_OPENING_CURLY)
             throw std::runtime_error("Expected '{' after while on line "
                                      + std::to_string(currentToken.lineNumber) + ".");
-        // Get next token
-        moveTokenWindow();
         // Get block after {
         auto structBlock = parseBlock();
-        // Get next token
-        moveTokenWindow();
         // Create ASTStructNode to return
         return std::make_shared<ASTStructNode>(identifier, structBlock, lineNumber);
     }
