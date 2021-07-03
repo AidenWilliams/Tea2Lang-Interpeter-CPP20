@@ -1,5 +1,5 @@
 cmake-build-debug
 .idea
-cmake-build-wsl
+cmake-build-debug-wsl
 /UnitTester
 /venv
