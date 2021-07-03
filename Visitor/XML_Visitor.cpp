@@ -79,6 +79,37 @@ namespace visitor {
         xmlfile << "</string>" << std::endl;
     }
 
+    void XMLVisitor::visit(parser::ASTLiteralNode<char> *literalNode) {
+        // Add initial <char> tag
+        xmlfile << indentation() << "<char>";
+        // Add value
+        xmlfile << std::to_string(literalNode->val);
+        // Add closing tag
+        xmlfile << "</char>" << std::endl;
+    }
+
+    void XMLVisitor::visit(parser::ASTArrayLiteralNode *arrayLiteralNode) {
+        // Add initial <Array> tag
+        xmlfile << indentation() << "<Array>" << std::endl;
+        // Add indentation level
+        indentationLevel++;
+        // For each item
+        for (auto &param : arrayLiteralNode->expressions) {
+            xmlfile << indentation() << "<item>" << std::endl;
+            // Add indentation level
+            indentationLevel++;
+            // Parameter
+            param->accept(this);
+            // Remove indentation level
+            indentationLevel++;
+            xmlfile << indentation() << "</item>" << std::endl;
+        }
+        // Remove indentation level
+        indentationLevel--;
+        // Add closing tag
+        xmlfile << indentation() << "</Array>" << std::endl;
+    }
+
     void XMLVisitor::visit(parser::ASTBinaryNode *binaryNode) {
         // Add initial <bin> tag
         xmlfile << indentation() << "<bin op = \"" + xmlSafeOp(binaryNode->op) +
@@ -99,7 +130,7 @@ namespace visitor {
         // Add initial <id> tag
         xmlfile << indentation() << "<id>";
         // Add value
-        xmlfile << identifierNode->identifier;
+        xmlfile << identifierNode->getID();
         // Add closing tag
         xmlfile << "</id>" << std::endl;
 
@@ -125,7 +156,7 @@ namespace visitor {
         // Add indentation level
         indentationLevel++;
         // Function identifier
-        xmlfile << indentation() << "<id>" + functionCallNode->identifier->identifier + "</id>" << std::endl;
+        xmlfile << indentation() << "<id>" + functionCallNode->identifier->getID() + "</id>" << std::endl;
         // For each parameter
         for (auto &param : functionCallNode->parameters) {
             xmlfile << indentation() << "<param>" << std::endl;
@@ -149,7 +180,7 @@ namespace visitor {
         // Add indentation level
         indentationLevel++;
         // Function identifier
-        xmlfile << indentation() << "<id>" + sFunctionCallNode->identifier->identifier + "</id>" << std::endl;
+        xmlfile << indentation() << "<id>" + sFunctionCallNode->identifier->getID() + "</id>" << std::endl;
         // For each parameter
         for (auto &param : sFunctionCallNode->parameters) {
             xmlfile << indentation() << "<param>" << std::endl;
@@ -174,7 +205,7 @@ namespace visitor {
         indentationLevel++;
         // Add identifier
         xmlfile << indentation() << "<id type = \"" + declarationNode->type + "\">"
-                << declarationNode->identifier->identifier << "</id>" << std::endl;
+                << declarationNode->identifier->getID() << "</id>" << std::endl;
         // Expression tags
         declarationNode->exprNode->accept(this);
         // Remove indentation level
@@ -189,7 +220,7 @@ namespace visitor {
         // Add indentation level
         indentationLevel++;
         // Add identifier
-        xmlfile << indentation() << "<id>" << assignmentNode->identifier->identifier << "</id>" << std::endl;
+        xmlfile << indentation() << "<id>" << assignmentNode->identifier->getID() << "</id>" << std::endl;
         // Expression tags
         assignmentNode->exprNode->accept(this);
         // Remove indentation level
@@ -342,7 +373,7 @@ namespace visitor {
         // Add indentation level
         indentationLevel++;
         // Function identifier
-        xmlfile << indentation() << "<id>" + functionDeclarationNode->identifier->identifier + "</id>" << std::endl;
+        xmlfile << indentation() << "<id>" + functionDeclarationNode->identifier->getID() + "</id>" << std::endl;
         // For each parameter
         for (auto &param : functionDeclarationNode->parameters) {
             xmlfile << indentation() << "<param type = \"" + param.second +
@@ -367,5 +398,28 @@ namespace visitor {
         indentationLevel--;
         // Add closing tag
         xmlfile << indentation() << "</return>" << std::endl;
+    }
+
+    void XMLVisitor::visit(parser::ASTStructNode *structNode) {
+        // Add initial <struct> tag
+        xmlfile << indentation() << "<struct>" << std::endl;
+        // Add indentation level
+        indentationLevel++;
+        // Add identifier
+        xmlfile << indentation() << "<id>" << structNode->identifier->getID() << "</id>" << std::endl;
+        // Add <structBlock> tag
+        xmlfile << indentation() << "<structBlock>" << std::endl;
+        // Add indentation level
+        indentationLevel++;
+        // structBlock
+        structNode->structBlock->accept(this);
+        // Remove indentation level
+        indentationLevel--;
+        // Add closing tag
+        xmlfile << indentation() << "</structBlock>" << std::endl;
+        // Remove indentation level
+        indentationLevel--;
+        // Add closing tag
+        xmlfile << indentation() << "</struct>" << std::endl;
     }
 }
