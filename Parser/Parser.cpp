@@ -273,12 +273,11 @@ namespace parser {
                 // Get next token
                 moveTokenWindow();
                 // ensure proper syntax
-                if(currentToken.type == lexer::TOK_CLOSING_SQUARE){
+                if(currentToken.type != lexer::TOK_CLOSING_SQUARE){
                     throw std::runtime_error("Expected ']' on line "
                                              + std::to_string(currentToken.lineNumber)
                                              + ".");
                 }
-                moveTokenWindow();
             }
         }
         return std::make_shared<ASTIdentifierNode>(identifier, ilocExprNode, lineNumber);
@@ -377,21 +376,27 @@ namespace parser {
         // Get next token
         moveTokenWindow();
         // Ensure proper syntax
-        if (currentToken.type != lexer::TOK_EQUALS)
-            throw std::runtime_error("Expected assignment operator '=' for " + identifier->identifier + " on line "
-                                     + std::to_string(currentToken.lineNumber) + ".");
-        // Get next token
-        moveTokenWindow();
-        // Get expression after =
-        auto expr = parseExpression();
-        // Get next token
-        moveTokenWindow();
+        // if we are declaring an array we may not need to have an equals
+        auto exprNode = std::shared_ptr<ASTExprNode>();
+        if (currentToken.type == lexer::TOK_EQUALS){
+            // Get next token
+            moveTokenWindow();
+            // Get expression after =
+            exprNode = parseExpression();
+            // Get next token
+            moveTokenWindow();
+        }else{
+            if(identifier->ilocExprNode == nullptr){
+                throw std::runtime_error("Expected assignment operator '=' for " + identifier->identifier + " on line "
+                                         + std::to_string(currentToken.lineNumber) + ".");
+            }
+        }
         // Ensure proper syntax
         if (currentToken.type != lexer::TOK_SEMICOLON)
             throw std::runtime_error("Expected ';' after assignment of " + identifier->identifier + " on line "
                                      + std::to_string(currentToken.lineNumber) + ".");
         // Create ASTDeclarationNode to return
-        return std::make_shared<ASTDeclarationNode>(type, identifier, expr, lineNumber);
+        return std::make_shared<ASTDeclarationNode>(type, identifier, exprNode, lineNumber);
     }
 
     std::shared_ptr<ASTAssignmentNode> Parser::parseAssignment(bool _for) {
@@ -409,7 +414,7 @@ namespace parser {
         // Get next token
         moveTokenWindow();
         // Get expression after =
-        auto expr = parseExpression();
+        auto exprNode = parseExpression();
         // Get next token
         moveTokenWindow();
         // Ensure proper; syntax
@@ -417,7 +422,7 @@ namespace parser {
             throw std::runtime_error("Expected ';' after assignment of " + identifier->identifier + " on line "
                                      + std::to_string(currentToken.lineNumber) + ".");
         // Create ASTAssignmentNode to return
-        return std::make_shared<ASTAssignmentNode>(identifier, expr, lineNumber);
+        return std::make_shared<ASTAssignmentNode>(identifier, exprNode, lineNumber);
     }
 
     std::shared_ptr<ASTPrintNode> Parser::parsePrint() {

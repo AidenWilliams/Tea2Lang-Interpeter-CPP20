@@ -43,26 +43,26 @@ int main(int argc, char **argv) {
             "   ii = ii + 1;\n"
             "}\n";
     std::string _program_2 =
-            "auto XGreaterY(toCompare[] : int ){\n"
+            "auto XGreaterY(toCompare[] : int ){\n" // 1
             "    let ans : auto = false;\n"
-            "    if(toCompare[0]>toCompare[1])   {\n"
+            "    if(toCompare[0] > toCompare[1])   {\n"
             "        ans=true;\n"
             "    }\n"
             "    return ans;\n"
             "}\n"
             "\n"
             "auto XGreaterY(x : int, y : int){\n"
-            "    if(x>y){\n"
+            "    if(x>y){\n" //10
             "        return true;\n"
             "    }else{\n"
             "        return false;\n"
             "    }\n"
             "}\n"
             "\n"
-            "float Average(toAverage[] : float ,count : int)\n"
+            "float Average(toAverage[] : float ,count : int){\n"
             "    let total : float = 0.0;\n"
             "    for(let i : int = 0; i<count; i=i+1){\n"
-            "        total = total + toAverage[i];\n"
+            "        total = total + toAverage[i];\n" //20
             "    }\n"
             "    return total / count;\n"
             "    }\n"
@@ -72,7 +72,7 @@ int main(int argc, char **argv) {
             "\n"
             "arr1[0] = 22.4;\n"
             "arr1[1] = 6.25;\n"
-            "print arr1[1]; //6.25\n"
+            "print arr1[1]; //6.25\n" //30
             "print XGreaterY(arr1); //true\n"
             "print Average(arr2); //6.92\n"
             "print XGreaterY(2,3); //false\n"
@@ -82,7 +82,7 @@ int main(int argc, char **argv) {
             "    let y : float = 0.0;\n"
             "    let z : float = 0.0;\n"
             "\n"
-            "    int Scale(s : float){\n"
+            "    int Scale(s : float){\n" //40
             "        x=x*s;\n"
             "        y=y*s;\n"
             "        z=z*s;\n"
@@ -92,7 +92,7 @@ int main(int argc, char **argv) {
             "        x=x+tx;\n"
             "        y=y+ty;\n"
             "        z=z+tz;\n"
-            "        return 0;//Language does not support void\n"
+            "        return 0;//Language does not support void\n" //50
             "    }\n"
             "}\n"
             "\n"
@@ -102,7 +102,7 @@ int main(int argc, char **argv) {
             "    v3.y = v1.y + v2.y;\n"
             "    v3.z = v1.z + v2.z;\n"
             "    return v3;\n"
-            "}\n"
+            "}\n" //60
             "\n"
             "let v1 : Vector;\n"
             "v1.x=1.0;\n"
@@ -112,7 +112,7 @@ int main(int argc, char **argv) {
             "let v2 : Vector;\n"
             "v2.x=2.0;\n"
             "v2.y=1.2;\n"
-            "v2.z=0.0;\n"
+            "v2.z=0.0;\n" //70
             "\n"
             "let v3 : Vector = Add(v1,v2);\n"
             "print v3.x;//3.0\n"
@@ -122,7 +122,7 @@ int main(int argc, char **argv) {
             "v3.translate(1.0, 1.0, 1.0);\n"
             "\n"
             "let v4 : Vector=Add(v1, v3);\n"
-            "print v3.x;//5.0\n"
+            "print v3.x;//5.0\n" //80
             "print v3.y;//6.2\n"
             "print v3.z;//5.0";
     if (std::string("-l") == argv[1]){
