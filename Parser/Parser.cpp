@@ -93,6 +93,8 @@ namespace parser {
                 return std::make_shared<ASTLiteralNode<int>>(std::stoi(currentToken.value), lineNumber);
             case lexer::TOK_FLOAT:
                 return std::make_shared<ASTLiteralNode<float>>(std::stof(currentToken.value), lineNumber);
+            case lexer::TOK_CHAR:
+                return std::make_shared<ASTLiteralNode<char>>(char(currentToken.value.at(1)), lineNumber);
             case lexer::TOK_TRUE:
                 return std::make_shared<ASTLiteralNode<bool>>(true, lineNumber);
             case lexer::TOK_FALSE:
@@ -134,10 +136,10 @@ namespace parser {
                 }
                 return std::make_shared<ASTLiteralNode<std::string>>(std::move(str), lineNumber);
             }
-                // Identifier or Function call case
+                // Identifier, Function call cases
             case lexer::TOK_IDENTIFIER:
                 // If next token is '(' then we found a Function call
-                if (nextLoc->type == lexer::TOK_OPENING_CURVY)
+                if (nextLoc[0].type == lexer::TOK_OPENING_CURVY)
                     return parseFunctionCall();
                 else {
                     // if not, its just an identifier
@@ -147,6 +149,8 @@ namespace parser {
             case lexer::TOK_OPENING_CURVY:
                 return parseSubExpression();
                 // Unary expression case
+            case lexer::TOK_OPENING_CURLY:
+                return parseArrayLiteral();
             case lexer::TOK_MINUS:
             case lexer::TOK_NOT:
                 // Current token is either not or -
@@ -167,7 +171,7 @@ namespace parser {
         // Add first param
         parameters.emplace_back(parseExpression());
         // If next token is a comma there are more
-        while (nextLoc->type == lexer::TOK_COMMA) {
+        while (nextLoc[0].type == lexer::TOK_COMMA) {
             // Move current token, to token after comma
             moveTokenWindow(2);
             // Add this token
@@ -226,12 +230,41 @@ namespace parser {
         return exprNode;
     }
 
+    std::shared_ptr<ASTExprNode> Parser::parseArrayLiteral(){
+        // Determine line number
+        unsigned int lineNumber = currentToken.lineNumber;
+        // current token is the curly ({) bracket
+        // move over first curly bracket
+        moveTokenWindow();
+        // Now we should be able to get an expression
+        auto expressions = std::vector<std::shared_ptr<ASTExprNode>>();
+        // Add first param
+        expressions.emplace_back(parseExpression());
+        // If next token is a comma there are more
+        while (nextLoc[0].type == lexer::TOK_COMMA) {
+            // Move current token, to token after comma
+            moveTokenWindow(2);
+            // Add this token
+            expressions.emplace_back(parseExpression());
+        }
+        // Current token is on the last param, we need to move beyond that to get the closing }
+        moveTokenWindow();
+        if(currentToken.type != lexer::TOK_CLOSING_CURLY){
+            throw std::runtime_error("Expected '}' on line "
+                                     + std::to_string(currentToken.lineNumber)
+                                     + " array literal.");
+        }
+        return std::make_shared<ASTArrayLiteralNode>(expressions, lineNumber);
+    }
+
     std::string Parser::parseType() const {
         switch (currentToken.type) {
             case lexer::TOK_INT_TYPE:
             case lexer::TOK_FLOAT_TYPE:
             case lexer::TOK_BOOL_TYPE:
             case lexer::TOK_STRING_TYPE:
+            case lexer::TOK_CHAR_TYPE:
+            case lexer::TOK_AUTO_TYPE:
                 return currentToken.value;
             default:
                 throw std::runtime_error("Expected type after ':' on line "
@@ -249,7 +282,7 @@ namespace parser {
                 // An identifier can either be a Function call or an assignment
             case lexer::TOK_IDENTIFIER:
                 // If next token is '(' then we found a Function call
-                if (nextLoc->type == lexer::TOK_OPENING_CURVY)
+                if (nextLoc[0].type == lexer::TOK_OPENING_CURVY)
                     return std::make_shared<ASTSFunctionCallNode>(parseFunctionCall(true));
                 else {
                     // if not, its should be an Assignment
@@ -567,7 +600,7 @@ namespace parser {
         // Add first param
         parameters.emplace_back(std::pair < std::string, std::string > {identifier->identifier, type});
         // If next token is a comma there are more
-        while (nextLoc->type == lexer::TOK_COMMA) {
+        while (nextLoc[0].type == lexer::TOK_COMMA) {
             // Move current token, to token after comma
             moveTokenWindow(2);
             // repeat the above steps

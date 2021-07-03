@@ -41,15 +41,14 @@ namespace parser {
         void accept(visitor::Visitor* v) override;
     };
 
-    template <typename T>
-    class ASTArrayNode : public ASTExprNode {
+    class ASTArrayLiteralNode : public ASTExprNode {
     public:
-        ASTArrayNode(std::vector<T> values, unsigned int lineNumber) :
-                values(values),
+        ASTArrayLiteralNode(std::vector<std::shared_ptr<ASTExprNode>> expressions, unsigned int lineNumber) :
+                expressions(std::move(expressions)),
                 lineNumber(lineNumber)
         {};
-        ~ASTArrayNode() = default;
-        std::vector<T> values;
+        ~ASTArrayLiteralNode() = default;
+        std::vector<std::shared_ptr<ASTExprNode>> expressions;
         unsigned int lineNumber;
         void accept(visitor::Visitor* v) override;
     };

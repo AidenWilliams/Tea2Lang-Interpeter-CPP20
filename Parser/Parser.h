@@ -24,6 +24,16 @@ namespace parser {
         }
 
         std::shared_ptr<ASTProgramNode> parseProgram(bool block=false);
+
+        std::shared_ptr<ASTExprNode> parseExpression();
+        std::shared_ptr<ASTExprNode> parseSimpleExpression();
+        std::shared_ptr<ASTExprNode> parseTerm();
+        std::shared_ptr<ASTExprNode> parseFactor();
+        std::vector<std::shared_ptr<ASTExprNode>> parseActualParams();
+        std::shared_ptr<ASTFunctionCallNode> parseFunctionCall(bool semicolon=false);
+        std::shared_ptr<ASTExprNode> parseSubExpression();
+        std::shared_ptr<ASTExprNode> parseArrayLiteral();
+
         std::shared_ptr<ASTStatementNode> parseStatement();
         std::shared_ptr<ASTDeclarationNode> parseDeclaration();
         std::shared_ptr<ASTAssignmentNode> parseAssignment(bool _for=false);
@@ -35,13 +45,6 @@ namespace parser {
         std::shared_ptr<ASTReturnNode> parseReturn();
         std::shared_ptr<ASTFunctionDeclarationNode> parseFunctionDeclaration();
         std::vector<std::pair<std::string, std::string>> parseFormalParams();
-        std::shared_ptr<ASTExprNode> parseExpression();
-        std::shared_ptr<ASTExprNode> parseSimpleExpression();
-        std::shared_ptr<ASTExprNode> parseTerm();
-        std::shared_ptr<ASTExprNode> parseFactor();
-        std::vector<std::shared_ptr<ASTExprNode>> parseActualParams();
-        std::shared_ptr<ASTFunctionCallNode> parseFunctionCall(bool semicolon=false);
-        std::shared_ptr<ASTExprNode> parseSubExpression();
 
         [[nodiscard]] std::string parseType() const;
 
