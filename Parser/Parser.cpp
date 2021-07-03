@@ -8,8 +8,9 @@
 namespace parser {
     void Parser::moveTokenWindow(int step) {
         // Move window by step
-        currentToken = *(nextLoc + step - 1);
-        nextLoc += step;
+        currentLoc += step;
+        currentToken = tokens.at(currentLoc);
+        nextToken = tokens.at(1 + currentLoc);
     }
 
     std::shared_ptr<ASTProgramNode> Parser::parseProgram(bool block) {
@@ -23,7 +24,7 @@ namespace parser {
                 statements.push_back(parseStatement());
             // Get next Token
             // There is a case when a scope/block is empty where were need to check before moving the token window
-            if (currentToken.type != lexer::TOK_END || nextLoc[0].type != lexer::TOK_END)
+            if (currentToken.type != lexer::TOK_END || nextToken.type != lexer::TOK_END)
                 moveTokenWindow();
         }
         return std::make_shared<ASTProgramNode>(statements);
@@ -34,11 +35,11 @@ namespace parser {
         unsigned int lineNumber = currentToken.lineNumber;
         std::string op;
         // Check if the next token is a relational operator
-        if (nextLoc[0].type == lexer::TOK_LESS_THAN || nextLoc[0].type == lexer::TOK_MORE_THAN ||
-            nextLoc[0].type == lexer::TOK_EQAUL_TO || nextLoc[0].type == lexer::TOK_NOT_EQAUL_TO ||
-            nextLoc[0].type == lexer::TOK_LESS_THAN_EQUAL_TO || nextLoc[0].type == lexer::TOK_MORE_THAN_EQUAL_TO) {
+        if (nextToken.type == lexer::TOK_LESS_THAN || nextToken.type == lexer::TOK_MORE_THAN ||
+            nextToken.type == lexer::TOK_EQAUL_TO || nextToken.type == lexer::TOK_NOT_EQAUL_TO ||
+            nextToken.type == lexer::TOK_LESS_THAN_EQUAL_TO || nextToken.type == lexer::TOK_MORE_THAN_EQUAL_TO) {
             // store the operator
-            op = nextLoc[0].value;
+            op = nextToken.value;
             // Move over current expression and operator (making the right side expression the current token)
             moveTokenWindow(2);
             // Parse right side expression and return
@@ -52,10 +53,10 @@ namespace parser {
         unsigned int lineNumber = currentToken.lineNumber;
         std::string op;
         // Check if the next token is an addition operator
-        if (nextLoc[0].type == lexer::TOK_PLUS || nextLoc[0].type == lexer::TOK_MINUS ||
-            nextLoc[0].type == lexer::TOK_OR) {
+        if (nextToken.type == lexer::TOK_PLUS || nextToken.type == lexer::TOK_MINUS ||
+            nextToken.type == lexer::TOK_OR) {
             // store the operator
-            op = nextLoc[0].value;
+            op = nextToken.value;
             // Move over current simple expression and operator (making the right side simple expression the current token)
             moveTokenWindow(2);
             // Parse right side simple expression and return
@@ -69,10 +70,10 @@ namespace parser {
         unsigned int lineNumber = currentToken.lineNumber;
         std::string op;
         // Check if the next token is an multiplication operator
-        if (nextLoc[0].type == lexer::TOK_ASTERISK || nextLoc[0].type == lexer::TOK_DIVIDE ||
-            nextLoc[0].type == lexer::TOK_AND) {
+        if (nextToken.type == lexer::TOK_ASTERISK || nextToken.type == lexer::TOK_DIVIDE ||
+            nextToken.type == lexer::TOK_AND) {
             // store the operator
-            op = nextLoc[0].value;
+            op = nextToken.value;
             // Move over current term and operator (making the right side term the current token)
             moveTokenWindow(2);
             // Parse right side term and return
@@ -139,7 +140,7 @@ namespace parser {
                 // Identifier, Function call cases
             case lexer::TOK_IDENTIFIER:
                 // If next token is '(' then we found a Function call
-                if (nextLoc[0].type == lexer::TOK_OPENING_CURVY)
+                if (nextToken.type == lexer::TOK_OPENING_CURVY)
                     return parseFunctionCall();
                 else {
                     // if not, its just an identifier
@@ -171,7 +172,7 @@ namespace parser {
         // Add first param
         parameters.emplace_back(parseExpression());
         // If next token is a comma there are more
-        while (nextLoc[0].type == lexer::TOK_COMMA) {
+        while (nextToken.type == lexer::TOK_COMMA) {
             // Move current token, to token after comma
             moveTokenWindow(2);
             // Add this token
@@ -241,7 +242,7 @@ namespace parser {
         // Add first param
         expressions.emplace_back(parseExpression());
         // If next token is a comma there are more
-        while (nextLoc[0].type == lexer::TOK_COMMA) {
+        while (nextToken.type == lexer::TOK_COMMA) {
             // Move current token, to token after comma
             moveTokenWindow(2);
             // Add this token
@@ -264,7 +265,7 @@ namespace parser {
         std::string identifier = currentToken.value;
         // now we check if the variable is an array
         auto ilocExprNode = std::shared_ptr<ASTExprNode>();
-        if (nextLoc[0].type == lexer::TOK_OPENING_SQUARE) {
+        if (nextToken.type == lexer::TOK_OPENING_SQUARE) {
             // Get next token (after [)
             moveTokenWindow(2);
             // get expression if the current token isnt a closing square (which it can)
@@ -317,10 +318,10 @@ namespace parser {
                 // An identifier can either be a Function call or an assignment
             case lexer::TOK_IDENTIFIER:
                 // If next token is '(' then we found a Function call
-                if (nextLoc[0].type == lexer::TOK_OPENING_CURVY) {
+                if (nextToken.type == lexer::TOK_OPENING_CURVY) {
                     return std::make_shared<ASTSFunctionCallNode>(parseFunctionCall(true));
                 // If next token is '=' or '[' then we found a Assignment
-                }else if(nextLoc[0].type == lexer::TOK_EQUALS || nextLoc[0].type == lexer::TOK_OPENING_SQUARE) {
+                }else if(nextToken.type == lexer::TOK_EQUALS || nextToken.type == lexer::TOK_OPENING_SQUARE) {
                     // if not, its should be an Assignment
                     return parseAssignment();
                 // else this is a declaration of a struct returning function
@@ -502,7 +503,7 @@ namespace parser {
         auto ifBlock = parseBlock();
         // Check for ELSE
         auto elseBlock = std::shared_ptr<ASTBlockNode>();
-        if (nextLoc[0].type == lexer::TOK_ELSE) {
+        if (nextToken.type == lexer::TOK_ELSE) {
             // Get next token
             moveTokenWindow(2);
             // Ensure proper syntax with starting {
@@ -651,7 +652,7 @@ namespace parser {
         // Add first param
         parameters.emplace_back(std::pair < std::string, std::string > {identifier->getID(), type});
         // If next token is a comma there are more
-        while (nextLoc[0].type == lexer::TOK_COMMA) {
+        while (nextToken.type == lexer::TOK_COMMA) {
             // Move current token, to token after comma
             moveTokenWindow(2);
             // repeat the above steps
