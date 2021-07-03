@@ -227,6 +227,10 @@ namespace lexer {
         return TOK_INVALID;
     }
 
+    bool isStruct(const std::string& type){
+        return !(isFloatType(type) || isIntType(type) || isBoolType(type) || isStringType(type) || isCharType(type) || isAutoType(type));
+    }
+
     TOKEN_TYPE fromState1(const std::string &s) {
         // Keywords
         if (isFloatType(s)) return TOK_FLOAT_TYPE;

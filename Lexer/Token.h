@@ -188,7 +188,8 @@ namespace lexer {
 
     // determines the token for an operator
     TOKEN_TYPE determineOperatorType(const std::string& op);
-
+    // checks whether a type is a struct or not
+    bool isStruct(const std::string& type);
     // TOKEN_TYPE functions that provide possible token type building avenues from a particular state
     // some states do not have a dedicated Function as they are not final states
     TOKEN_TYPE fromState1(const std::string& s);

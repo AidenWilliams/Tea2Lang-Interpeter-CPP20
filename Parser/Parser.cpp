@@ -280,7 +280,15 @@ namespace parser {
                 }
             }
         }
-        return std::make_shared<ASTIdentifierNode>(identifier, ilocExprNode, lineNumber);
+
+        auto child = std::shared_ptr<ASTIdentifierNode>();
+        // Check if next token is '.'
+        if (currentToken.type == lexer::TOK_FULLSTOP) {
+            moveTokenWindow();
+            child = parseIdentifier();
+        }
+
+        return std::make_shared<ASTIdentifierNode>(identifier, child, ilocExprNode, lineNumber);
     }
 
     std::string Parser::parseType() const {
@@ -372,7 +380,7 @@ namespace parser {
         moveTokenWindow();
         // Ensure proper syntax
         if (currentToken.type != lexer::TOK_COLON)
-            throw std::runtime_error("Expected ':' after " + identifier->identifier + " on line "
+            throw std::runtime_error("Expected ':' after " + identifier->getID() + " on line "
                                      + std::to_string(currentToken.lineNumber) + ".");
         // Get next token
         moveTokenWindow();
@@ -381,24 +389,27 @@ namespace parser {
         // Get next token
         moveTokenWindow();
         // Ensure proper syntax
-        // if we are declaring an array we may not need to have an equals
         auto exprNode = std::shared_ptr<ASTExprNode>();
-        if (currentToken.type == lexer::TOK_EQUALS){
-            // Get next token
-            moveTokenWindow();
-            // Get expression after =
-            exprNode = parseExpression();
-            // Get next token
-            moveTokenWindow();
-        }else{
-            if(identifier->ilocExprNode == nullptr){
-                throw std::runtime_error("Expected assignment operator '=' for " + identifier->identifier + " on line "
-                                         + std::to_string(currentToken.lineNumber) + ".");
+        // If the type is a strict then the next token has to be a ';'
+        if(!lexer::isStruct(type)){
+            // if we are declaring an array we may not need to have an equals
+            if (currentToken.type == lexer::TOK_EQUALS){
+                // Get next token
+                moveTokenWindow();
+                // Get expression after =
+                exprNode = parseExpression();
+                // Get next token
+                moveTokenWindow();
+            }else{
+                if(identifier->ilocExprNode == nullptr){
+                    throw std::runtime_error("Expected assignment operator '=' for " + identifier->getID() + " on line "
+                                             + std::to_string(currentToken.lineNumber) + ".");
+                }
             }
         }
         // Ensure proper syntax
         if (currentToken.type != lexer::TOK_SEMICOLON)
-            throw std::runtime_error("Expected ';' after assignment of " + identifier->identifier + " on line "
+            throw std::runtime_error("Expected ';' after assignment of " + identifier->getID() + " on line "
                                      + std::to_string(currentToken.lineNumber) + ".");
         // Create ASTDeclarationNode to return
         return std::make_shared<ASTDeclarationNode>(type, identifier, exprNode, lineNumber);
@@ -414,7 +425,7 @@ namespace parser {
         // Token must be =
         // Ensure proper syntax
         if (currentToken.type != lexer::TOK_EQUALS)
-            throw std::runtime_error("Expected assignment operator '=' for " + identifier->identifier + " on line "
+            throw std::runtime_error("Expected assignment operator '=' for " + identifier->getID() + " on line "
                                      + std::to_string(currentToken.lineNumber) + ".");
         // Get next token
         moveTokenWindow();
@@ -424,7 +435,7 @@ namespace parser {
         moveTokenWindow();
         // Ensure proper; syntax
         if (!_for && currentToken.type != lexer::TOK_SEMICOLON)
-            throw std::runtime_error("Expected ';' after assignment of " + identifier->identifier + " on line "
+            throw std::runtime_error("Expected ';' after assignment of " + identifier->getID() + " on line "
                                      + std::to_string(currentToken.lineNumber) + ".");
         // Create ASTAssignmentNode to return
         return std::make_shared<ASTAssignmentNode>(identifier, exprNode, lineNumber);
@@ -631,14 +642,14 @@ namespace parser {
         moveTokenWindow();
         // Ensure proper syntax with : after identifier
         if (currentToken.type != lexer::TOK_COLON)
-            throw std::runtime_error("Expected ':' after " + identifier->identifier + " on line "
+            throw std::runtime_error("Expected ':' after " + identifier->getID() + " on line "
                                      + std::to_string(currentToken.lineNumber) + ".");
         // Get next token
         moveTokenWindow();
         // get first type
         std::string type = parseType();
         // Add first param
-        parameters.emplace_back(std::pair < std::string, std::string > {identifier->identifier, type});
+        parameters.emplace_back(std::pair < std::string, std::string > {identifier->getID(), type});
         // If next token is a comma there are more
         while (nextLoc[0].type == lexer::TOK_COMMA) {
             // Move current token, to token after comma
@@ -654,14 +665,14 @@ namespace parser {
             moveTokenWindow();
             // Ensure proper syntax with : after identifier
             if (currentToken.type != lexer::TOK_COLON)
-                throw std::runtime_error("Expected ':' after " + identifier->identifier + " on line "
+                throw std::runtime_error("Expected ':' after " + identifier->getID() + " on line "
                                          + std::to_string(currentToken.lineNumber) + ".");
             // Get next token
             moveTokenWindow();
             // get  type
             type = parseType();
             // Add first param
-            parameters.emplace_back(std::pair < std::string, std::string > {identifier->identifier, type});
+            parameters.emplace_back(std::pair < std::string, std::string > {identifier->getID(), type});
         }
         // Current token is on the last param, we need to move beyond that to get the closing )
         moveTokenWindow();

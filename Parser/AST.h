@@ -84,17 +84,33 @@ namespace parser {
     };
 
     class ASTIdentifierNode : public ASTExprNode {
+    private:
+        std::string identifier;
+        std::shared_ptr<ASTIdentifierNode> child;
     public:
-        explicit ASTIdentifierNode(std::string identifier, std::shared_ptr<ASTExprNode> ilocExprNode, unsigned int lineNumber) :
+        explicit ASTIdentifierNode(std::string identifier, std::shared_ptr<ASTIdentifierNode> child, std::shared_ptr<ASTExprNode> ilocExprNode, unsigned int lineNumber) :
                 identifier(std::move(identifier)),
+                child(std::move(child)),
                 ilocExprNode(std::move(ilocExprNode)),
                 lineNumber(lineNumber)
         {};
         ~ASTIdentifierNode() = default;
 
-        std::string identifier;
         std::shared_ptr<ASTExprNode> ilocExprNode;
         unsigned int lineNumber;
+
+        std::string getID(){
+            if(child != nullptr)
+                if(!child->isEmpty())
+                    return identifier + "." + child->getID();
+
+            return identifier;
+        }
+
+        bool isEmpty(){
+            return identifier.empty();
+        }
+
         void accept(visitor::Visitor* v) override;
     };
 
