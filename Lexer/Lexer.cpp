@@ -135,7 +135,7 @@ namespace lexer {
                 ? current_state = 1 : current_state = 24;
                 break;
             case OPENING_SQUARE:
-                (fromState == 1)
+                (fromState == 0)
                 ? current_state = 26 : current_state = 24;
                 break;
             case CLOSING_SQUARE:
@@ -233,6 +233,7 @@ namespace lexer {
                 ? current_state = 16 : current_state = 24;
                 break;
             case QUOTATION_MARK:
+            case APOSTROPHE:
                 if (fromState == 0) {
                     current_state = 2;
                 } else if (fromState == 2 || fromState == 5) {

@@ -244,6 +244,8 @@ namespace lexer {
         if (isElse(s)) return TOK_ELSE;
         if (isFor(s)) return TOK_FOR;
         if (isWhile(s)) return TOK_WHILE;
+        // OPENING SQUARE
+        if (isOpeningSquare(s)) return TOK_OPENING_SQUARE;
         // Identifier
         if (isIdentifier(s)) return TOK_IDENTIFIER;
         return TOK_INVALID;
@@ -252,6 +254,8 @@ namespace lexer {
     TOKEN_TYPE fromState3(const std::string &s) {
         // String
         if (isString(s)) return TOK_STRING;
+        // Char
+        if (isChar(s)) return TOK_CHAR;
         return TOK_INVALID;
     }
 
@@ -353,6 +357,12 @@ namespace lexer {
         return TOK_INVALID;
     }
 
+    TOKEN_TYPE fromState27(const std::string &s) {
+        // Can only be Closing Square
+        if (isClosingSquare(s)) return TOK_CLOSING_SQUARE;
+        return TOK_INVALID;
+    }
+
     TOKEN_TYPE Token::determineTokenType(std::string &s, unsigned int state) {
         switch (state) {
             case 0:
@@ -389,6 +399,8 @@ namespace lexer {
                 return fromState23(s);
             case 25:
                 return fromState25(s);
+            case 27:
+                return fromState27(s);
             default:
                 return TOK_INVALID;
         }
