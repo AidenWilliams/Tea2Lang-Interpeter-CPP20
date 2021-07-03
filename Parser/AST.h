@@ -85,13 +85,15 @@ namespace parser {
 
     class ASTIdentifierNode : public ASTExprNode {
     public:
-        explicit ASTIdentifierNode(std::string identifier, unsigned int lineNumber) :
+        explicit ASTIdentifierNode(std::string identifier, std::shared_ptr<ASTExprNode> ilocExprNode, unsigned int lineNumber) :
                 identifier(std::move(identifier)),
+                ilocExprNode(std::move(ilocExprNode)),
                 lineNumber(lineNumber)
         {};
         ~ASTIdentifierNode() = default;
 
         std::string identifier;
+        std::shared_ptr<ASTExprNode> ilocExprNode;
         unsigned int lineNumber;
         void accept(visitor::Visitor* v) override;
     };

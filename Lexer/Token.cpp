@@ -361,6 +361,12 @@ namespace lexer {
         return TOK_INVALID;
     }
 
+    TOKEN_TYPE fromState26(const std::string &s) {
+        // Can only be Closing Square
+        if (isOpeningSquare(s)) return TOK_OPENING_SQUARE;
+        return TOK_INVALID;
+    }
+
     TOKEN_TYPE fromState27(const std::string &s) {
         // Can only be Closing Square
         if (isClosingSquare(s)) return TOK_CLOSING_SQUARE;
@@ -409,6 +415,8 @@ namespace lexer {
                 return fromState23(s);
             case 25:
                 return fromState25(s);
+            case 26:
+                return fromState26(s);
             case 27:
                 return fromState27(s);
             case 28:

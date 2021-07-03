@@ -143,7 +143,7 @@ namespace parser {
                     return parseFunctionCall();
                 else {
                     // if not, its just an identifier
-                    return std::make_shared<ASTIdentifierNode>(currentToken.value, lineNumber);
+                    return parseIdentifier();
                 }
                 // Subexpression case
             case lexer::TOK_OPENING_CURVY:
@@ -186,7 +186,7 @@ namespace parser {
         auto parameters = std::vector<std::shared_ptr<ASTExprNode>>();
         unsigned int lineNumber = currentToken.lineNumber;
         // current token is the Function identifier
-        auto identifier = std::make_shared<ASTIdentifierNode>(currentToken.value, lineNumber);
+        auto identifier = parseIdentifier();
         // Get next token
         moveTokenWindow();
         // Ensure proper syntax
@@ -230,7 +230,7 @@ namespace parser {
         return exprNode;
     }
 
-    std::shared_ptr<ASTExprNode> Parser::parseArrayLiteral(){
+    std::shared_ptr<ASTArrayLiteralNode> Parser::parseArrayLiteral(){
         // Determine line number
         unsigned int lineNumber = currentToken.lineNumber;
         // current token is the curly ({) bracket
@@ -252,9 +252,36 @@ namespace parser {
         if(currentToken.type != lexer::TOK_CLOSING_CURLY){
             throw std::runtime_error("Expected '}' on line "
                                      + std::to_string(currentToken.lineNumber)
-                                     + " array literal.");
+                                     + " to close the array literal.");
         }
         return std::make_shared<ASTArrayLiteralNode>(expressions, lineNumber);
+    }
+
+    std::shared_ptr<ASTIdentifierNode> Parser::parseIdentifier() {
+        // Determine line number
+        unsigned int lineNumber = currentToken.lineNumber;
+        // current value is identifier
+        std::string identifier = currentToken.value;
+        // now we check if the variable is an array
+        auto ilocExprNode = std::shared_ptr<ASTExprNode>();
+        if (nextLoc[0].type == lexer::TOK_OPENING_SQUARE) {
+            // Get next token (after [)
+            moveTokenWindow(2);
+            // get expression if the current token isnt a closing square (which it can)
+            if(currentToken.type != lexer::TOK_CLOSING_SQUARE){
+                ilocExprNode = parseExpression();
+                // Get next token
+                moveTokenWindow();
+                // ensure proper syntax
+                if(currentToken.type == lexer::TOK_CLOSING_SQUARE){
+                    throw std::runtime_error("Expected ']' on line "
+                                             + std::to_string(currentToken.lineNumber)
+                                             + ".");
+                }
+                moveTokenWindow();
+            }
+        }
+        return std::make_shared<ASTIdentifierNode>(identifier, ilocExprNode, lineNumber);
     }
 
     std::string Parser::parseType() const {
@@ -308,6 +335,8 @@ namespace parser {
             case lexer::TOK_FLOAT_TYPE:
             case lexer::TOK_BOOL_TYPE:
             case lexer::TOK_STRING_TYPE:
+            case lexer::TOK_CHAR_TYPE:
+            case lexer::TOK_AUTO_TYPE:
                 return parseFunctionDeclaration();
                 // Block parsing case
             case lexer::TOK_STRUCT_TYPE:
@@ -334,7 +363,7 @@ namespace parser {
             throw std::runtime_error("Expected Variable name after 'let' on line "
                                      + std::to_string(currentToken.lineNumber) + ".");
         // Get identifier for new Variable
-        auto identifier = std::make_shared<ASTIdentifierNode>(currentToken.value, lineNumber);
+        auto identifier = parseIdentifier();
         // Get next token
         moveTokenWindow();
         // Ensure proper syntax
@@ -361,7 +390,7 @@ namespace parser {
         if (currentToken.type != lexer::TOK_SEMICOLON)
             throw std::runtime_error("Expected ';' after assignment of " + identifier->identifier + " on line "
                                      + std::to_string(currentToken.lineNumber) + ".");
-        // Create ASTExpressionNode to return
+        // Create ASTDeclarationNode to return
         return std::make_shared<ASTDeclarationNode>(type, identifier, expr, lineNumber);
     }
 
@@ -369,7 +398,7 @@ namespace parser {
         // Determine line number
         unsigned int lineNumber = currentToken.lineNumber;
         // Current token is an IDENTIFIER
-        auto identifier = std::make_shared<ASTIdentifierNode>(currentToken.value, lineNumber);
+        auto identifier = parseIdentifier();
         // Get next token
         moveTokenWindow();
         // Token must be =
@@ -577,14 +606,13 @@ namespace parser {
     std::vector <std::pair<std::string, std::string>> Parser::parseFormalParams() {
         //current token is identifier
         // Determine line number
-        unsigned int lineNumber = currentToken.lineNumber;
         auto parameters = std::vector <std::pair<std::string, std::string>>();
         // get first identifier
         // ensure identifier is here
 
         auto identifier = std::shared_ptr<ASTIdentifierNode>();
         if (currentToken.type == lexer::TOK_IDENTIFIER) {
-            identifier = std::make_shared<ASTIdentifierNode>(currentToken.value, lineNumber);
+            identifier = parseIdentifier();
         } else {
             throw std::runtime_error("Expected Function name after type on line "
                                      + std::to_string(currentToken.lineNumber) + ".");
@@ -607,7 +635,7 @@ namespace parser {
             moveTokenWindow(2);
             // repeat the above steps
             if (currentToken.type == lexer::TOK_IDENTIFIER) {
-                identifier = std::make_shared<ASTIdentifierNode>(currentToken.value, lineNumber);
+                identifier = parseIdentifier();
             } else {
                 throw std::runtime_error("Expected Function name after type on line "
                                          + std::to_string(currentToken.lineNumber) + ".");
@@ -640,7 +668,7 @@ namespace parser {
         // ensure identifier is here
         auto identifier = std::shared_ptr<ASTIdentifierNode>();
         if (currentToken.type == lexer::TOK_IDENTIFIER) {
-            identifier = std::make_shared<ASTIdentifierNode>(currentToken.value, lineNumber);
+            identifier = parseIdentifier();
         } else {
             throw std::runtime_error("Expected Function name after type on line "
                                      + std::to_string(currentToken.lineNumber) + ".");
@@ -680,7 +708,7 @@ namespace parser {
             throw std::runtime_error("Expected Variable name after 'tlstruct' on line "
                                      + std::to_string(currentToken.lineNumber) + ".");
         // Get identifier for new Variable
-        auto identifier = std::make_shared<ASTIdentifierNode>(currentToken.value, lineNumber);
+        auto identifier = parseIdentifier();
         // Get next token
         moveTokenWindow();
         // Ensure proper syntax with starting {

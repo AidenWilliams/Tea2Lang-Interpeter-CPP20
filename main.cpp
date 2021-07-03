@@ -1,13 +1,9 @@
 #include <iostream>
-#include <memory>
 #include "Lexer/Lexer.h"
-#include "Lexer/Token.h"
 #include "Parser/Parser.h"
-#include "Parser/AST.h"
-#include "Visitor/Visitor.h"
-#include "Visitor/XML_Visitor.h"
-#include "Visitor/Semantic_Visitor.h"
-#include "Visitor/Interpreter_Visitor.h"
+//#include "Visitor/XML_Visitor.h"
+//#include "Visitor/Semantic_Visitor.h"
+//#include "Visitor/Interpreter_Visitor.h"
 
 int main(int argc, char **argv) {
     std::string _program_ =
@@ -47,7 +43,7 @@ int main(int argc, char **argv) {
             "   ii = ii + 1;\n"
             "}\n";
     std::string _program_2 =
-            "auto XGreaterY(int toCompare[]){\n"
+            "auto XGreaterY(toCompare[] : int ){\n"
             "    let ans : auto = false;\n"
             "    if(toCompare[0]>toCompare[1])   {\n"
             "        ans=true;\n"
@@ -55,7 +51,7 @@ int main(int argc, char **argv) {
             "    return ans;\n"
             "}\n"
             "\n"
-            "auto XGreaterY(int x,int y){\n"
+            "auto XGreaterY(x : int, y : int){\n"
             "    if(x>y){\n"
             "        return true;\n"
             "    }else{\n"
@@ -63,7 +59,7 @@ int main(int argc, char **argv) {
             "    }\n"
             "}\n"
             "\n"
-            "float Average(float toAverage[],int count)\n"
+            "float Average(toAverage[] : float ,count : int)\n"
             "    let total : float = 0.0;\n"
             "    for(let i : int = 0; i<count; i=i+1){\n"
             "        total = total + toAverage[i];\n"
@@ -86,13 +82,13 @@ int main(int argc, char **argv) {
             "    let y : float = 0.0;\n"
             "    let z : float = 0.0;\n"
             "\n"
-            "    intScale(float s){\n"
+            "    int Scale(s : float){\n"
             "        x=x*s;\n"
             "        y=y*s;\n"
             "        z=z*s;\n"
             "        return 0;//Because functions always return something\n"
             "    }\n"
-            "    intTranslate(float tx,float ty,float tz){\n"
+            "    int Translate(tx : float,ty : float,tz : float){\n"
             "        x=x+tx;\n"
             "        y=y+ty;\n"
             "        z=z+tz;\n"
@@ -100,7 +96,7 @@ int main(int argc, char **argv) {
             "    }\n"
             "}\n"
             "\n"
-            "Vector Add(Vectorv1,Vectorv2){\n"
+            "Vector Add(v1 : Vector, v2 : Vector){\n"
             "    let v3 : Vector;\n"
             "    v3.x = v1.x + v2.x;\n"
             "    v3.y = v1.y + v2.y;\n"
@@ -108,17 +104,17 @@ int main(int argc, char **argv) {
             "    return v3;\n"
             "}\n"
             "\n"
-            "let v1:Vector;\n"
+            "let v1 : Vector;\n"
             "v1.x=1.0;\n"
             "v1.y=2.0;\n"
             "v1.z=2.0;\n"
             "\n"
-            "let v2:Vector;\n"
+            "let v2 : Vector;\n"
             "v2.x=2.0;\n"
             "v2.y=1.2;\n"
             "v2.z=0.0;\n"
             "\n"
-            "let v3:Vector = Add(v1,v2);\n"
+            "let v3 : Vector = Add(v1,v2);\n"
             "print v3.x;//3.0\n"
             "print v3.y;//3.2\n"
             "print v3.z;//2.0\n"
@@ -141,55 +137,56 @@ int main(int argc, char **argv) {
     }else if (std::string("-p") == argv[1]){
 //        std::cout << "TESTING PARSER" << std::endl;
         lexer::Lexer lexer;
-        lexer.extractLexemes(argv[2]);
+        lexer.extractLexemes(_program_2);
 
         parser::Parser parser(lexer.tokens);
         auto programNode = std::shared_ptr<parser::ASTProgramNode>(parser.parseProgram());
-    }else if (std::string("-x") == argv[1]){
-//        std::cout << "TESTING XML Generator" << std::endl;
-
-        lexer::Lexer lexer;
-        lexer.extractLexemes(argv[2]);
-
-        parser::Parser parser(lexer.tokens);
-        auto programNode = std::shared_ptr<parser::ASTProgramNode>(parser.parseProgram());
-
-        visitor::XMLVisitor xmlVisitor;
-        auto *programNode1 = new parser::ASTProgramNode(programNode);
-        xmlVisitor.visit(programNode1);
-
-        delete programNode1;
-    }else if (std::string("-s") == argv[1]){
-//        std::cout << "TESTING Semantic Analyzer" << std::endl;
-
-        lexer::Lexer lexer;
-        lexer.extractLexemes(argv[2]); //_program_
-
-        parser::Parser parser(lexer.tokens);
-        auto programNode = std::shared_ptr<parser::ASTProgramNode>(parser.parseProgram());
-
-        visitor::SemanticAnalyser semanticAnalyser;
-        auto *programNode1 = new parser::ASTProgramNode(programNode);
-        semanticAnalyser.visit(programNode1);
-
-        delete programNode1;
-    }else if (std::string("-i") == argv[1]){
-//        std::cout << "TESTING Interpreter" << std::endl;
-
-        lexer::Lexer lexer;
-        lexer.extractLexemes(_program_); //argv[2]
-
-        parser::Parser parser(lexer.tokens);
-        auto programNode = std::shared_ptr<parser::ASTProgramNode>(parser.parseProgram());
-
-        visitor::SemanticAnalyser semanticAnalyser;
-        auto *programNode1 = new parser::ASTProgramNode(programNode);
-        semanticAnalyser.visit(programNode1);
-
-        visitor::Interpreter interpreter;
-        interpreter.visit(programNode1);
-
-        delete programNode1;
     }
+//    else if (std::string("-x") == argv[1]){
+////        std::cout << "TESTING XML Generator" << std::endl;
+//
+//        lexer::Lexer lexer;
+//        lexer.extractLexemes(_program_2);
+//
+//        parser::Parser parser(lexer.tokens);
+//        auto programNode = std::shared_ptr<parser::ASTProgramNode>(parser.parseProgram());
+//
+//        visitor::XMLVisitor xmlVisitor;
+//        auto *programNode1 = new parser::ASTProgramNode(programNode);
+//        xmlVisitor.visit(programNode1);
+//
+//        delete programNode1;
+//    }else if (std::string("-s") == argv[1]){
+////        std::cout << "TESTING Semantic Analyzer" << std::endl;
+//
+//        lexer::Lexer lexer;
+//        lexer.extractLexemes(_program_2); //_program_
+//
+//        parser::Parser parser(lexer.tokens);
+//        auto programNode = std::shared_ptr<parser::ASTProgramNode>(parser.parseProgram());
+//
+//        visitor::SemanticAnalyser semanticAnalyser;
+//        auto *programNode1 = new parser::ASTProgramNode(programNode);
+//        semanticAnalyser.visit(programNode1);
+//
+//        delete programNode1;
+//    }else if (std::string("-i") == argv[1]){
+////        std::cout << "TESTING Interpreter" << std::endl;
+//
+//        lexer::Lexer lexer;
+//        lexer.extractLexemes(_program_2); //argv[2]
+//
+//        parser::Parser parser(lexer.tokens);
+//        auto programNode = std::shared_ptr<parser::ASTProgramNode>(parser.parseProgram());
+//
+//        visitor::SemanticAnalyser semanticAnalyser;
+//        auto *programNode1 = new parser::ASTProgramNode(programNode);
+//        semanticAnalyser.visit(programNode1);
+//
+//        visitor::Interpreter interpreter;
+//        interpreter.visit(programNode1);
+//
+//        delete programNode1;
+//    }
     return 0;
 }

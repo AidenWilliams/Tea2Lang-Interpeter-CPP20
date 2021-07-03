@@ -32,7 +32,8 @@ namespace parser {
         std::vector<std::shared_ptr<ASTExprNode>> parseActualParams();
         std::shared_ptr<ASTFunctionCallNode> parseFunctionCall(bool semicolon=false);
         std::shared_ptr<ASTExprNode> parseSubExpression();
-        std::shared_ptr<ASTExprNode> parseArrayLiteral();
+        std::shared_ptr<ASTArrayLiteralNode> parseArrayLiteral();
+        std::shared_ptr<ASTIdentifierNode> parseIdentifier();
 
         std::shared_ptr<ASTStatementNode> parseStatement();
         std::shared_ptr<ASTDeclarationNode> parseDeclaration();
