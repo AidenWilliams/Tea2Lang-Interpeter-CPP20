@@ -269,7 +269,7 @@ namespace parser {
         if (nextToken.type == lexer::TOK_OPENING_SQUARE) {
             // Get next token (after [)
             moveTokenWindow(2);
-            // get expression if the current token isnt a closing square (which it can)
+            // get expression if the current token isn't a closing square (which it can)
             if(currentToken.type != lexer::TOK_CLOSING_SQUARE){
                 ilocExprNode = parseExpression();
                 // Get next token
@@ -285,8 +285,8 @@ namespace parser {
 
         auto child = std::shared_ptr<ASTIdentifierNode>();
         // Check if next token is '.'
-        if (currentToken.type == lexer::TOK_FULLSTOP) {
-            moveTokenWindow();
+        if (nextToken.type == lexer::TOK_FULLSTOP) {
+            moveTokenWindow(2);
             child = parseIdentifier();
         }
 
@@ -321,8 +321,19 @@ namespace parser {
                 // If next token is '(' then we found a Function call
                 if (nextToken.type == lexer::TOK_OPENING_CURVY) {
                     return std::make_shared<ASTSFunctionCallNode>(parseFunctionCall(true));
-                // If next token is '=' or '[' then we found a Assignment
-                }else if(nextToken.type == lexer::TOK_EQUALS || nextToken.type == lexer::TOK_OPENING_SQUARE) {
+                // If next token is '=' or '[' or '.' then we found a Assignment
+                }else if(nextToken.type == lexer::TOK_EQUALS || nextToken.type == lexer::TOK_OPENING_SQUARE || nextToken.type == lexer::TOK_FULLSTOP) {
+                    // we can have a case of multiple identifiers after a . then finding a '(' this is a case where we
+                    if(nextToken.type == lexer::TOK_FULLSTOP){
+                        // star looping until we find a semi colon
+                        lexer::Token searchToken = currentToken;
+                        int i = currentLoc;
+                        while (searchToken.type != lexer::TOK_SEMICOLON){
+                            if(searchToken.type == lexer::TOK_OPENING_CURVY)
+                                return std::make_shared<ASTSFunctionCallNode>(parseFunctionCall(true));
+                            searchToken = tokens.at(++i);
+                        }
+                    }
                     // if not, its should be an Assignment
                     return parseAssignment();
                 // else this is a declaration of a struct returning function
@@ -392,9 +403,17 @@ namespace parser {
         moveTokenWindow();
         // Ensure proper syntax
         auto exprNode = std::shared_ptr<ASTExprNode>();
-        // If the type is a strict then the next token has to be a ';'
-        if(!lexer::isStruct(type)){
-            // if we are declaring an array we may not need to have an equals
+        // if we are declaring an array or a struct we may not need to have an equals
+        if(lexer::isStruct(type)){
+            if (currentToken.type == lexer::TOK_EQUALS){
+                // Get next token
+                moveTokenWindow();
+                // Get expression after =
+                exprNode = parseExpression();
+                // Get next token
+                moveTokenWindow();
+            }
+        }else{
             if (currentToken.type == lexer::TOK_EQUALS){
                 // Get next token
                 moveTokenWindow();
