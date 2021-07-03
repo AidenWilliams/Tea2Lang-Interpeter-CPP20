@@ -101,7 +101,7 @@ namespace visitor {
             // Parameter
             param->accept(this);
             // Remove indentation level
-            indentationLevel++;
+            indentationLevel--;
             xmlfile << indentation() << "</item>" << std::endl;
         }
         // Remove indentation level
@@ -128,11 +128,16 @@ namespace visitor {
 
     void XMLVisitor::visit(parser::ASTIdentifierNode *identifierNode) {
         // Add initial <id> tag
-        xmlfile << indentation() << "<id>";
+        xmlfile << indentation() << "<id>" << std::endl;
         // Add value
-        xmlfile << identifierNode->getID();
+        indentationLevel++;
+        xmlfile << indentation() << identifierNode->getID() << std::endl;
+        if(identifierNode->ilocExprNode != nullptr){
+            identifierNode->ilocExprNode->accept(this);
+        }
+        indentationLevel--;
         // Add closing tag
-        xmlfile << "</id>" << std::endl;
+        xmlfile << indentation() << "</id>" << std::endl;
 
     }
 
@@ -165,7 +170,7 @@ namespace visitor {
             // Parameter
             param->accept(this);
             // Remove indentation level
-            indentationLevel++;
+            indentationLevel--;
             xmlfile << indentation() << "</param>" << std::endl;
         }
         // Remove indentation level
@@ -189,7 +194,7 @@ namespace visitor {
             // Parameter
             param->accept(this);
             // Remove indentation level
-            indentationLevel++;
+            indentationLevel--;
             xmlfile << indentation() << "</param>" << std::endl;
         }
         // Remove indentation level
@@ -207,7 +212,8 @@ namespace visitor {
         xmlfile << indentation() << "<id type = \"" + declarationNode->type + "\">"
                 << declarationNode->identifier->getID() << "</id>" << std::endl;
         // Expression tags
-        declarationNode->exprNode->accept(this);
+        if(declarationNode->exprNode != nullptr)
+            declarationNode->exprNode->accept(this);
         // Remove indentation level
         indentationLevel--;
         // Add closing tag
