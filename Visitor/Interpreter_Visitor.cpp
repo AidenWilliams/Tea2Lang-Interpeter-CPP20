@@ -832,13 +832,12 @@ namespace visitor {
         f = result->second;
         // go over the function parameters
         // and make sure to update these variables according to the parameters passed
-        std::vector<std::pair<std::string, std::string>> type_and_id;
         for (int i = 0; i < functionCallNode -> parameters.size(); ++i){
             // this visit will check if the variables exist
             functionCallNode -> parameters.at(i) -> accept(this);
             // This visit updates the currentID and currentType
             // store current ID so that we dont need to visit the parameters again to pop their values
-            type_and_id.emplace_back(std::make_pair(currentType, f.paramIDs.at(i)));
+            toPop.emplace_back(std::make_pair(currentType, f.paramIDs.at(i)));
             if (currentType == "int"){
                 /* Update the currentID variable by emplacing back
                  * to f.paramIDs.at(i) variable
@@ -857,13 +856,15 @@ namespace visitor {
             }
         }
         // Ok so now we have updated the arguments, so we can call the actual function to run
+        function = true;
         f.blockNode -> accept(this);
+        function = false;
         // the function has completed its run now we pop back the variables we added
-        for (const auto& pair : type_and_id){
+        for (const auto& pair : toPop){
+            /*
+             * Now we pop the variables
+            */
             if (pair.first == "int"){
-                /*
-                 * Now we pop the variables
-                */
                 pop_back<int>(pair.second);
             }else if (pair.first == "float"){
                 pop_back<float>(pair.second);
@@ -873,6 +874,7 @@ namespace visitor {
                 pop_back<std::string>(pair.second);
             }
         }
+        toPop = std::vector<std::pair<std::string, std::string>>();
     }
     // Expressions
 
@@ -891,13 +893,12 @@ namespace visitor {
         f = result->second;
         // go over the function parameters
         // and make sure to update these variables according to the parameters passed
-        std::vector<std::pair<std::string, std::string>> type_and_id;
         for (int i = 0; i < sFunctionCallNode -> parameters.size(); ++i){
             // this visit will check if the variables exist
             sFunctionCallNode -> parameters.at(i) -> accept(this);
             // This visit updates the currentID and currentType
             // store current ID so that we dont need to visit the parameters again to pop their values
-            type_and_id.emplace_back(std::make_pair(currentType, currentID));
+            toPop.emplace_back(std::make_pair(currentType, currentID));
             if (currentType == "int"){
                 /* Update the currentID variable by emplacing back
                  * to f.paramIDs.at(i) variable
@@ -916,13 +917,15 @@ namespace visitor {
             }
         }
         // Ok so now we have updated the arguments, so we can call the actual function to run
+        function = true;
         f.blockNode -> accept(this);
+        function = false;
         // the function has completed its run now we pop back the variables we added
-        for (const auto& pair : type_and_id){
+        for (const auto& pair : toPop){
+            /*
+             * Now we pop the variables
+            */
             if (pair.first == "int"){
-                /*
-                 * Now we pop the variables
-                */
                 pop_back<int>(pair.second);
             }else if (pair.first == "float"){
                 pop_back<float>(pair.second);
@@ -932,6 +935,7 @@ namespace visitor {
                 pop_back<std::string>(pair.second);
             }
         }
+        toPop = std::vector<std::pair<std::string, std::string>>();
     }
 
     void Interpreter::visit(parser::ASTDeclarationNode *declarationNode) {
@@ -968,6 +972,10 @@ namespace visitor {
                     interpreter::Variable<std::string>(currentType, declarationNode -> identifier -> identifier, get<std::string>(currentID), declarationNode -> lineNumber)
             );
         }
+
+        if(function){
+            toPop.emplace_back(std::make_pair(currentType, declarationNode -> identifier -> identifier));
+        }
     }
 
     void Interpreter::visit(parser::ASTAssignmentNode *assignmentNode) {
@@ -1003,6 +1011,9 @@ namespace visitor {
             insert (
                     interpreter::Variable<std::string>(type, id, get<std::string>(currentID), assignmentNode -> lineNumber)
             );
+        }
+        if(function){
+            toPop.emplace_back(std::make_pair(currentType, assignmentNode -> identifier -> identifier));
         }
     }
 

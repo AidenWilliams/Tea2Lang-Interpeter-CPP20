@@ -82,7 +82,10 @@ namespace visitor {
         // type, identifier
         std::string currentType;
         std::string currentID;
-
+        // function block
+        bool function;
+        //                      Type, Identifier
+        std::vector<std::pair<std::string, std::string>> toPop;
     public:
         Interpreter(){
             // insert the interpreter variables these being the literal and 0CurrentVariable for each type
@@ -94,6 +97,7 @@ namespace visitor {
             insert(interpreter::Variable<bool> ("bool", "literal", false, 0));
             insert(interpreter::Variable<std::string>("string", "0CurrentVariable", "", 0));
             insert(interpreter::Variable<std::string> ("string", "literal", "", 0));
+            function = false;
         };
         ~Interpreter() = default;
 
