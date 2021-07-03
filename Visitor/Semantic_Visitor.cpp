@@ -19,7 +19,7 @@ namespace visitor{
         if (f.type.empty()){
             throw FunctionTypeException();
         }
-        auto ret = functionTable.insert(std::pair<std::string, Function>(f.identifier, f) );
+        auto ret = functionTable.insert(std::pair<std::string, Function>(f.identifier, f) );o
         return ret.second;
     }
 
