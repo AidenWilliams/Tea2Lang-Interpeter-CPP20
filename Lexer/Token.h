@@ -113,6 +113,13 @@ namespace lexer {
         // Invalid
         // Invalid
         TOK_INVALID             = 41,
+        // NEW TOKENS
+        TOK_CHAR_TYPE           = 42,
+        TOK_CHAR                = 43,
+        TOK_AUTO_TYPE           = 44,
+        TOK_OPENING_SQUARE      = 45,
+        TOK_CLOSING_SQUARE      = 46,
+        TOK_STRUCT_TYPE         = 47,
     };
 
     /* regex statements that defines:
@@ -133,6 +140,9 @@ namespace lexer {
     bool isIntType(const std::string& s);
     bool isBoolType(const std::string& s);
     bool isStringType(const std::string& s);
+    bool isCharType(const std::string &s);
+    bool isAutoType(const std::string &s);
+    bool isStructType(const std::string &s);
     bool isTrue(const std::string& s);
     bool isFalse(const std::string& s);
     bool isIdentifier(const std::string& s);
@@ -149,6 +159,7 @@ namespace lexer {
     bool isString(const std::string& s);
     bool isInt(const std::string& s);
     bool isFloat(const std::string& s);
+    bool isChar(const std::string &s);
     bool isDivide(const std::string& s);
     bool isSingleLineComment(const std::string& s);
     bool isMultiLineComment(const std::string& s);
@@ -157,6 +168,8 @@ namespace lexer {
     bool isClosingCurly(const std::string& s);
     bool isOpeningCurvy(const std::string& s);
     bool isClosingCurvy(const std::string& s);
+    bool isOpeningSquare(const std::string &s);
+    bool isClosingSquare(const std::string &s);
     bool isComma(const std::string& s);
     bool isColon(const std::string& s);
     bool isSemiColon(const std::string& s);
@@ -175,7 +188,7 @@ namespace lexer {
     TOKEN_TYPE determineOperatorType(const std::string& op);
 
     // TOKEN_TYPE functions that provide possible token type building avenues from a particular state
-    // some states do not have a dedicated Function as they are completely final states
+    // some states do not have a dedicated Function as they are not final states
     TOKEN_TYPE fromState1(const std::string& s);
     TOKEN_TYPE fromState3(const std::string& s);
     TOKEN_TYPE fromState6(const std::string& s);
@@ -192,6 +205,7 @@ namespace lexer {
     TOKEN_TYPE fromState22(const std::string& s);
     TOKEN_TYPE fromState23(const std::string& s);
     TOKEN_TYPE fromState25(const std::string& s);
+    TOKEN_TYPE fromState27(const std::string& s);
 
     // Token class
     class Token {

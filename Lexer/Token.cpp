@@ -229,9 +229,9 @@ namespace lexer {
         if (isIntType(s)) return TOK_INT_TYPE;
         if (isBoolType(s)) return TOK_BOOL_TYPE;
         if (isStringType(s)) return TOK_STRING_TYPE;
-//        if (isCharType(s)) return TOK_STRING_TYPE;
-//        if (isAutoType(s)) return TOK_STRING_TYPE;
-//        if (isStructType(s)) return TOK_STRING_TYPE;
+        if (isCharType(s)) return TOK_CHAR_TYPE;
+        if (isAutoType(s)) return TOK_AUTO_TYPE;
+        if (isStructType(s)) return TOK_STRUCT_TYPE;
         if (isTrue(s)) return TOK_TRUE;
         if (isFalse(s)) return TOK_FALSE;
         if (isAnd(s)) return TOK_AND;

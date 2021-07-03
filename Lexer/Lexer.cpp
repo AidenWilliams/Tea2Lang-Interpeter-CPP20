@@ -98,6 +98,10 @@ namespace lexer {
         return c == ']';
     }
 
+    bool isApostrophe(char c) {
+        return c == '\'';
+    }
+
     TRANSITION_TYPE determineTransitionType(char c) {
         if (isLetter(c)) return LETTER;
         if (isDigit(c)) return DIGIT;
@@ -116,8 +120,8 @@ namespace lexer {
         if (isEquals(c)) return EQUALS;
         if (isExclamation(c)) return EXCLAMATION;
         if (isSpace(c)) return SPACE;
-        if (isOpeningSquare(c)) return OPENING_SQAURE;
-        if (isClosingSquare(c)) return CLOSING_SQAURE;
+        if (isOpeningSquare(c)) return OPENING_SQUARE;
+        if (isClosingSquare(c)) return CLOSING_SQUARE;
         // lastly
         if (isPrintable(c)) return PRINTABLE;
         return INVALID;
@@ -130,11 +134,11 @@ namespace lexer {
                 (fromState == 0 || fromState == 1)
                 ? current_state = 1 : current_state = 24;
                 break;
-            case OPENING_SQAURE:
+            case OPENING_SQUARE:
                 (fromState == 1)
                 ? current_state = 26 : current_state = 24;
                 break;
-            case CLOSING_SQAURE:
+            case CLOSING_SQUARE:
                 (fromState == 26 || fromState == 6)
                 ? current_state = 27 : current_state = 24;
                 break;

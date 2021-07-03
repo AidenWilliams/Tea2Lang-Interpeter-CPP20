@@ -50,9 +50,14 @@ namespace lexer {
         END             = 16,
         INVALID         = 17,
         SPACE           = 18,
+        // '}'
         CLOSING_CURLY   = 19,
-        OPENING_SQAURE  = 20,
-        CLOSING_SQAURE  = 21
+        // '['
+        OPENING_SQUARE  = 20,
+        // ']'
+        CLOSING_SQUARE  = 21,
+        // ' ' '
+        APOSTROPHE  = 22
     };
     // regex statements that define a letter, digit, or printable character
     extern std::regex letter;
@@ -78,6 +83,7 @@ namespace lexer {
     bool isExclamation(char c);
     bool isSpace(char c);
     bool isClosingCurly(char c);
+    bool isApostrophe(char c);
 
     // TRANSITION_TYPE Function that determines the TRANSITION_TYPE when given a char c
     static TRANSITION_TYPE determineTransitionType(char c);
