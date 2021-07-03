@@ -1,10 +1,6 @@
 //
 // Created by Aiden Williams on 26/06/2021.
 //
-/*
- *
-
- */
 
 #include "Semantic_Visitor.h"
 
@@ -76,6 +72,14 @@ namespace visitor{
 
     void SemanticAnalyser::visit(parser::ASTLiteralNode<std::string> *literalNode) {
         currentType = "string";
+    }
+
+    void SemanticAnalyser::visit(parser::ASTLiteralNode<char> *literalNode) {
+
+    }
+
+    void SemanticAnalyser::visit(parser::ASTArrayLiteralNode *arrayLiteralNode) {
+
     }
 
     void SemanticAnalyser::visit(parser::ASTBinaryNode *binaryNode) {
@@ -157,7 +161,7 @@ namespace visitor{
 
     void SemanticAnalyser::visit(parser::ASTIdentifierNode *identifierNode) {
         // Build variable shell
-        Variable v(identifierNode->identifier);
+        Variable v(identifierNode->getID());
         // Check that a variable with this identifier exists
         for(const auto& scope : scopes) {
             auto result = scope->find(v);
@@ -207,7 +211,7 @@ namespace visitor{
             paramTypes.emplace_back(currentType);
         }
         // Generate Function
-        Function f(functionCallNode->identifier->identifier);
+        Function f(functionCallNode->identifier->getID());
         // Now confirm this exists in the function table for any scope
         for(const auto& scope : scopes){
             auto result = scope->find(f);
@@ -246,7 +250,7 @@ namespace visitor{
             paramTypes.emplace_back(currentType);
         }
         // now generate the function object
-        Function f(sFunctionCallNode->identifier->identifier);
+        Function f(sFunctionCallNode->identifier->getID());
         // Now confirm this exists in the function table for any scope
         for(const auto& scope : scopes){
             auto result = scope->find(f);
@@ -273,7 +277,7 @@ namespace visitor{
 
     void SemanticAnalyser::visit(parser::ASTDeclarationNode *declarationNode) {
         // Generate Variable
-        Variable v(declarationNode->type, declarationNode->identifier->identifier, declarationNode->lineNumber);
+        Variable v(declarationNode->type, declarationNode->identifier->getID(), declarationNode->lineNumber);
         // Check current scope
         auto scope = scopes.back();
         // Try to insert v
@@ -309,7 +313,7 @@ namespace visitor{
          * type = currentType
          */
         // Generate Variable
-        Variable v(currentType, assignmentNode->identifier->identifier, assignmentNode->lineNumber);
+        Variable v(currentType, assignmentNode->identifier->getID(), assignmentNode->lineNumber);
         // Now confirm this exists in the function table for any scope
         for(const auto& scope : scopes){
             auto result = scope->find(v);
@@ -403,7 +407,7 @@ namespace visitor{
         // If current scope is not global then do not allow declaration
         auto scope = scopes.back();
         if (!scope->isGlobal()){
-            throw std::runtime_error("Tried declaring function with identifier " + functionDeclarationNode->identifier->identifier
+            throw std::runtime_error("Tried declaring function with identifier " + functionDeclarationNode->identifier->getID()
                                      + " in a non-global scope.");
         }
         // Create new scope for function params
@@ -419,7 +423,7 @@ namespace visitor{
         }
         // NOTE: The scope variable is still viewing the global scope
         // now generate the function object
-        Function f(functionDeclarationNode->type, functionDeclarationNode->identifier->identifier, paramTypes, functionDeclarationNode->lineNumber);
+        Function f(functionDeclarationNode->type, functionDeclarationNode->identifier->getID(), paramTypes, functionDeclarationNode->lineNumber);
         // Try to insert f
         auto result = scope->find(f);
         // compare the found key and the actual key
@@ -465,6 +469,10 @@ namespace visitor{
         returnNode -> exprNode -> accept(this);
         // mark returns as true
         returns = true;
+    }
+
+    void SemanticAnalyser::visit(parser::ASTStructNode *structNode) {
+
     }
     // Statements
 }

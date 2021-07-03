@@ -118,7 +118,9 @@ namespace visitor {
         void visit(parser::ASTLiteralNode<int>* literalNode) override;
         void visit(parser::ASTLiteralNode<float>* literalNode) override;
         void visit(parser::ASTLiteralNode<bool>* literalNode) override;
+        void visit(parser::ASTLiteralNode<char>* literalNode) override;
         void visit(parser::ASTLiteralNode<std::string>* literalNode) override;
+        void visit(parser::ASTArrayLiteralNode* arrayLiteralNode) override;
         void visit(parser::ASTBinaryNode* binaryNode) override;
         void visit(parser::ASTIdentifierNode* identifierNode) override;
         void visit(parser::ASTUnaryNode* unaryNode) override;
@@ -134,6 +136,7 @@ namespace visitor {
         void visit(parser::ASTWhileNode* whileNode) override;
         void visit(parser::ASTFunctionDeclarationNode* functionDeclarationNode) override;
         void visit(parser::ASTReturnNode* returnNode) override;
+        void visit(parser::ASTStructNode* structNode) override;
     };
 }
 
