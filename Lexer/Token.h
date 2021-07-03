@@ -120,6 +120,7 @@ namespace lexer {
         TOK_OPENING_SQUARE      = 45,
         TOK_CLOSING_SQUARE      = 46,
         TOK_STRUCT_TYPE         = 47,
+        TOK_FULLSTOP            = 48
     };
 
     /* regex statements that defines:
@@ -183,6 +184,7 @@ namespace lexer {
     bool isLessThanEqualTo(const std::string& s);
     bool isNotEqualTo(const std::string& s);
     bool isEqualTo(const std::string& s);
+    bool isFullstop(const std::string& s);
 
     // determines the token for an operator
     TOKEN_TYPE determineOperatorType(const std::string& op);
@@ -206,6 +208,7 @@ namespace lexer {
     TOKEN_TYPE fromState23(const std::string& s);
     TOKEN_TYPE fromState25(const std::string& s);
     TOKEN_TYPE fromState27(const std::string& s);
+    TOKEN_TYPE fromState28(const std::string& s);
 
     // Token class
     class Token {

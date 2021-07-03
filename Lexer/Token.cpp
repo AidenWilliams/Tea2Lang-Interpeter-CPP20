@@ -203,6 +203,10 @@ namespace lexer {
         return s == "==";
     }
 
+    bool isFullstop(const std::string& s){
+        return s == ".";
+    }
+
     TOKEN_TYPE determineOperatorType(const std::string& op){
         // Multiplicative
         if(isAnd(op)) return TOK_AND;
@@ -363,6 +367,12 @@ namespace lexer {
         return TOK_INVALID;
     }
 
+    TOKEN_TYPE fromState28(const std::string &s) {
+        // Can only be Closing Square
+        if (isFullstop(s)) return TOK_FULLSTOP;
+        return TOK_INVALID;
+    }
+
     TOKEN_TYPE Token::determineTokenType(std::string &s, unsigned int state) {
         switch (state) {
             case 0:
@@ -401,6 +411,8 @@ namespace lexer {
                 return fromState25(s);
             case 27:
                 return fromState27(s);
+            case 28:
+                return fromState28(s);
             default:
                 return TOK_INVALID;
         }

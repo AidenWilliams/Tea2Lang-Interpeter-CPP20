@@ -139,7 +139,7 @@ namespace lexer {
                 ? current_state = 26 : current_state = 24;
                 break;
             case CLOSING_SQUARE:
-                (fromState == 26 || fromState == 6)
+                (fromState == 0)
                 ? current_state = 27 : current_state = 24;
                 break;
             case DIGIT:
@@ -179,8 +179,13 @@ namespace lexer {
                 }
                 break;
             case FULLSTOP:
-                (fromState == 6)
-                ? current_state = 7 : current_state = 24;
+                if (fromState == 6){
+                    current_state = 7;
+                }else if(fromState == 0){
+                    current_state = 28;
+                }else{
+                    current_state = 24;
+                }
                 break;
             case UNDERSCORE:
                 (fromState == 0 || fromState == 1)
