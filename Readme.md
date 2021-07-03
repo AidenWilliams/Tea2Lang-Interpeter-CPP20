@@ -1,4 +1,4 @@
-# TeaLang Interpreter CPP20
+# Tea2Lang Interpreter CPP20
 
 Presented here is a TeaLang interpreter written in C++ (20). This assignment forms part of the CPS2000 unit which was taken in partial fulfilment of the
 requirements for the degree of B.Sc. in Artificial Intelligence.
