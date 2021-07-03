@@ -49,8 +49,10 @@ namespace lexer {
         EXCLAMATION     = 15,
         END             = 16,
         INVALID         = 17,
-        SPACE         = 18,
-        CLOSING_CURLY         = 19
+        SPACE           = 18,
+        CLOSING_CURLY   = 19,
+        OPENING_SQAURE  = 20,
+        CLOSING_SQAURE  = 21
     };
     // regex statements that define a letter, digit, or printable character
     extern std::regex letter;
