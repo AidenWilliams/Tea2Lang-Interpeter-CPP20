@@ -93,9 +93,12 @@ namespace lexer {
         // When used, given a vector it acts as a Function to determine whether a state is final or not
         // e.g finalStates[0] == true
         std::vector<bool> finalStates = {
+                                        //  0,    1,    2,     3,    4,     5,     6,    7,     8,    9,    10,   11
                                             true, true, false, true, false, false, true, false, true, true, true, true,
+                                        //  12,    13,    14,   15,   16,   17,   18,   19,   20,    21,   22,   23
                                             false, false, true, true, true, true, true, true, false, true, true, true,
-                                            true, true
+                                        //  24,   25,   26,    27
+                                            true, true, false, true
                                         };
         // Function to extract program lexemes into tokens
         std::vector<Token> extractLexemes(const std::string& text);

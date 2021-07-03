@@ -9,6 +9,7 @@
 namespace lexer {
     std::regex identifier("^[a-zA-Z_]*[a-zA-Z0-9_]*$");
     std::regex string(R"(\"(\\.|[^"\\])*\")");
+    std::regex charLiteral(R"(\'(\\.|[^"\\])*\')"); //cpp chars can have more than one character like \n \t and others
     std::regex intLiteral("^[0-9]*$");
     std::regex floatLiteral("^[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)$");
     std::regex singleLineComment(R"(^\/\/[^\n\r]+(?:[\n\r]|\*\))$)");
@@ -28,6 +29,18 @@ namespace lexer {
 
     bool isStringType(const std::string &s) {
         return s == "string";
+    }
+
+    bool isCharType(const std::string &s) {
+        return s == "char";
+    }
+
+    bool isAutoType(const std::string &s) {
+        return s == "auto";
+    }
+
+    bool isStructType(const std::string &s) {
+        return s == "tlstruct";
     }
 
     bool isTrue(const std::string &s) {
@@ -94,6 +107,10 @@ namespace lexer {
         return (std::regex_match(s, floatLiteral));
     }
 
+    bool isChar(const std::string &s) {
+        return (std::regex_match(s, charLiteral));
+    }
+
     bool isDivide(const std::string &s) {
         return s == "/";
     }
@@ -124,6 +141,14 @@ namespace lexer {
 
     bool isClosingCurvy(const std::string &s) {
         return s == ")";
+    }
+
+    bool isOpeningSquare(const std::string &s) {
+        return s == "[";
+    }
+
+    bool isClosingSquare(const std::string &s) {
+        return s == "]";
     }
 
     bool isComma(const std::string &s) {
@@ -204,6 +229,9 @@ namespace lexer {
         if (isIntType(s)) return TOK_INT_TYPE;
         if (isBoolType(s)) return TOK_BOOL_TYPE;
         if (isStringType(s)) return TOK_STRING_TYPE;
+//        if (isCharType(s)) return TOK_STRING_TYPE;
+//        if (isAutoType(s)) return TOK_STRING_TYPE;
+//        if (isStructType(s)) return TOK_STRING_TYPE;
         if (isTrue(s)) return TOK_TRUE;
         if (isFalse(s)) return TOK_FALSE;
         if (isAnd(s)) return TOK_AND;

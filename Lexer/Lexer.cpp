@@ -315,7 +315,7 @@ namespace lexer {
                 value = "";
                 // if current state moves to state again 24, go back to state 0
                 if (current_state == 24) current_state = 0;
-                    // else if the current state is not 0 add c to value
+                // else if the current state is not 0 add c to value
                 else if (current_state != 0) value += c;
             } else {
                 // if the current state is not 0 add c to value

@@ -1,9 +1,11 @@
 # Tea2Lang Interpreter CPP20
 
-Presented here is a TeaLang interpreter written in C++ (20). This assignment forms part of the CPS2000 unit which was taken in partial fulfilment of the
+Presented here is a Tea2Lang interpreter written in C++ (20). This assignment forms part of the CPS2000 unit which was taken in partial fulfilment of the
 requirements for the degree of B.Sc. in Artificial Intelligence.
 
-The interpreter and sub processes were developed and written to follow the specifications in the CPS2000_Assignment_2021 (Part1) pdf.
+The interpreter and sub processes were developed and written to follow the specifications in the CPS2000_Assignment_2021 (Part2) pdf.
+
+This repository is a fork of the TeaLang Interpreter found [here](https://github.com/AidenWilliams/TeaLang-Interpeter-CPP20)
 
 The TeaLang language follows the following EBNF:
 
