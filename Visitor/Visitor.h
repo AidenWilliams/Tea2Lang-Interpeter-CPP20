@@ -12,6 +12,7 @@ namespace parser {
     class ASTProgramNode;
 
     template <typename T> class ASTLiteralNode;
+    template <typename T> class ASTArrayNode;
     class ASTBinaryNode;
     class ASTFunctionCallNode;
     class ASTIdentifierNode;
@@ -27,9 +28,12 @@ namespace parser {
     class ASTWhileNode;
     class ASTFunctionDeclarationNode;
     class ASTReturnNode;
+    class ASTStructNode;
 }
 
 namespace visitor {
+
+    class tlauto;
 
     class Visitor {
 
@@ -40,7 +44,13 @@ namespace visitor {
         virtual void visit(parser::ASTLiteralNode<int>*) = 0;
         virtual void visit(parser::ASTLiteralNode<float>*) = 0;
         virtual void visit(parser::ASTLiteralNode<bool>*) = 0;
+        virtual void visit(parser::ASTLiteralNode<char>*) = 0;
         virtual void visit(parser::ASTLiteralNode<std::string>*) = 0;
+        virtual void visit(parser::ASTArrayNode<int>*) = 0;
+        virtual void visit(parser::ASTArrayNode<float>*) = 0;
+        virtual void visit(parser::ASTArrayNode<bool>*) = 0;
+        virtual void visit(parser::ASTArrayNode<char>*) = 0;
+        virtual void visit(parser::ASTArrayNode<std::string>*) = 0;
         virtual void visit(parser::ASTBinaryNode*) = 0;
         virtual void visit(parser::ASTFunctionCallNode*) = 0;
         virtual void visit(parser::ASTIdentifierNode*) = 0;
@@ -56,6 +66,7 @@ namespace visitor {
         virtual void visit(parser::ASTWhileNode*) = 0;
         virtual void visit(parser::ASTFunctionDeclarationNode*) = 0;
         virtual void visit(parser::ASTReturnNode*) = 0;
+        virtual void visit(parser::ASTStructNode*) = 0;
     };
 
 }

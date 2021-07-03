@@ -41,6 +41,19 @@ namespace parser {
         void accept(visitor::Visitor* v) override;
     };
 
+    template <typename T>
+    class ASTArrayNode : public ASTExprNode {
+    public:
+        ASTArrayNode(std::vector<T> values, unsigned int lineNumber) :
+                values(values),
+                lineNumber(lineNumber)
+        {};
+        ~ASTArrayNode() = default;
+        std::vector<T> values;
+        unsigned int lineNumber;
+        void accept(visitor::Visitor* v) override;
+    };
+
     class ASTBinaryNode : public ASTExprNode {
     public:
         ASTBinaryNode(std::string op, std::shared_ptr<ASTExprNode> left, std::shared_ptr<ASTExprNode> right, unsigned int lineNumber) :
@@ -293,6 +306,21 @@ namespace parser {
         ~ASTReturnNode() = default;
 
         std::shared_ptr<ASTExprNode> exprNode;
+        unsigned int lineNumber;
+        void accept(visitor::Visitor* v) override;
+    };
+
+    class ASTStructNode : public ASTStatementNode {
+    public:
+        ASTStructNode(std::shared_ptr<ASTIdentifierNode> identifier, std::shared_ptr<ASTBlockNode> structBlock, unsigned int lineNumber) :
+                identifier(std::move(identifier)),
+                structBlock(std::move(structBlock)),
+                lineNumber(lineNumber)
+        {};
+        ~ASTStructNode() = default;
+
+        std::shared_ptr<ASTIdentifierNode> identifier;
+        std::shared_ptr<ASTBlockNode> structBlock;
         unsigned int lineNumber;
         void accept(visitor::Visitor* v) override;
     };

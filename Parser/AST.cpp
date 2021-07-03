@@ -38,6 +38,36 @@ namespace parser {
         v->visit(this);
     }
 
+    template<>
+    void ASTLiteralNode<char>::accept(visitor::Visitor *v) {
+        v->visit(this);
+    }
+
+    template<>
+    void ASTArrayNode<int>::accept(visitor::Visitor *v) {
+        v->visit(this);
+    }
+
+    template<>
+    void ASTArrayNode<float>::accept(visitor::Visitor *v) {
+        v->visit(this);
+    }
+
+    template<>
+    void ASTArrayNode<bool>::accept(visitor::Visitor *v) {
+        v->visit(this);
+    }
+
+    template<>
+    void ASTArrayNode<std::string>::accept(visitor::Visitor *v) {
+        v->visit(this);
+    }
+
+    template<>
+    void ASTArrayNode<char>::accept(visitor::Visitor *v) {
+        v->visit(this);
+    }
+
     void ASTBinaryNode::accept(visitor::Visitor *v) {
         v->visit(this);
     }
@@ -95,6 +125,10 @@ namespace parser {
     }
 
     void ASTReturnNode::accept(visitor::Visitor *v) {
+        v->visit(this);
+    }
+
+    void ASTStructNode::accept(visitor::Visitor *v) {
         v->visit(this);
     }
 }
