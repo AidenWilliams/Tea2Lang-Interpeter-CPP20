@@ -310,6 +310,8 @@ namespace parser {
             case lexer::TOK_STRING_TYPE:
                 return parseFunctionDeclaration();
                 // Block parsing case
+            case lexer::TOK_STRUCT_TYPE:
+                return parseStruct();
             case lexer::TOK_OPENING_CURLY:
                 return parseBlock();
                 // Any other case is an error case
@@ -665,5 +667,33 @@ namespace parser {
         auto functionBlock = parseBlock();
         // Create ASTFunctionDeclarationNode to return
         return std::make_shared<ASTFunctionDeclarationNode>(type, identifier, parameters, functionBlock, lineNumber);
+    }
+
+    std::shared_ptr<ASTStructNode> Parser::parseStruct() {
+        // Determine line number
+        unsigned int lineNumber = currentToken.lineNumber;
+        // Current token is WHILE
+        // Get next token
+        moveTokenWindow();
+        // Confirm current token is IDENTIFIER
+        if (currentToken.type != lexer::TOK_IDENTIFIER)
+            throw std::runtime_error("Expected Variable name after 'tlstruct' on line "
+                                     + std::to_string(currentToken.lineNumber) + ".");
+        // Get identifier for new Variable
+        auto identifier = std::make_shared<ASTIdentifierNode>(currentToken.value, lineNumber);
+        // Get next token
+        moveTokenWindow();
+        // Ensure proper syntax with starting {
+        if (currentToken.type != lexer::TOK_OPENING_CURLY)
+            throw std::runtime_error("Expected '{' after while on line "
+                                     + std::to_string(currentToken.lineNumber) + ".");
+        // Get next token
+        moveTokenWindow();
+        // Get block after {
+        auto structBlock = parseBlock();
+        // Get next token
+        moveTokenWindow();
+        // Create ASTStructNode to return
+        return std::make_shared<ASTStructNode>(identifier, structBlock, lineNumber);
     }
 }

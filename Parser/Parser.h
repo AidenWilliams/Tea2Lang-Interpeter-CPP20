@@ -45,6 +45,7 @@ namespace parser {
         std::shared_ptr<ASTReturnNode> parseReturn();
         std::shared_ptr<ASTFunctionDeclarationNode> parseFunctionDeclaration();
         std::vector<std::pair<std::string, std::string>> parseFormalParams();
+        std::shared_ptr<ASTStructNode> parseStruct();
 
         [[nodiscard]] std::string parseType() const;
 
