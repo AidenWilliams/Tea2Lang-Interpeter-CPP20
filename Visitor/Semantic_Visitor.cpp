@@ -312,6 +312,10 @@ namespace visitor{
                                      + std::to_string(v.lineNumber) + " already declared on line "
                                      + std::to_string(result->second.lineNumber));
         }
+        // by changing the current type we help to init an array literal
+        // if not an array this will be overwritten by the visit
+        // if not visited then this should be auto or struct
+        currentType = declarationNode->type;
         // There are 2 cases here
         // One where there is a default constructor (structs & arrays)
         // and the other is the classic Tealang
@@ -323,8 +327,6 @@ namespace visitor{
         // This will change the current type
         if(declarationNode->exprNode != nullptr){
             declarationNode->exprNode->accept(this);
-        }else{
-            currentType = declarationNode->type;
         }
 
         // handle auto here
