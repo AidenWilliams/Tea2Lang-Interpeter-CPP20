@@ -1121,5 +1121,17 @@ namespace visitor {
         }
 
     }
+
+    void Interpreter::visit(parser::ASTLiteralNode<char> *literalNode) {
+
+    }
+
+    void Interpreter::visit(parser::ASTArrayLiteralNode *arrayLiteralNode) {
+
+    }
+
+    void Interpreter::visit(parser::ASTStructNode *structNode) {
+
+    }
     // Statements
 }

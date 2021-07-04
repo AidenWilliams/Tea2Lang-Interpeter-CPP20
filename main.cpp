@@ -3,7 +3,7 @@
 #include "Parser/Parser.h"
 #include "Visitor/XML_Visitor.h"
 #include "Visitor/Semantic_Visitor.h"
-//#include "Visitor/Interpreter_Visitor.h"
+#include "Visitor/Interpreter_Visitor.h"
 
 int main(int argc, char **argv) {
     std::string _program_ =
@@ -145,7 +145,7 @@ int main(int argc, char **argv) {
 //        std::cout << "TESTING XML Generator" << std::endl;
 
         lexer::Lexer lexer;
-        lexer.extractLexemes(_program_2);
+        lexer.extractLexemes(argv[2]);
 
         parser::Parser parser(lexer.tokens);
         auto programNode = std::shared_ptr<parser::ASTProgramNode>(parser.parseProgram());
@@ -158,7 +158,7 @@ int main(int argc, char **argv) {
     }else if (std::string("-s") == argv[1]) {
 //        std::cout << "TESTING Semantic Analyzer" << std::endl;
         lexer::Lexer lexer;
-        lexer.extractLexemes(_program_2); //_program_
+        lexer.extractLexemes(argv[2]); //_program_
 
         parser::Parser parser(lexer.tokens);
         auto programNode = std::shared_ptr<parser::ASTProgramNode>(parser.parseProgram());
@@ -168,24 +168,23 @@ int main(int argc, char **argv) {
         semanticAnalyser.visit(programNode1);
 
         delete programNode1;
+    }else if (std::string("-i") == argv[1]){
+//        std::cout << "TESTING Interpreter" <<  aasdasdstd::endl;
+
+        lexer::Lexer lexer;
+        lexer.extractLexemes(_program_2); //argv[2]
+
+        parser::Parser parser(lexer.tokens);
+        auto programNode = std::shared_ptr<parser::ASTProgramNode>(parser.parseProgram());
+
+        visitor::SemanticAnalyser semanticAnalyser;
+        auto *programNode1 = new parser::ASTProgramNode(programNode);
+        semanticAnalyser.visit(programNode1);
+
+        visitor::Interpreter interpreter;
+        interpreter.visit(programNode1);
+
+        delete programNode1;
     }
-//    }else if (std::string("-i") == argv[1]){
-////        std::cout << "TESTING Interpreter" <<  aasdasdstd::endl;
-//
-//        lexer::Lexer lexer;
-//        lexer.extractLexemes(_program_2); //argv[2]
-//
-//        parser::Parser parser(lexer.tokens);
-//        auto programNode = std::shared_ptr<parser::ASTProgramNode>(parser.parseProgram());
-//
-//        visitor::SemanticAnalyser semanticAnalyser;
-//        auto *programNode1 = new parser::ASTProgramNode(programNode);
-//        semanticAnalyser.visit(programNode1);
-//
-//        visitor::Interpreter interpreter;
-//        interpreter.visit(programNode1);
-//
-//        delete programNode1;
-//    }
     return 0;
 }
