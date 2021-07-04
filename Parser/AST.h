@@ -85,18 +85,26 @@ namespace parser {
 
     class ASTIdentifierNode : public ASTExprNode {
     private:
-        std::string identifier;
         std::shared_ptr<ASTIdentifierNode> child;
     public:
-        explicit ASTIdentifierNode(std::string identifier, std::shared_ptr<ASTIdentifierNode> child, std::shared_ptr<ASTExprNode> ilocExprNode, unsigned int lineNumber) :
+        ASTIdentifierNode(std::string identifier, std::shared_ptr<ASTIdentifierNode> child, std::shared_ptr<ASTExprNode> ilocExprNode, unsigned int lineNumber) :
                 identifier(std::move(identifier)),
                 child(std::move(child)),
                 ilocExprNode(std::move(ilocExprNode)),
                 lineNumber(lineNumber)
         {};
+
+        explicit ASTIdentifierNode(const std::shared_ptr<ASTIdentifierNode>& identifier) :
+                identifier(std::move(identifier->identifier)),
+                child(std::move(identifier->child)),
+                ilocExprNode(std::move(identifier->ilocExprNode)),
+                lineNumber(identifier->lineNumber)
+        {};
+
         ~ASTIdentifierNode() = default;
 
         std::shared_ptr<ASTExprNode> ilocExprNode;
+        std::string identifier;
         unsigned int lineNumber;
 
         std::string getID(){
@@ -105,6 +113,10 @@ namespace parser {
                     return identifier + "." + child->getID();
 
             return identifier;
+        }
+
+        std::shared_ptr<ASTIdentifierNode> getChild(){
+            return child;
         }
 
         bool isEmpty(){

@@ -245,6 +245,60 @@ namespace visitor{
     }
 
     void SemanticAnalyser::visit(parser::ASTIdentifierNode *identifierNode) {
+        // There are 2 cases here
+        // one where this is a normal variable (i.e. no '.')
+        // the other when the identifier is referencing another variable
+        auto parent = parser::ASTIdentifierNode(identifierNode->identifier, identifierNode->getChild(), identifierNode->ilocExprNode, identifierNode->lineNumber);
+        auto child = identifierNode->getChild();
+        bool found = false;
+        std::vector<std::string> path; // path of structs with the last element being the variable
+        while(child != nullptr){
+            // we have found a child
+            // this means that the identifier of identifierNode must be a struct
+            for(const auto& scope : scopes) {
+                // First find the variable (remember identifierNode->identifier is a variable of a type)
+                auto result = scope->find(Variable(parent.identifier));
+                if(scope->found(result)) {
+                    // we found it, now does it have a struct type?
+                    if(!lexer::isStruct(result->second.type)){
+                        throw std::runtime_error("Variable with identifier " + parent.identifier + " called on line "
+                                                 + std::to_string(parent.lineNumber) + " is not a tlstruct object. Only"
+                                                                                                "tlstruct objects can reference other variables or functions via the '.' operator.");
+                    }
+                    // get the struct
+                    for(const auto& _scope : scopes) {
+                        auto struct_result = _scope->find(Struct(result->second.type));
+                        if(_scope->found(struct_result)) {
+                            // found the struct
+                            // go over its variables and verify child.identifier is there
+                            for(auto var : struct_result->second.variables){
+                                if(var.identifier == child->identifier) {
+                                    //found
+                                    found = true;
+                                    currentType = var.type;
+                                    break;
+                                }
+                            }
+                            if(found) break;
+                        }
+                    }
+                    if(found) {
+                        found = false;
+                    }else{
+                        throw std::runtime_error("Variable with identifier " + child->identifier + " called on line "
+                                                 + std::to_string(parent.lineNumber) + " is not a child object of "
+                                                 + parent.identifier);
+                    }
+                    break;
+                }
+            }
+            parent = parser::ASTIdentifierNode(child);
+            child = child->getChild();
+            if(child == nullptr)
+                return;
+        }
+
+        // normal variable case
         // Build variable shell
         Variable v(identifierNode->getID());
         // Check that a variable with this identifier exists
@@ -430,27 +484,8 @@ namespace visitor{
          * identifier = assignmentNode.identifier
          * type = currentType
          */
-        // Generate Variable
-        Variable v(currentType, assignmentNode->identifier->getID(),
-                assignmentNode->identifier->ilocExprNode != nullptr, assignmentNode->lineNumber);
-        // Now confirm this exists in the function table for any scope
-        for(const auto& scope : scopes){
-            auto result = scope->find(v);
-            if(scope->found(result)){
-                // if identifier has been found
-                // check that the types match
-                if(result->second.type != v.type){
-                    // throw an error since type casting is not supported
-                    throw std::runtime_error("Variable " + v.identifier + " declared on line " + std::to_string(result->second.lineNumber)
-                                                + " cannot be assigned a value of type " + v.type
-                                                + ".\nImplicit and Automatic Typecasting is not supported by TeaLang.");
-                }
-                return;
-            }
-        }
-        // Variable hasn't been found in any scope
-        throw std::runtime_error("Variable with identifier " + assignmentNode->identifier->getID() + " called on line "
-                                 + std::to_string(assignmentNode->lineNumber) + " has not been declared.");
+        // visit the identifier
+        assignmentNode->identifier->accept(this);
     }
 
     void SemanticAnalyser::visit(parser::ASTPrintNode *printNode) {
