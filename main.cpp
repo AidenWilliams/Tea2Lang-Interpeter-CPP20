@@ -73,9 +73,9 @@ int main(int argc, char **argv) {
             "arr1[0] = 22.4;\n"
             "arr1[1] = 6.25;\n"
             "print arr1[1]; //6.25\n" //30
+            "print XGreaterY(2,3); //false\n"
             "print XGreaterY(arr1); //true\n"
             "print Average(arr2, 4.0); //6.92\n"
-            "print XGreaterY(2,3); //false\n"
             "\n"
             "tlstruct Vector{\n"
             "    let x : float = 0.0;\n"
@@ -172,7 +172,7 @@ int main(int argc, char **argv) {
 //        std::cout << "TESTING Interpreter" <<  aasdasdstd::endl;
 
         lexer::Lexer lexer;
-        lexer.extractLexemes(_program_); //argv[2]
+        lexer.extractLexemes(_program_2); //argv[2]
 
         parser::Parser parser(lexer.tokens);
         auto programNode = std::shared_ptr<parser::ASTProgramNode>(parser.parseProgram());

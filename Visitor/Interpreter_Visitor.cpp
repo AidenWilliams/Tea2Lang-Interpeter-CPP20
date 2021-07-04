@@ -133,29 +133,29 @@ namespace visitor {
         // Push left node into 0CurrentVariable
         if(currentType == "int"){
             intTable.insert(interpreter::Variable<int>("int", "0CurrentVariable",
-                                                      false,
-                                                      intTable.get(currentID).latestValue,
-                                                      binaryNode -> lineNumber));
+                                                       false,
+                                                       (array ? intArrayTable.get(currentID).latestValue.at(iloc) : intTable.get(currentID).latestValue),
+                                                       binaryNode -> lineNumber));
         }else if(currentType == "float"){
             floatTable.insert(interpreter::Variable<float>("float", "0CurrentVariable",
-                                                      false,
-                                                      floatTable.get(currentID).latestValue,
-                                                      binaryNode -> lineNumber));
+                                                           false,
+                                                           (array ? floatArrayTable.get(currentID).latestValue.at(iloc) : floatTable.get(currentID).latestValue),
+                                                           binaryNode->lineNumber));
         }else if(currentType == "bool"){
             boolTable.insert(interpreter::Variable<bool>("bool", "0CurrentVariable",
-                                                      false,
-                                                      boolTable.get(currentID).latestValue,
-                                                      binaryNode -> lineNumber));
+                                                           false,
+                                                           (array ? boolArrayTable.get(currentID).latestValue.at(iloc) : boolTable.get(currentID).latestValue),
+                                                           binaryNode->lineNumber));
         }else if(currentType == "string"){
             stringTable.insert(interpreter::Variable<std::string>("string", "0CurrentVariable",
-                                                      false,
-                                                      stringTable.get(currentID).latestValue,
-                                                      binaryNode -> lineNumber));
+                                                           false,
+                                                           (array ? stringArrayTable.get(currentID).latestValue.at(iloc) : stringTable.get(currentID).latestValue),
+                                                            binaryNode->lineNumber));
         }else if(currentType == "char"){
             charTable.insert(interpreter::Variable<char>("char", "0CurrentVariable",
-                                                      false,
-                                                      charTable.get(currentID).latestValue,
-                                                      binaryNode -> lineNumber));
+                                                     false,
+                                                          (array ? charArrayTable.get(currentID).latestValue.at(iloc) : charTable.get(currentID).latestValue),
+                                                          binaryNode->lineNumber));
         }else{
             // should never get here
             throw std::runtime_error("Expression on line " + std::to_string(binaryNode -> lineNumber)
@@ -190,7 +190,7 @@ namespace visitor {
                                                        false,
                                                        intTable.get().latestValue
                                                        !=
-                                                       intTable.get(currentID).latestValue,
+                                                       (array ? intArrayTable.get(currentID).latestValue.at(iloc) : intTable.get(currentID).latestValue),
                                                        binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "bool";
@@ -200,7 +200,7 @@ namespace visitor {
                                                        false,
                                                        intTable.get().latestValue
                                                        ==
-                                                       intTable.get(currentID).latestValue,
+                                                       (array ? intArrayTable.get(currentID).latestValue.at(iloc) : intTable.get(currentID).latestValue),
                                                        binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "bool";
@@ -210,7 +210,7 @@ namespace visitor {
                                                        false,
                                                        intTable.get().latestValue
                                                        >
-                                                       intTable.get(currentID).latestValue,
+                                                       (array ? intArrayTable.get(currentID).latestValue.at(iloc) : intTable.get(currentID).latestValue),
                                                        binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "bool";
@@ -220,7 +220,7 @@ namespace visitor {
                                                        false,
                                                        intTable.get().latestValue
                                                        <
-                                                       intTable.get(currentID).latestValue,
+                                                       (array ? intArrayTable.get(currentID).latestValue.at(iloc) : intTable.get(currentID).latestValue),
                                                        binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "bool";
@@ -230,7 +230,7 @@ namespace visitor {
                                                        false,
                                                        intTable.get().latestValue
                                                        >=
-                                                       intTable.get(currentID).latestValue,
+                                                       (array ? intArrayTable.get(currentID).latestValue.at(iloc) : intTable.get(currentID).latestValue),
                                                        binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "bool";
@@ -240,7 +240,7 @@ namespace visitor {
                                                        false,
                                                        intTable.get().latestValue
                                                       <=
-                                                      intTable.get(currentID).latestValue,
+                                                      (array ? intArrayTable.get(currentID).latestValue.at(iloc) : intTable.get(currentID).latestValue),
                                                       binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "bool";
@@ -251,7 +251,7 @@ namespace visitor {
                                                        false,
                                                        intTable.get().latestValue
                                                        +
-                                                       intTable.get(currentID).latestValue,
+                                                       (array ? intArrayTable.get(currentID).latestValue.at(iloc) : intTable.get(currentID).latestValue),
                                                        binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "int";
@@ -261,7 +261,7 @@ namespace visitor {
                                                        false,
                                                        intTable.get().latestValue
                                                       *
-                                                      intTable.get(currentID).latestValue,
+                                                      (array ? intArrayTable.get(currentID).latestValue.at(iloc) : intTable.get(currentID).latestValue),
                                                       binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "int";
@@ -272,7 +272,7 @@ namespace visitor {
                                                        false,
                                                        intTable.get().latestValue
                                                       /
-                                                      intTable.get(currentID).latestValue,
+                                                      (array ? intArrayTable.get(currentID).latestValue.at(iloc) : intTable.get(currentID).latestValue),
                                                       binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "int";
@@ -282,7 +282,7 @@ namespace visitor {
                                                        false,
                                                        intTable.get().latestValue
                                                       -
-                                                      intTable.get(currentID).latestValue,
+                                                      (array ? intArrayTable.get(currentID).latestValue.at(iloc) : intTable.get(currentID).latestValue),
                                                       binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "int";
@@ -300,7 +300,7 @@ namespace visitor {
                                                        false,
                                                        floatTable.get().latestValue
                                                        !=
-                                                       floatTable.get(currentID).latestValue,
+                                                       (array ? floatArrayTable.get(currentID).latestValue.at(iloc) : floatTable.get(currentID).latestValue),
                                                        binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "bool";
@@ -310,7 +310,7 @@ namespace visitor {
                                                        false,
                                                        floatTable.get().latestValue
                                                        ==
-                                                       floatTable.get(currentID).latestValue,
+                                                       (array ? floatArrayTable.get(currentID).latestValue.at(iloc) : floatTable.get(currentID).latestValue),
                                                        binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "bool";
@@ -320,7 +320,7 @@ namespace visitor {
                                                        false,
                                                        floatTable.get().latestValue
                                                        >
-                                                       floatTable.get(currentID).latestValue,
+                                                       (array ? (array ? floatArrayTable.get(currentID).latestValue.at(iloc) : floatTable.get(currentID).latestValue) : floatArrayTable.get(currentID).latestValue.at(iloc)),
                                                        binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "bool";
@@ -330,7 +330,7 @@ namespace visitor {
                                                        false,
                                                        floatTable.get().latestValue
                                                        <
-                                                       floatTable.get(currentID).latestValue,
+                                                       (array ? floatArrayTable.get(currentID).latestValue.at(iloc) : floatTable.get(currentID).latestValue),
                                                        binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "bool";
@@ -340,7 +340,7 @@ namespace visitor {
                                                        false,
                                                        floatTable.get().latestValue
                                                        >=
-                                                       floatTable.get(currentID).latestValue,
+                                                       (array ? floatArrayTable.get(currentID).latestValue.at(iloc) : floatTable.get(currentID).latestValue),
                                                        binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "bool";
@@ -350,7 +350,7 @@ namespace visitor {
                                                        false,
                                                        floatTable.get().latestValue
                                                        <=
-                                                       floatTable.get(currentID).latestValue,
+                                                       (array ? floatArrayTable.get(currentID).latestValue.at(iloc) : floatTable.get(currentID).latestValue),
                                                        binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "bool";
@@ -361,7 +361,7 @@ namespace visitor {
                                                        false,
                                                        floatTable.get().latestValue
                                                        +
-                                                       floatTable.get(currentID).latestValue,
+                                                       (array ? floatArrayTable.get(currentID).latestValue.at(iloc) : floatTable.get(currentID).latestValue),
                                                        binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "float";
@@ -371,7 +371,7 @@ namespace visitor {
                                                        false,
                                                        floatTable.get().latestValue
                                                         *
-                                                        floatTable.get(currentID).latestValue,
+                                                        (array ? floatArrayTable.get(currentID).latestValue.at(iloc) : floatTable.get(currentID).latestValue),
                                                         binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "float";
@@ -382,7 +382,7 @@ namespace visitor {
                                                        false,
                                                        floatTable.get().latestValue
                                                         /
-                                                        floatTable.get(currentID).latestValue,
+                                                        (array ? floatArrayTable.get(currentID).latestValue.at(iloc) : floatTable.get(currentID).latestValue),
                                                         binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "float";
@@ -392,7 +392,7 @@ namespace visitor {
                                                        false,
                                                        floatTable.get().latestValue
                                                         -
-                                                        floatTable.get(currentID).latestValue,
+                                                        (array ? floatArrayTable.get(currentID).latestValue.at(iloc) : floatTable.get(currentID).latestValue),
                                                         binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "float";
@@ -410,7 +410,7 @@ namespace visitor {
                                                        false,
                                                        boolTable.get().latestValue
                                                         !=
-                                                        boolTable.get(currentID).latestValue,
+                                                        (array ? boolArrayTable.get(currentID).latestValue.at(iloc) : boolTable.get(currentID).latestValue),
                                                         binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "bool";
@@ -420,7 +420,7 @@ namespace visitor {
                                                        false,
                                                        boolTable.get().latestValue
                                                        ==
-                                                       boolTable.get(currentID).latestValue,
+                                                       (array ? boolArrayTable.get(currentID).latestValue.at(iloc) : boolTable.get(currentID).latestValue),
                                                        binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "bool";
@@ -430,7 +430,7 @@ namespace visitor {
                                                        false,
                                                        boolTable.get().latestValue
                                                        &&
-                                                       boolTable.get(currentID).latestValue,
+                                                       (array ? boolArrayTable.get(currentID).latestValue.at(iloc) : boolTable.get(currentID).latestValue),
                                                        binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "0CurrentVariable";
@@ -440,7 +440,7 @@ namespace visitor {
                                                        false,
                                                        boolTable.get().latestValue
                                                        ||
-                                                       boolTable.get(currentID).latestValue,
+                                                       (array ? boolArrayTable.get(currentID).latestValue.at(iloc) : boolTable.get(currentID).latestValue),
                                                        binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "bool";
@@ -450,7 +450,7 @@ namespace visitor {
                                                        false,
                                                        boolTable.get().latestValue
                                                        >
-                                                       boolTable.get(currentID).latestValue,
+                                                       (array ? boolArrayTable.get(currentID).latestValue.at(iloc) : boolTable.get(currentID).latestValue),
                                                        binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "bool";
@@ -460,7 +460,7 @@ namespace visitor {
                                                        false,
                                                        boolTable.get().latestValue
                                                        <
-                                                       boolTable.get(currentID).latestValue,
+                                                       (array ? boolArrayTable.get(currentID).latestValue.at(iloc) : boolTable.get(currentID).latestValue),
                                                        binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "bool";
@@ -470,7 +470,7 @@ namespace visitor {
                                                        false,
                                                        boolTable.get().latestValue
                                                        >=
-                                                       boolTable.get(currentID).latestValue,
+                                                       (array ? boolArrayTable.get(currentID).latestValue.at(iloc) : boolTable.get(currentID).latestValue),
                                                        binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "0CurrentVariable";
@@ -480,7 +480,7 @@ namespace visitor {
                                                        false,
                                                        boolTable.get().latestValue
                                                        <=
-                                                       boolTable.get(currentID).latestValue,
+                                                       (array ? boolArrayTable.get(currentID).latestValue.at(iloc) : boolTable.get(currentID).latestValue),
                                                        binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "bool";
@@ -498,7 +498,7 @@ namespace visitor {
                                                        false,
                                                        stringTable.get().latestValue
                                                        !=
-                                                       stringTable.get(currentID).latestValue,
+                                                       (array ? stringArrayTable.get(currentID).latestValue.at(iloc) : stringTable.get(currentID).latestValue),
                                                        binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "bool";
@@ -508,7 +508,7 @@ namespace visitor {
                                                        false,
                                                        stringTable.get().latestValue
                                                        ==
-                                                       stringTable.get(currentID).latestValue,
+                                                       (array ? stringArrayTable.get(currentID).latestValue.at(iloc) : stringTable.get(currentID).latestValue),
                                                        binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "bool";
@@ -518,7 +518,7 @@ namespace visitor {
                                                               false,
                                                               stringTable.get().latestValue
                                                               +
-                                                              stringTable.get(currentID).latestValue,
+                                                              (array ? stringArrayTable.get(currentID).latestValue.at(iloc) : stringTable.get(currentID).latestValue),
                                                               binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "string";
@@ -527,6 +527,41 @@ namespace visitor {
                     // Should never get here because of the semantic pass but still included because of the default case
                     throw std::runtime_error("Expression on line " + std::to_string(binaryNode -> lineNumber)
                                              + " has incorrect operator " + binaryNode -> op
+                                             + " acting between expressions of type " + currentType);
+            }
+        }else if(currentType == "char") {
+            switch (lexer::determineOperatorType(binaryNode->op)) {
+                case lexer::TOK_NOT_EQAUL_TO:
+                    boolTable.insert(interpreter::Variable<bool>("bool", "0CurrentVariable",
+                                                                 false,
+                                                                 charTable.get().latestValue
+                                                                 !=
+                                                                 (array ? charArrayTable.get(
+                                                                         currentID).latestValue.at(iloc)
+                                                                        : charTable.get(currentID).latestValue),
+                                                                 binaryNode->lineNumber));
+                    // Update Current Type to the that of the type being inserted
+                    currentType = "bool";
+                    break;
+                case lexer::TOK_EQAUL_TO:
+                    boolTable.insert(interpreter::Variable<bool>("bool", "0CurrentVariable",
+                                                                 false,
+                                                                 charTable.get().latestValue
+                                                                 ==
+                                                                 (array ? charArrayTable.get(
+                                                                         currentID).latestValue.at(iloc)
+                                                                        : charTable.get(currentID).latestValue),
+                                                                 binaryNode->lineNumber));
+                    // Update Current Type to the that of the type being inserted
+                    currentType = "bool";
+                    break;
+                    // Update Current Type to the that of the type being inserted
+                    currentType = "string";
+                    break;
+                default:
+                    // Should never get here because of the semantic pass but still included because of the default case
+                    throw std::runtime_error("Expression on line " + std::to_string(binaryNode->lineNumber)
+                                             + " has incorrect operator " + binaryNode->op
                                              + " acting between expressions of type " + currentType);
             }
         }
@@ -598,20 +633,24 @@ namespace visitor {
         }
         // array cases
 
-        // get array iloc
-        auto _cId = currentID;
-        auto _cType = currentType;
-        identifierNode->ilocExprNode->accept(this);
-        if(currentType == "int"){
-            iloc = intTable.get(currentID).latestValue;
-        }else if(currentType == "float"){
-            iloc = floatTable.get(currentID).latestValue;
+        if(identifierNode->ilocExprNode != nullptr){
+            // get array iloc
+            auto _cId = currentID;
+            auto _cType = currentType;
+            identifierNode->ilocExprNode->accept(this);
+            if(currentType == "int"){
+                iloc = intTable.get(currentID).latestValue;
+            }else if(currentType == "float"){
+                iloc = floatTable.get(currentID).latestValue;
+            }else{
+                throw std::runtime_error("Variable with identifier " + identifierNode->getID() + " called on line "
+                                         + std::to_string(identifierNode->lineNumber) + " has not incorrect value between [].");
+            }
+            currentID = _cId;
+            currentType = _cType;
         }else{
-            throw std::runtime_error("Variable with identifier " + identifierNode->getID() + " called on line "
-                                     + std::to_string(identifierNode->lineNumber) + " has not incorrect value between [].");
+            iloc = -1;
         }
-        currentID = _cId;
-        currentType = _cType;
         // Build variable shells
         interpreter::Variable<std::vector<int>> i(identifierNode -> identifier);
         interpreter::Variable<std::vector<float>> f(identifierNode -> identifier);
@@ -722,21 +761,38 @@ namespace visitor {
             // This visit updates the currentID and currentType
             // store current ID so that we dont need to visit the parameters again to pop their values
             toPop.emplace_back(std::make_pair(currentType, f.paramIDs.at(i)));
-            if(currentType == "int"){
-                /* Update the currentID variable by emplacing back
-                 * to f.paramIDs.at(i) variable
-                 * what is found inside the variable with identifier currentID
-                 * which we got from visiting the parameter expression
-                 * this temporarily overwrites any global variable
-                 * Once the block is function block is visited we pop back these variables to clear memory
-                */
-                intTable.insert(interpreter::Variable<int>("int", f.paramIDs.at(i), false, intTable.get(currentID).latestValue, functionCallNode -> lineNumber));
-            }else if(currentType == "float"){
-                floatTable.insert(interpreter::Variable<float>("float", f.paramIDs.at(i), false, floatTable.get(currentID).latestValue, functionCallNode -> lineNumber));
-            }else if(currentType == "bool"){
-                boolTable.insert(interpreter::Variable<bool>("bool", f.paramIDs.at(i), false, boolTable.get(currentID).latestValue, functionCallNode -> lineNumber));
-            }else if(currentType == "string"){
-                stringTable.insert(interpreter::Variable<std::string>("string", f.paramIDs.at(i), false, stringTable.get(currentID).latestValue, functionCallNode -> lineNumber));
+            if(!array){
+                if(currentType == "int"){
+                    /* Update the currentID variable by emplacing back
+                     * to f.paramIDs.at(i) variable
+                     * what is found inside the variable with identifier currentID
+                     * which we got from visiting the parameter expression
+                     * this temporarily overwrites any global variable
+                     * Once the block is function block is visited we pop back these variables to clear memory
+                    */
+                    intTable.insert(interpreter::Variable<int>("int", f.paramIDs.at(i), false, intTable.get(currentID).latestValue, functionCallNode -> lineNumber));
+                }else if(currentType == "float"){
+                    floatTable.insert(interpreter::Variable<float>("float", f.paramIDs.at(i), false, floatTable.get(currentID).latestValue, functionCallNode -> lineNumber));
+                }else if(currentType == "bool"){
+                    boolTable.insert(interpreter::Variable<bool>("bool", f.paramIDs.at(i), false, boolTable.get(currentID).latestValue, functionCallNode -> lineNumber));
+                }else if(currentType == "string"){
+                    stringTable.insert(interpreter::Variable<std::string>("string", f.paramIDs.at(i), false, stringTable.get(currentID).latestValue, functionCallNode -> lineNumber));
+                }else if(currentType == "char"){
+                    charTable.insert(interpreter::Variable<char>("char", f.paramIDs.at(i), false, charTable.get(currentID).latestValue, functionCallNode -> lineNumber));
+                }
+            }else{
+
+                if(currentType == "int"){
+                    intArrayTable.insert(interpreter::Variable<std::vector<int>>("int", f.paramIDs.at(i), true, intArrayTable.get(currentID).latestValue, functionCallNode -> lineNumber));
+                }else if(currentType == "float"){
+                    floatArrayTable.insert(interpreter::Variable<std::vector<float>>("float", f.paramIDs.at(i), true, floatArrayTable.get(currentID).latestValue, functionCallNode -> lineNumber));
+                }else if(currentType == "bool"){
+                    boolArrayTable.insert(interpreter::Variable<std::vector<bool>>("bool", f.paramIDs.at(i), true, boolArrayTable.get(currentID).latestValue, functionCallNode -> lineNumber));
+                }else if(currentType == "string"){
+                    stringArrayTable.insert(interpreter::Variable<std::vector<std::string>>("string", f.paramIDs.at(i), true, stringArrayTable.get(currentID).latestValue, functionCallNode -> lineNumber));
+                }else if(currentType == "char"){
+                    charArrayTable.insert(interpreter::Variable<std::vector<char>>("char", f.paramIDs.at(i), true, charArrayTable.get(currentID).latestValue, functionCallNode -> lineNumber));
+                }
             }
         }
         // Ok so now we have updated the arguments, so we can call the actual function to run
@@ -744,22 +800,22 @@ namespace visitor {
         f.blockNode -> accept(this);
         function = false;
         // the function has completed its run now we pop back the variables we added
-        for (const auto& pair : toPop){
-            /*
-             * Now we pop the variables
-            */
-            if(pair.first == "int"){
-                intTable.pop_back(pair.second);
-            }else if(pair.first == "float"){
-                floatTable.pop_back(pair.second);
-            }else if(pair.first == "bool"){
-                boolTable.pop_back(pair.second);
-            }else if(pair.first == "string"){
-                stringTable.pop_back(pair.second);
-            }else if(pair.first == "char"){
-                charTable.pop_back(pair.second);
-            }
-        }
+//        for (const auto& pair : toPop){
+//            /*
+//             * Now we pop the variables
+//            */
+//            if(pair.first == "int"){
+//                intTable.pop_back(pair.second);
+//            }else if(pair.first == "float"){
+//                floatTable.pop_back(pair.second);
+//            }else if(pair.first == "bool"){
+//                boolTable.pop_back(pair.second);
+//            }else if(pair.first == "string"){
+//                stringTable.pop_back(pair.second);
+//            }else if(pair.first == "char"){
+//                charTable.pop_back(pair.second);
+//            }
+//        }
         toPop = std::vector<std::pair<std::string, std::string>>();
     }
     // Expressions
@@ -794,21 +850,37 @@ namespace visitor {
             // This visit updates the currentID and currentType
             // store current ID so that we dont need to visit the parameters again to pop their values
             toPop.emplace_back(std::make_pair(currentType, currentID));
-            if(currentType == "int"){
-                /* Update the currentID variable by emplacing back
-                 * to f.paramIDs.at(i) variable
-                 * what is found inside the variable with identifier currentID
-                 * which we got from visiting the parameter expression
-                 * this temporarily overwrites any global variable
-                 * Once the block is function block is visited we pop back these variables to clear memory
-                */
-                intTable.insert(interpreter::Variable<int>("int", f.paramIDs.at(i), false, intTable.get(currentID).latestValue, sFunctionCallNode -> lineNumber));
-            }else if(currentType == "float"){
-                floatTable.insert(interpreter::Variable<float>("float", f.paramIDs.at(i), false, floatTable.get(currentID).latestValue, sFunctionCallNode -> lineNumber));
-            }else if(currentType == "bool"){
-                boolTable.insert(interpreter::Variable<bool>("bool", f.paramIDs.at(i), false, boolTable.get(currentID).latestValue, sFunctionCallNode -> lineNumber));
-            }else if(currentType == "string"){stringTable.insert(interpreter::Variable<std::string>
-                ("string", f.paramIDs.at(i), false, stringTable.get(currentID).latestValue, sFunctionCallNode -> lineNumber));
+            if(!array){
+                if(currentType == "int"){
+                    /* Update the currentID variable by emplacing back
+                     * to f.paramIDs.at(i) variable
+                     * what is found inside the variable with identifier currentID
+                     * which we got from visiting the parameter expression
+                     * this temporarily overwrites any global variable
+                     * Once the block is function block is visited we pop back these variables to clear memory
+                    */
+                    intTable.insert(interpreter::Variable<int>("int", f.paramIDs.at(i), false, intTable.get(currentID).latestValue, sFunctionCallNode -> lineNumber));
+                }else if(currentType == "float"){
+                    floatTable.insert(interpreter::Variable<float>("float", f.paramIDs.at(i), false, floatTable.get(currentID).latestValue, sFunctionCallNode -> lineNumber));
+                }else if(currentType == "bool"){
+                    boolTable.insert(interpreter::Variable<bool>("bool", f.paramIDs.at(i), false, boolTable.get(currentID).latestValue, sFunctionCallNode -> lineNumber));
+                }else if(currentType == "string"){
+                    stringTable.insert(interpreter::Variable<std::string>("string", f.paramIDs.at(i), false, stringTable.get(currentID).latestValue, sFunctionCallNode -> lineNumber));
+                }else if(currentType == "char"){
+                    charTable.insert(interpreter::Variable<char>("char", f.paramIDs.at(i), false, charTable.get(currentID).latestValue, sFunctionCallNode -> lineNumber));
+                }
+            }else{
+                if(currentType == "int"){
+                    intArrayTable.insert(interpreter::Variable<std::vector<int>>("int", f.paramIDs.at(i), true, intArrayTable.get(currentID).latestValue, sFunctionCallNode -> lineNumber));
+                }else if(currentType == "float"){
+                    floatArrayTable.insert(interpreter::Variable<std::vector<float>>("float", f.paramIDs.at(i), true, floatArrayTable.get(currentID).latestValue, sFunctionCallNode -> lineNumber));
+                }else if(currentType == "bool"){
+                    boolArrayTable.insert(interpreter::Variable<std::vector<bool>>("bool", f.paramIDs.at(i), true, boolArrayTable.get(currentID).latestValue, sFunctionCallNode -> lineNumber));
+                }else if(currentType == "string"){
+                    stringArrayTable.insert(interpreter::Variable<std::vector<std::string>>("string", f.paramIDs.at(i), true, stringArrayTable.get(currentID).latestValue, sFunctionCallNode -> lineNumber));
+                }else if(currentType == "char"){
+                    charArrayTable.insert(interpreter::Variable<std::vector<char>>("char", f.paramIDs.at(i), true, charArrayTable.get(currentID).latestValue, sFunctionCallNode -> lineNumber));
+                }
             }
         }
         // Ok so now we have updated the arguments, so we can call the actual function to run
@@ -816,22 +888,22 @@ namespace visitor {
         f.blockNode -> accept(this);
         function = false;
         // the function has completed its run now we pop back the variables we added
-        for (const auto& pair : toPop){
-            /*
-             * Now we pop the variables
-            */
-            if(pair.first == "int"){
-                intTable.pop_back(pair.second);
-            }else if(pair.first == "float"){
-                floatTable.pop_back(pair.second);
-            }else if(pair.first == "bool"){
-                boolTable.pop_back(pair.second);
-            }else if(pair.first == "string"){
-                stringTable.pop_back(pair.second);
-            }else if(pair.first == "char"){
-                charTable.pop_back(pair.second);
-            }
-        }
+//        for (const auto& pair : toPop){
+//            /*
+//             * Now we pop the variables
+//            */
+//            if(pair.first == "int"){
+//                intTable.pop_back(pair.second);
+//            }else if(pair.first == "float"){
+//                floatTable.pop_back(pair.second);
+//            }else if(pair.first == "bool"){
+//                boolTable.pop_back(pair.second);
+//            }else if(pair.first == "string"){
+//                stringTable.pop_back(pair.second);
+//            }else if(pair.first == "char"){
+//                charTable.pop_back(pair.second);
+//            }
+//        }
         toPop = std::vector<std::pair<std::string, std::string>>();
     }
 
@@ -847,31 +919,47 @@ namespace visitor {
         }else{
             // array declaration case
             if(declarationNode->identifier->ilocExprNode != nullptr){
+                // get array size
+                currentType = declarationNode -> type;
+                auto _cId = currentID;
+                auto _cType = currentType;
+                declarationNode->identifier->ilocExprNode->accept(this);
+                int size;
+                if(currentType == "int"){
+                    size = intTable.get(currentID).latestValue;
+                }else if(currentType == "float"){
+                    size = floatTable.get(currentID).latestValue;
+                }else{
+                    throw std::runtime_error("Variable with identifier " + declarationNode->identifier->getID() + " called on line "
+                                             + std::to_string(declarationNode->lineNumber) + " has not incorrect value between [].");
+                }
+                currentID = _cId;
+                currentType = _cType;
                 // amend array
                 if(currentType == "int"){
                     intArrayTable.insert (
                             interpreter::Variable<std::vector<int>>(currentType, declarationNode -> identifier -> identifier,
-                                                                    true, std::vector<int>(iloc), declarationNode -> lineNumber)
+                                                                    true, std::vector<int>(size), declarationNode -> lineNumber)
                     );
                 }else if(currentType == "float"){
                     floatArrayTable.insert (
                             interpreter::Variable<std::vector<float>>(currentType, declarationNode -> identifier -> identifier,
-                                                         true, std::vector<float>(iloc), declarationNode -> lineNumber)
+                                                         true, std::vector<float>(size), declarationNode -> lineNumber)
                     );
                 }else if(currentType == "bool"){
                     boolArrayTable.insert (
                             interpreter::Variable<std::vector<bool>>(currentType, declarationNode -> identifier -> identifier,
-                                                        true, std::vector<bool>(iloc), declarationNode -> lineNumber)
+                                                        true, std::vector<bool>(size), declarationNode -> lineNumber)
                     );
                 }else if(currentType == "string"){
                     stringArrayTable.insert (
                             interpreter::Variable<std::vector<std::string>>(currentType, declarationNode -> identifier -> identifier,
-                                                               true, std::vector<std::string>(iloc), declarationNode -> lineNumber)
+                                                               true, std::vector<std::string>(size), declarationNode -> lineNumber)
                     );
                 }else if(currentType == "char"){
                     charArrayTable.insert (
                             interpreter::Variable<std::vector<char>>(currentType, declarationNode -> identifier -> identifier,
-                                                        true, std::vector<char>(iloc), declarationNode -> lineNumber)
+                                                        true, std::vector<char>(size), declarationNode -> lineNumber)
                     );
                 }
                 // TODO::Update THIS
@@ -889,11 +977,6 @@ namespace visitor {
         // Now we have an updated current type and id
         // Create a variable with this information
 
-        // Ensure interpreter/semantic is working as intended by comparing the type in the AST and the current TYPE
-        if(declarationNode -> type != currentType){
-            throw std::runtime_error("Types don't match between declaration and expression on line "
-                                     + std::to_string(declarationNode -> lineNumber) + ".");
-        }
         // Insert the new variable
         if(currentType == "int"){
             intTable.insert (
@@ -967,9 +1050,9 @@ namespace visitor {
         // accessing_array assignment cases
 
         if(accessing_array){
-            if(assignmentNode->identifier->ilocExprNode != nullptr) {
+//            if(assignmentNode->identifier->ilocExprNode != nullptr) {
                 // get array iloc
-                assignmentNode->identifier->ilocExprNode->accept(this);
+//                assignmentNode->identifier->ilocExprNode->accept(this);
                 if(currentType == "int"){
                     auto result = intArrayTable.find(interpreter::Variable<std::vector<int>>(id));
                     if(!intArrayTable.found(result)){
@@ -1043,7 +1126,7 @@ namespace visitor {
                 array = false;
                 return;
             }
-        }
+//        }
 
         // assigning_array cases
 
@@ -1113,35 +1196,15 @@ namespace visitor {
         // Visit expression node to get current type
         printNode -> exprNode -> accept(this);
         if(currentType == "int"){
-            if(array){
-                std::cout << intArrayTable.get(currentID).latestValue.at(iloc) << std::endl;
-            }else{
-                std::cout << intTable.get(currentID).latestValue << std::endl;
-            }
+            std::cout << (array ? intArrayTable.get(currentID).latestValue.at(iloc) : intTable.get(currentID).latestValue) << std::endl;
         }else if(currentType == "float"){
-            if(array){
-                std::cout << floatArrayTable.get(currentID).latestValue.at(iloc) << std::endl;
-            }else{
-                std::cout << floatTable.get(currentID).latestValue << std::endl;
-            }
+            std::cout << (array ? floatArrayTable.get(currentID).latestValue.at(iloc) : floatTable.get(currentID).latestValue) << std::endl;
         }else if(currentType == "bool"){
-            if(array){
-                std::cout << (boolArrayTable.get(currentID).latestValue.at(iloc) ? "true" : "false") << std::endl;
-            }else{
-                std::cout << (boolTable.get(currentID).latestValue ? "true" : "false") << std::endl;
-            }
+            std::cout << ((array ? boolArrayTable.get(currentID).latestValue.at(iloc) : boolTable.get(currentID).latestValue) ? "true" : "false") << std::endl;
         }else if(currentType == "string"){
-            if(array){
-                std::cout << stringArrayTable.get(currentID).latestValue.at(iloc) << std::endl;
-            }else{
-                std::cout << stringTable.get(currentID).latestValue << std::endl;
-            }
+            std::cout << (array ? stringArrayTable.get(currentID).latestValue.at(iloc) : stringTable.get(currentID).latestValue) << std::endl;
         }else if(currentType == "char"){
-            if(array){
-                std::cout << charArrayTable.get(currentID).latestValue.at(iloc) << std::endl;
-            }else{
-                std::cout << charTable.get(currentID).latestValue << std::endl;
-            }
+            std::cout << (array ? charArrayTable.get(currentID).latestValue.at(iloc) : charTable.get(currentID).latestValue) << std::endl;
         }
         array = false;
     }
