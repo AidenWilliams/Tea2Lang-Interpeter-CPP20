@@ -19,18 +19,17 @@ namespace visitor{
         if (f.type.empty()){
             throw FunctionTypeException();
         }
-        auto ret = functionTable.insert(std::pair<std::string, Function>(f.identifier, f) );
+        auto ret = functionTable.insert (std::pair<std::pair<std::string, std::vector<std::string>>, Function>
+                                        (             std::make_pair(f.identifier, f.paramTypes),       f));
         return ret.second;
     }
 
-    std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>, Variable>>
-    Scope::find(const Variable& v) {
+    auto Scope::find(const Variable& v) {
         return variableTable.find(v.identifier);
     }
 
-    std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>, Function>>
-    Scope::find(const Function& f) {
-        return functionTable.find(f.identifier);
+    auto Scope::find(const Function& f) {
+        return functionTable.find( std::pair(f.identifier, f.paramTypes));
     }
 
     bool Scope::found(
@@ -39,12 +38,14 @@ namespace visitor{
     }
 
     bool Scope::found(
-            std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>, Function>> result) {
+            std::_Rb_tree_iterator<std::pair<const std::pair<std::basic_string<char, std::char_traits<char>, std::allocator<char>>, std::vector<std::basic_string<char, std::char_traits<char>, std::allocator<char>>>>, Function>>
+            result) {
         return result != functionTable.end();
     }
 
     bool Scope::erase(
-            std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>, Function>> result) {
+            std::_Rb_tree_iterator<std::pair<const std::pair<std::basic_string<char, std::char_traits<char>, std::allocator<char>>, std::vector<std::basic_string<char, std::char_traits<char>, std::allocator<char>>>>, Function>>
+            result) {
         if(found(result)){
             functionTable.erase(result);
             return true;
@@ -243,7 +244,7 @@ namespace visitor{
             paramTypes.emplace_back(currentType);
         }
         // Generate Function
-        Function f(functionCallNode->identifier->getID());
+        Function f(functionCallNode->identifier->getID(), paramTypes);
         // Now confirm this exists in the function table for any scope
         for(const auto& scope : scopes){
             auto result = scope->find(f);
@@ -265,7 +266,7 @@ namespace visitor{
         }
         // Function hasn't been found in any scope
         throw std::runtime_error("Function with identifier " + f.identifier + " called on line "
-                                 + std::to_string(f.lineNumber) + " has not been declared.");
+                                 + std::to_string(functionCallNode->lineNumber) + " has not been declared.");
     }
 
     // Expressions
@@ -282,7 +283,7 @@ namespace visitor{
             paramTypes.emplace_back(currentType);
         }
         // now generate the function object
-        Function f(sFunctionCallNode->identifier->getID());
+        Function f(sFunctionCallNode->identifier->getID(), paramTypes);
         // Now confirm this exists in the function table for any scope
         for(const auto& scope : scopes){
             auto result = scope->find(f);
@@ -304,12 +305,13 @@ namespace visitor{
         }
         // Function hasn't been found in any scope
         throw std::runtime_error("Function with identifier " + f.identifier + " called on line "
-                                 + std::to_string(f.lineNumber) + " has not been declared.");
+                                 + std::to_string(sFunctionCallNode->lineNumber) + " has not been declared.");
     }
 
     void SemanticAnalyser::visit(parser::ASTDeclarationNode *declarationNode) {
         // Generate Variable
-        Variable v(declarationNode->type, declarationNode->identifier->getID(), declarationNode->lineNumber);
+        Variable v(declarationNode->type, declarationNode->identifier->getID(),
+                declarationNode->identifier->ilocExprNode != nullptr, declarationNode->lineNumber);
         // Check current scope
         auto scope = scopes.back();
         // Try to insert v
@@ -371,7 +373,7 @@ namespace visitor{
          * type = currentType
          */
         // Generate Variable
-        Variable v(currentType, assignmentNode->identifier->getID(), assignmentNode->lineNumber);
+        Variable v(assignmentNode->identifier->getID());
         // Now confirm this exists in the function table for any scope
         for(const auto& scope : scopes){
             auto result = scope->find(v);
@@ -476,8 +478,8 @@ namespace visitor{
         std::vector<std::string> paramTypes;
         for (const auto& param : functionDeclarationNode->parameters){
             paramTypes.emplace_back(param.second);
-            // While going over the types add these to the new scope
-            scopes.back()->insert(Variable(param.second, param.first, functionDeclarationNode->lineNumber));
+            // While going over the types add these to the new scope // arrau or not here it is irrelevant
+            scopes.back()->insert(Variable(param.second, param.first, true, functionDeclarationNode->lineNumber));
         }
         // NOTE: The scope variable is still viewing the global scope
         // now generate the function object

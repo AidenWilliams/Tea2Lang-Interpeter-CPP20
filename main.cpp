@@ -59,9 +59,9 @@ int main(int argc, char **argv) {
             "    }\n"
             "}\n"
             "\n"
-            "float Average(toAverage[] : float ,count : int){\n"
+            "float Average(toAverage[] : float ,count : float){\n"
             "    let total : float = 0.0;\n"
-            "    for(let i : int = 0; i<count; i=i+1){\n"
+            "    for(let i : float = 0.0; i < count; i=i+1.0){\n"
             "        total = total + toAverage[i];\n" //20
             "    }\n"
             "    return total / count;\n"

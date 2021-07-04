@@ -37,24 +37,26 @@ namespace visitor {
                 identifier(std::move(identifier)),
                 lineNumber(0)
         {};
-        Variable(std::string type, std::string identifier, unsigned int lineNumber) :
+        Variable(std::string type, std::string identifier, bool array, unsigned int lineNumber) :
                 type(std::move(type)),
                 identifier(std::move(identifier)),
+                array(array),
                 lineNumber(lineNumber)
         {};
         ~Variable() = default;
 
         std::string type;
         std::string identifier;
+        bool array;
         unsigned int lineNumber;
     };
 
     class Function{
     public:
-        explicit Function(std::string identifier) :
+        explicit Function(std::string identifier, std::vector<std::string> paramTypes) :
                 type(""),
                 identifier(std::move(identifier)),
-                paramTypes(),
+                paramTypes(std::move(paramTypes)),
                 lineNumber(0)
         {};
         Function(std::string type, std::string identifier, std::vector<std::string> paramTypes, unsigned int lineNumber) :
@@ -77,8 +79,8 @@ namespace visitor {
         // variableTable = {identifier: {TYPE, identifier, lineNumber}}
         std::map<std::string, Variable> variableTable;
         // Python equivalent of:
-        // functionTable = {identifier: {TYPE, identifier, [ARGUMENT_TYPES,], lineNumber}}
-        std::map<std::string, Function> functionTable;
+        // functionTable = {{identifier, [ARGUMENT_TYPES,]}: {TYPE, identifier, [ARGUMENT_TYPES,], lineNumber}}
+        std::map<std::pair<std::string, std::vector<std::string>>, Function> functionTable;
         bool global;
     public:
         explicit Scope(bool global=false) : global(global) {};
@@ -89,15 +91,13 @@ namespace visitor {
         bool insert(const Variable& v);
         bool insert(const Function& f);
 
-        std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>, Variable>>
-        find(const Variable& v);
-        std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>, Function>>
-        find(const Function& f);
+        auto find(const Variable& v);
+        auto find(const Function& f);
 
         bool found(std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>, Variable>> result);
-        bool found(std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>, Function>> result);
+        bool found(std::_Rb_tree_iterator<std::pair<const std::pair<std::basic_string<char, std::char_traits<char>, std::allocator<char>>, std::vector<std::basic_string<char, std::char_traits<char>, std::allocator<char>>>>, Function>> result);
 
-        bool erase(std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>, Function>> result);
+        bool erase(std::_Rb_tree_iterator<std::pair<const std::pair<std::basic_string<char, std::char_traits<char>, std::allocator<char>>, std::vector<std::basic_string<char, std::char_traits<char>, std::allocator<char>>>>, Function>> result);
     };
 
 
@@ -105,7 +105,6 @@ namespace visitor {
     public:
         SemanticAnalyser()
         {
-            scopes.emplace_back(std::make_shared<Scope>());
             currentType = std::string();
             returns = false;
         };
