@@ -27,6 +27,10 @@ namespace visitor {
         return functionTable.find( std::pair(f.identifier, f.paramTypes));
     }
 
+    auto Interpreter::find(const interpreter::Function& f) {
+        return functionTable.find( std::pair(f.identifier, f.paramTypes));
+    }
+
     bool Interpreter::insert(const interpreter::Variable<int>& v){
         if(v.type.empty()){
             throw VariableTypeException();
@@ -317,6 +321,35 @@ namespace visitor {
         return "1";
     }
 
+
+    template<> char Interpreter::pop_back<char>(const std::string &identifier) {
+        auto result = find(interpreter::Variable<char>(identifier));
+        if(!found(result)){
+            throw std::runtime_error("Failed to find variable with identifier " + identifier);
+        }
+        // unfortunately boolTable[identifier] kills the cpp compiler
+        // so in order to pop_back a value from the values vector we have to completely replace the object
+        // Check if the result has no values variable
+        // If the vector is empty we get a sigsev
+        // Copy the result variable
+        if(result->second.values.empty()){
+            result->second.values.emplace_back(0);
+        }
+        interpreter::Variable<char> cpy(result -> second);
+        // pop the value from the copy
+        cpy.values.pop_back();
+        if(!cpy.values.empty()) {
+            cpy.latestValue = cpy.values.back();
+        }else{
+            cpy.latestValue = false;
+        }
+        // remove the result=
+        charTable.erase(result);
+        // insert the copy
+        insert(cpy);
+        return ' ';
+    }
+
     template<> int Interpreter::get<int>(const std::string& identifier) {
         auto result = find(interpreter::Variable<int>(identifier));
         if(!found(result)){
@@ -368,6 +401,20 @@ namespace visitor {
         // pop_back case
         if(identifier == "0CurrentVariable"){
             pop_back<std::string>("0CurrentVariable");
+        }
+        // return the popped value
+        return ret;
+    }
+
+    template<> char Interpreter::get<char>(const std::string& identifier) {
+        auto result = find(interpreter::Variable<char>(identifier));
+        if(!found(result)){
+            throw std::runtime_error("Failed to find variable with identifier " + identifier);
+        }
+        float ret = result -> second.latestValue;
+        // pop_back case
+        if(identifier == "0CurrentVariable") {
+            pop_back<char>("0CurrentVariable");
         }
         // return the popped value
         return ret;
@@ -430,7 +477,44 @@ namespace visitor {
     }
 
     void Interpreter::visit(parser::ASTArrayLiteralNode *arrayLiteralNode) {
+        array = true;
+        // create array
+        if(currentType == "int"){
+            std::vector<int> arr;
 
+            for(const auto& item : arrayLiteralNode->expressions){
+                item->accept(this);
+                arr.emplace_back(get<int>(currentID));
+            }
+        }else if(currentType == "float"){
+            std::vector<float> arr;
+
+            for(const auto& item : arrayLiteralNode->expressions){
+                item->accept(this);
+                arr.emplace_back(get<float>(currentID));
+            }
+        }else if(currentType == "bool"){
+            std::vector<bool> arr;
+
+            for(const auto& item : arrayLiteralNode->expressions){
+                item->accept(this);
+                arr.emplace_back(get<bool>(currentID));
+            }
+        }else if(currentType == "string"){
+            std::vector<std::string> arr;
+
+            for(const auto& item : arrayLiteralNode->expressions){
+                item->accept(this);
+                arr.emplace_back(get<std::string>(currentID));
+            }
+        }else if(currentType == "char"){
+            std::vector<char> arr;
+
+            for(const auto& item : arrayLiteralNode->expressions){
+                item->accept(this);
+                arr.emplace_back(get<char>(currentID));
+            }
+        }
     }
 
     void Interpreter::visit(parser::ASTBinaryNode *binaryNode) {
@@ -446,18 +530,23 @@ namespace visitor {
                                                       binaryNode -> lineNumber));
         }else if(currentType == "float"){
             insert(interpreter::Variable<float>("float", "0CurrentVariable",
-                                                false,
-                                                get<float>(currentID),
+                                                      false,
+                                                      get<float>(currentID),
                                                       binaryNode -> lineNumber));
         }else if(currentType == "bool"){
             insert(interpreter::Variable<bool>("bool", "0CurrentVariable",
-                                               false,
-                                               get<bool>(currentID),
+                                                      false,
+                                                      get<bool>(currentID),
                                                       binaryNode -> lineNumber));
         }else if(currentType == "string"){
             insert(interpreter::Variable<std::string>("string", "0CurrentVariable",
                                                       false,
                                                       get<std::string>(currentID),
+                                                      binaryNode -> lineNumber));
+        }else if(currentType == "char"){
+            insert(interpreter::Variable<char>("char", "0CurrentVariable",
+                                                      false,
+                                                      get<char>(currentID),
                                                       binaryNode -> lineNumber));
         }
 
@@ -1058,21 +1147,26 @@ namespace visitor {
         // Insert the new variable
         if(currentType == "int"){
             insert (
-                    interpreter::Variable<int>(currentType, declarationNode -> identifier -> identifier, false, get<int>(currentID), declarationNode -> lineNumber)
+                    interpreter::Variable<int>(currentType, declarationNode -> identifier -> identifier, array, get<int>(currentID), declarationNode -> lineNumber)
             );
         }else if(currentType == "float"){
             insert (
-                    interpreter::Variable<float>(currentType, declarationNode -> identifier -> identifier, false, get<float>(currentID), declarationNode -> lineNumber)
+                    interpreter::Variable<float>(currentType, declarationNode -> identifier -> identifier, array, get<float>(currentID), declarationNode -> lineNumber)
             );
         }else if(currentType == "bool"){
             insert (
-                    interpreter::Variable<bool>(currentType, declarationNode -> identifier -> identifier, false, get<bool>(currentID), declarationNode -> lineNumber)
+                    interpreter::Variable<bool>(currentType, declarationNode -> identifier -> identifier, array, get<bool>(currentID), declarationNode -> lineNumber)
             );
         }else if(currentType == "string"){
             insert (
-                    interpreter::Variable<std::string>(currentType, declarationNode -> identifier -> identifier, false, get<std::string>(currentID), declarationNode -> lineNumber)
+                    interpreter::Variable<std::string>(currentType, declarationNode -> identifier -> identifier, array, get<std::string>(currentID), declarationNode -> lineNumber)
+            );
+        }else if(currentType == "char"){
+            insert (
+                    interpreter::Variable<char>(currentType, declarationNode -> identifier -> identifier, array, get<char>(currentID), declarationNode -> lineNumber)
             );
         }
+        array = false;
 
         if(function){
             toPop.emplace_back(std::make_pair(currentType, declarationNode -> identifier -> identifier));
