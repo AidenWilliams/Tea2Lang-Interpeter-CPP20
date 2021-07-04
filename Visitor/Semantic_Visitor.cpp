@@ -299,8 +299,6 @@ namespace visitor{
         }
 
         // normal variable case
-        // Can be either variable or function
-        // check variable first
         // Build variable shell
         Variable v(identifierNode->getID());
         // Check that a variable with this identifier exists
@@ -314,23 +312,8 @@ namespace visitor{
                 return;
             }
         }
-        // Ok we havent found a variable check the functions
-        // Build variable shell
-        Function f(identifierNode->identifier);
-        // Check that a variable with this identifier exists
-        for(const auto& scope : scopes) {
-            auto result = scope->find(f);
-            if(scope->found(result)) {
-                // if identifier has been found
-                // change current Type
-                currentType = result->second.type;
-                // Then return
-                return;
-            }
-        }
-
-        // Object hasn't been found in any scope
-        throw std::runtime_error("Object with identifier " + identifierNode->identifier + " called on line "
+        // Variable hasn't been found in any scope
+        throw std::runtime_error("Variable with identifier " + identifierNode->getID() + " called on line "
                                  + std::to_string(identifierNode->lineNumber) + " has not been declared.");
     }
 
@@ -367,8 +350,30 @@ namespace visitor{
             // when the function is found
             paramTypes.emplace_back(currentType);
         }
-        // Go into the identifier
-        functionCallNode->identifier->accept(this);
+        // Generate Function
+        Function f(functionCallNode->identifier->getID(), paramTypes);
+        // Now confirm this exists in the function table for any scope
+        for(const auto& scope : scopes){
+            auto result = scope->find(f);
+            if(scope->found(result)) {
+                // change current type to the function return type
+                currentType = result->second.type;
+                // start going over the parameters in the function
+                for (int i = 0; i < result->second.paramTypes.size(); ++i){
+                    if (result->second.paramTypes.at(i) != paramTypes.at(i)){
+                        throw std::runtime_error("The " + std::to_string(i) + "th argument's type on line "
+                                                + std::to_string(f.lineNumber) +" does not match "
+                                                + f.identifier + "'s argument signature. The type should be "
+                                                + result->second.paramTypes.at(i));
+                    }
+                }
+                // all params match
+                return;
+            }
+        }
+        // Function hasn't been found in any scope
+        throw std::runtime_error("Function with identifier " + functionCallNode->identifier->getID() + " called on line "
+                                 + std::to_string(functionCallNode->lineNumber) + " has not been declared.");
     }
 
     // Expressions
@@ -384,8 +389,30 @@ namespace visitor{
             // when the function is found
             paramTypes.emplace_back(currentType);
         }
-        // Go into the identifier
-        sFunctionCallNode->identifier->accept(this);
+        // now generate the function object
+        Function f(sFunctionCallNode->identifier->getID(), paramTypes);
+        // Now confirm this exists in the function table for any scope
+        for(const auto& scope : scopes){
+            auto result = scope->find(f);
+            if(scope->found(result)) {
+                // change current type to the function return type
+                currentType = result->second.type;
+                // start going over the parameters in the function
+                for (int i = 0; i < result->second.paramTypes.size(); ++i){
+                    if (result->second.paramTypes.at(i) != paramTypes.at(i)){
+                        throw std::runtime_error("The " + std::to_string(i) + "th argument's type on line "
+                                                 + std::to_string(f.lineNumber) +" does not match "
+                                                 + f.identifier + "'s argument signature. The type should be "
+                                                 + result->second.paramTypes.at(i));
+                    }
+                }
+                // all params match
+                return;
+            }
+        }
+        // Function hasn't been found in any scope
+        throw std::runtime_error("Function with identifier " + sFunctionCallNode->identifier->getID() + " called on line "
+                                 + std::to_string(sFunctionCallNode->lineNumber) + " has not been declared.");
     }
 
     void SemanticAnalyser::visit(parser::ASTDeclarationNode *declarationNode) {
