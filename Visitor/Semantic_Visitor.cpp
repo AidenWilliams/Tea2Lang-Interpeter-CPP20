@@ -5,6 +5,17 @@
 #include "Semantic_Visitor.h"
 
 namespace visitor{
+    // Struct
+    void Struct::insert(const Variable& v) {
+        variables.emplace_back(v);
+    }
+    void Struct::insert(const Function& f) {
+        functions.emplace_back(f);
+    }
+    void Struct::defineLineNumber(unsigned int lineNumber){
+        this->lineNumber = lineNumber;
+    }
+    //Struct
     // Semantic Scope
     //TODO: Definitely needs to be tested out
     bool Scope::insert(const Variable& v){
@@ -24,12 +35,50 @@ namespace visitor{
         return ret.second;
     }
 
+    bool Scope::insert(const Struct& s){
+        auto ret = structTable.insert(std::pair<std::string, Struct>(s.identifier, s) );
+        return ret.second;
+    }
+
     auto Scope::find(const Variable& v) {
         return variableTable.find(v.identifier);
     }
 
     auto Scope::find(const Function& f) {
         return functionTable.find( std::pair(f.identifier, f.paramTypes));
+    }
+
+    auto Scope::find(const Struct& s){
+        return structTable.find(s.identifier);
+    }
+
+    void Scope::insertTo(const Struct& s, const Variable& v){
+        auto result = find(s);
+        if(!found(result)){
+            throw StructInsertionException();
+        }
+//        structTable[result->first].insert(v);
+        auto cpy(result -> second);
+        // add the new value
+        cpy.insert(v);
+        // remove the result
+        structTable.erase(result);
+        // insert the copy
+        insert(cpy);
+    }
+    void Scope::insertTo(const Struct& s, const Function& f){
+        auto result = find(s);
+        if(!found(result)){
+            throw StructInsertionException();
+        }
+//        structTable[result->first].insert(f);
+        auto cpy(result -> second);
+        // add the new value
+        cpy.insert(f);
+        // remove the result
+        structTable.erase(result);
+        // insert the copy
+        insert(cpy);
     }
 
     bool Scope::found(
@@ -41,6 +90,10 @@ namespace visitor{
             std::_Rb_tree_iterator<std::pair<const std::pair<std::basic_string<char, std::char_traits<char>, std::allocator<char>>, std::vector<std::basic_string<char, std::char_traits<char>, std::allocator<char>>>>, Function>>
             result) {
         return result != functionTable.end();
+    }
+
+    bool Scope::found(std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>, Struct>> result){
+        return result != structTable.end();
     }
 
     bool Scope::erase(
@@ -349,6 +402,7 @@ namespace visitor{
 
             }
             v.type = currentType;
+
         }
         // set the currentType to declarationNode->type
         // this will help initialise array literals
@@ -357,6 +411,10 @@ namespace visitor{
         // auto is handled at the interpreter
         if(declarationNode->type == currentType || declarationNode->type == "auto"){
             scope->insert(v);
+            // add this to the struct as well (if we are in a struct)
+            if(!structID.empty()){
+                structScope->insertTo(Struct(structID), v);
+            }
         }else{
             // throw an error since type casting is not supported
             throw std::runtime_error("Variable " + v.identifier + " was declared of type " + v.type + " on line "
@@ -467,7 +525,7 @@ namespace visitor{
     void SemanticAnalyser::visit(parser::ASTFunctionDeclarationNode *functionDeclarationNode) {
         // If current scope is not global then do not allow declaration
         auto scope = scopes.back();
-        if (!scope->isGlobal()){
+        if (!scope->isFunctionDeclarable()){
             throw std::runtime_error("Tried declaring function with identifier " + functionDeclarationNode->identifier->getID()
                                      + " in a non-global scope.");
         }
@@ -489,10 +547,8 @@ namespace visitor{
         auto result = scope->find(f);
         // compare the found key and the actual key
         // if identical than the function is already declared
-        // Overloading is a problem for task 2 so we do not care if the params area actually different
         if(scope->found(result)){
             // The variable has already been declared in the current scope
-            // Overloading is a problem for task 2
             throw std::runtime_error("Function with identifier " + functionDeclarationNode->identifier->getID() + " declared on line "
                                      + std::to_string(functionDeclarationNode->lineNumber) + " already declared on line "
                                      + std::to_string(result->second.lineNumber));
@@ -513,6 +569,10 @@ namespace visitor{
                 // remove function and re insert it with the new type
                 scope->erase(scope->find(f));
                 scope->insert(Function(currentType, functionDeclarationNode->identifier->getID(), paramTypes, functionDeclarationNode->lineNumber));
+                // add this to the struct as well (if we are in a struct)
+                if(!structID.empty()){
+                    structScope->insertTo(Struct(structID), f);
+                }
             }else{
                 // Check current type with the declaration type
                 // since the language does not perform any implicit/automatic typecast (as said in spec)
@@ -539,7 +599,33 @@ namespace visitor{
     }
 
     void SemanticAnalyser::visit(parser::ASTStructNode *structNode) {
-
+        // get current scope
+        auto scope = scopes.back();
+        // Generate a dummy struct object
+        Struct s(structNode->identifier->getID());
+        // Try to insert f
+        auto result = scope->find(s);
+        // compare the found key and the actual key
+        // if identical than the struct is already declared
+        if(scope->found(result)){
+            // The variable has already been declared in the current scope
+            throw std::runtime_error("Struct with identifier " + structNode->identifier->getID() + " declared on line "
+                                     + std::to_string(structNode->lineNumber) + " already declared on line "
+                                     + std::to_string(result->second.lineNumber));
+        }
+        // insert struct to the struct table, this allows us to build the variable and function lists in the struct
+        // inside the block
+        s.defineLineNumber(structNode->lineNumber);
+        structID = s.identifier;
+        structScope = scope;
+        scopes.emplace_back(std::make_shared<Scope>(true));
+        // Visit each statement in the block
+        for(auto &statement : structNode->structBlock -> statements)
+            statement -> accept(this);
+        // Close scope
+        structID = "";
+        structScope = nullptr;
+        scopes.pop_back();
     }
     // Statements
 }

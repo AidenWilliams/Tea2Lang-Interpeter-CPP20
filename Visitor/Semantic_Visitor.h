@@ -29,12 +29,19 @@ namespace visitor {
             return "Function Has No Type Design Exception";
         }
     };
+    class StructInsertionException : public std::exception{
+        [[nodiscard]] const char* what() const noexcept override{
+            return "Insertion of variable/function into struct failed.";
+        }
+    };
+
 
     class Variable{
     public:
         explicit Variable(std::string identifier) :
                 type(""),
                 identifier(std::move(identifier)),
+                array(),
                 lineNumber(0)
         {};
         Variable(std::string type, std::string identifier, bool array, unsigned int lineNumber) :
@@ -47,13 +54,13 @@ namespace visitor {
 
         std::string type;
         std::string identifier;
-        bool array;
+        bool array{};
         unsigned int lineNumber;
     };
 
     class Function{
     public:
-        explicit Function(std::string identifier, std::vector<std::string> paramTypes) :
+        Function(std::string identifier, std::vector<std::string> paramTypes) :
                 type(""),
                 identifier(std::move(identifier)),
                 paramTypes(std::move(paramTypes)),
@@ -73,6 +80,26 @@ namespace visitor {
         std::string type;
     };
 
+    class Struct{
+    public:
+        Struct(std::string identifier) :
+                identifier(std::move(identifier)),
+                variables(std::vector<Variable>()),
+                functions(std::vector<Function>()),
+                lineNumber()
+        {};
+        ~Struct() = default;
+
+        std::string identifier;
+        std::vector<Variable> variables;
+        std::vector<Function> functions;
+        unsigned int lineNumber;
+
+        void insert(const Variable& v);
+        void insert(const Function& f);
+        void defineLineNumber(unsigned int lineNumber);
+    };
+
     class Scope {
     private:
         // Python equivalent of:
@@ -81,21 +108,30 @@ namespace visitor {
         // Python equivalent of:
         // functionTable = {{identifier, [ARGUMENT_TYPES,]}: {TYPE, identifier, [ARGUMENT_TYPES,], lineNumber}}
         std::map<std::pair<std::string, std::vector<std::string>>, Function> functionTable;
-        bool global;
+        // Python equivalent of:
+        // StructTable = {{identifier}: {identifier, [variables], [functions], lineNumber}}
+        std::map<std::string, Struct> structTable;
+        bool functionDeclarable;
     public:
-        explicit Scope(bool global=false) : global(global) {};
+        explicit Scope(bool functionDeclarable=false) : functionDeclarable(functionDeclarable) {};
         ~Scope() = default;
 
-        [[nodiscard]] bool isGlobal() const { return global; }
+        [[nodiscard]] bool isFunctionDeclarable() const { return functionDeclarable; }
 
         bool insert(const Variable& v);
         bool insert(const Function& f);
+        bool insert(const Struct& s);
 
         auto find(const Variable& v);
         auto find(const Function& f);
+        auto find(const Struct& s);
+
+        void insertTo(const Struct& s, const Variable& v);
+        void insertTo(const Struct& s, const Function& f);
 
         bool found(std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>, Variable>> result);
         bool found(std::_Rb_tree_iterator<std::pair<const std::pair<std::basic_string<char, std::char_traits<char>, std::allocator<char>>, std::vector<std::basic_string<char, std::char_traits<char>, std::allocator<char>>>>, Function>> result);
+        bool found(std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>, Struct>> result);
 
         bool erase(std::_Rb_tree_iterator<std::pair<const std::pair<std::basic_string<char, std::char_traits<char>, std::allocator<char>>, std::vector<std::basic_string<char, std::char_traits<char>, std::allocator<char>>>>, Function>> result);
     };
@@ -106,12 +142,16 @@ namespace visitor {
         SemanticAnalyser()
         {
             currentType = std::string();
+            structID = std::string();
             returns = false;
+            structScope = std::shared_ptr<Scope>();
         };
         ~SemanticAnalyser() = default;
 
         std::vector<std::shared_ptr<Scope>> scopes;
         std::string currentType;
+        std::string structID;
+        std::shared_ptr<Scope> structScope;
         bool returns;
 
         void visit(parser::ASTProgramNode* programNode) override;
