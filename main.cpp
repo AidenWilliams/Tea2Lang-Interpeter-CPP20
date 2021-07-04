@@ -43,7 +43,7 @@ int main(int argc, char **argv) {
             "   ii = ii + 1;\n"
             "}\n";
     std::string _program_2 =
-            "auto XGreaterY(toCompare[] : int ){\n" // 1
+            "auto XGreaterY(toCompare[] : float){\n" // 1
             "    let ans : auto = false;\n"
             "    if(toCompare[0] > toCompare[1])   {\n"
             "        ans=true;\n"
@@ -59,7 +59,7 @@ int main(int argc, char **argv) {
             "    }\n"
             "}\n"
             "\n"
-            "float Average(toAverage[] : float ,count : float){\n"
+            "float Average(toAverage[] : float , count : float){\n"
             "    let total : float = 0.0;\n"
             "    for(let i : float = 0.0; i < count; i=i+1.0){\n"
             "        total = total + toAverage[i];\n" //20
@@ -74,7 +74,7 @@ int main(int argc, char **argv) {
             "arr1[1] = 6.25;\n"
             "print arr1[1]; //6.25\n" //30
             "print XGreaterY(arr1); //true\n"
-            "print Average(arr2); //6.92\n"
+            "print Average(arr2, 4.0); //6.92\n"
             "print XGreaterY(2,3); //false\n"
             "\n"
             "tlstruct Vector{\n"

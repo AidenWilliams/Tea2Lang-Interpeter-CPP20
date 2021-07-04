@@ -206,8 +206,8 @@ namespace visitor{
             }
         }
         // Variable hasn't been found in any scope
-        throw std::runtime_error("Variable with identifier " + v.identifier + " called on line "
-                                 + std::to_string(v.lineNumber) + " has not been declared.");
+        throw std::runtime_error("Variable with identifier " + identifierNode->getID() + " called on line "
+                                 + std::to_string(identifierNode->lineNumber) + " has not been declared.");
     }
 
     void SemanticAnalyser::visit(parser::ASTUnaryNode *unaryNode) {
@@ -321,7 +321,7 @@ namespace visitor{
         if(scope->found(result)){
             // The variable has already been declared in the current scope
             throw std::runtime_error("Variable with identifier " + v.identifier + " declared on line "
-                                     + std::to_string(v.lineNumber) + " already declared on line "
+                                     + std::to_string(declarationNode->lineNumber) + " already declared on line "
                                      + std::to_string(result->second.lineNumber));
         }
         // by changing the current type we help to init an array literal
@@ -373,7 +373,8 @@ namespace visitor{
          * type = currentType
          */
         // Generate Variable
-        Variable v(assignmentNode->identifier->getID());
+        Variable v(currentType, assignmentNode->identifier->getID(),
+                assignmentNode->identifier->ilocExprNode != nullptr, assignmentNode->lineNumber);
         // Now confirm this exists in the function table for any scope
         for(const auto& scope : scopes){
             auto result = scope->find(v);
@@ -390,8 +391,8 @@ namespace visitor{
             }
         }
         // Variable hasn't been found in any scope
-        throw std::runtime_error("Variable with identifier " + v.identifier + " called on line "
-                                 + std::to_string(v.lineNumber) + " has not been declared.");
+        throw std::runtime_error("Variable with identifier " + assignmentNode->identifier->getID() + " called on line "
+                                 + std::to_string(assignmentNode->lineNumber) + " has not been declared.");
     }
 
     void SemanticAnalyser::visit(parser::ASTPrintNode *printNode) {
