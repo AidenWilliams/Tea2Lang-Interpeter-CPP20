@@ -119,7 +119,7 @@ int main(int argc, char **argv) {
             "print v3.y;//3.2\n"
             "print v3.z;//2.0\n"
             "\n"
-            "v3.translate(1.0, 1.0, 1.0);\n"
+            "v3.Translate(1.0, 1.0, 1.0);\n"
             "\n"
             "let v4 : Vector=Add(v1, v3);\n"
             "print v3.x;//5.0\n" //80

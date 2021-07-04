@@ -350,7 +350,63 @@ namespace visitor{
             // when the function is found
             paramTypes.emplace_back(currentType);
         }
-        // Generate Function
+        // Unfortunately we cant just visit the identifier because this doesnt carry over the paramTypes
+        // of course we can just add another 'global' variable but it is much easier to copy the code
+        // There are 2 cases here
+        // one where this is a normal function (i.e. no '.')
+        // the other when the identifier is referencing another variable
+        auto parent = parser::ASTIdentifierNode(functionCallNode->identifier);
+        auto child = parent.getChild();
+        bool found = false;
+        std::vector<std::string> path; // path of structs with the last element being the variable
+        while(child != nullptr){
+            // we have found a child
+            // this means that the identifier of identifierNode must be a struct
+            for(const auto& scope : scopes) {
+                // First find the variable (remember identifierNode->identifier is a variable of a type)
+                auto result = scope->find(Variable(parent.identifier));
+                if(scope->found(result)) {
+                    // we found it, now does it have a struct type?
+                    if(!lexer::isStruct(result->second.type)){
+                        throw std::runtime_error("Variable with identifier " + parent.identifier + " called on line "
+                                                 + std::to_string(parent.lineNumber) + " is not a tlstruct object. Only"
+                                                                                       "tlstruct objects can reference other variables or functions via the '.' operator.");
+                    }
+                    // get the struct
+                    for(const auto& _scope : scopes) {
+                        auto struct_result = _scope->find(Struct(result->second.type));
+                        if(_scope->found(struct_result)) {
+                            // found the struct
+                            // go over its functions and verify child.identifier is there
+                            for(auto func : struct_result->second.functions){
+                                if(func.identifier == child->identifier && func.paramTypes == paramTypes) {
+                                    //found
+                                    found = true;
+                                    currentType = func.type;
+                                    break;
+                                }
+                            }
+                            if(found) break;
+                        }
+                    }
+                    if(found) {
+                        found = false;
+                    }else{
+                        throw std::runtime_error("Function with identifier " + child->identifier + " called on line "
+                                                 + std::to_string(parent.lineNumber) + " is not a child function of "
+                                                 + parent.identifier);
+                    }
+                    break;
+                }
+            }
+            parent = parser::ASTIdentifierNode(child);
+            child = child->getChild();
+            if(child == nullptr)
+                return;
+        }
+
+        // normal function case
+        // now generate the function object
         Function f(functionCallNode->identifier->getID(), paramTypes);
         // Now confirm this exists in the function table for any scope
         for(const auto& scope : scopes){
@@ -362,9 +418,9 @@ namespace visitor{
                 for (int i = 0; i < result->second.paramTypes.size(); ++i){
                     if (result->second.paramTypes.at(i) != paramTypes.at(i)){
                         throw std::runtime_error("The " + std::to_string(i) + "th argument's type on line "
-                                                + std::to_string(f.lineNumber) +" does not match "
-                                                + f.identifier + "'s argument signature. The type should be "
-                                                + result->second.paramTypes.at(i));
+                                                 + std::to_string(f.lineNumber) +" does not match "
+                                                 + f.identifier + "'s argument signature. The type should be "
+                                                 + result->second.paramTypes.at(i));
                     }
                 }
                 // all params match
@@ -375,7 +431,6 @@ namespace visitor{
         throw std::runtime_error("Function with identifier " + functionCallNode->identifier->getID() + " called on line "
                                  + std::to_string(functionCallNode->lineNumber) + " has not been declared.");
     }
-
     // Expressions
 
     // Statements
@@ -389,6 +444,60 @@ namespace visitor{
             // when the function is found
             paramTypes.emplace_back(currentType);
         }
+        // There are 2 cases here
+        // one where this is a normal function (i.e. no '.')
+        // the other when the identifier is referencing another variable
+        auto parent = parser::ASTIdentifierNode(sFunctionCallNode->identifier);
+        auto child = parent.getChild();
+        bool found = false;
+        std::vector<std::string> path; // path of structs with the last element being the variable
+        while(child != nullptr){
+            // we have found a child
+            // this means that the identifier of identifierNode must be a struct
+            for(const auto& scope : scopes) {
+                // First find the variable (remember identifierNode->identifier is a variable of a type)
+                auto result = scope->find(Variable(parent.identifier));
+                if(scope->found(result)) {
+                    // we found it, now does it have a struct type?
+                    if(!lexer::isStruct(result->second.type)){
+                        throw std::runtime_error("Variable with identifier " + parent.identifier + " called on line "
+                                                 + std::to_string(parent.lineNumber) + " is not a tlstruct object. Only"
+                                                                                       "tlstruct objects can reference other variables or functions via the '.' operator.");
+                    }
+                    // get the struct
+                    for(const auto& _scope : scopes) {
+                        auto struct_result = _scope->find(Struct(result->second.type));
+                        if(_scope->found(struct_result)) {
+                            // found the struct
+                            // go over its functions and verify child.identifier is there
+                            for(auto func : struct_result->second.functions){
+                                if(func.identifier == child->identifier && func.paramTypes == paramTypes) {
+                                    //found
+                                    found = true;
+                                    currentType = func.type;
+                                    break;
+                                }
+                            }
+                            if(found) break;
+                        }
+                    }
+                    if(found) {
+                        found = false;
+                    }else{
+                        throw std::runtime_error("Function with identifier " + child->identifier + " called on line "
+                                                 + std::to_string(parent.lineNumber) + " is not a child object of "
+                                                 + parent.identifier);
+                    }
+                    break;
+                }
+            }
+            parent = parser::ASTIdentifierNode(child);
+            child = child->getChild();
+            if(child == nullptr)
+                return;
+        }
+
+        // normal function case
         // now generate the function object
         Function f(sFunctionCallNode->identifier->getID(), paramTypes);
         // Now confirm this exists in the function table for any scope

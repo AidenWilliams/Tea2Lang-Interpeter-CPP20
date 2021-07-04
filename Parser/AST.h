@@ -95,9 +95,9 @@ namespace parser {
         {};
 
         explicit ASTIdentifierNode(const std::shared_ptr<ASTIdentifierNode>& identifier) :
-                identifier(std::move(identifier->identifier)),
-                child(std::move(identifier->child)),
-                ilocExprNode(std::move(identifier->ilocExprNode)),
+                identifier(identifier->identifier),
+                child(identifier->child),
+                ilocExprNode(identifier->ilocExprNode),
                 lineNumber(identifier->lineNumber)
         {};
 
