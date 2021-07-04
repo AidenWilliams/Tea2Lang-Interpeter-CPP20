@@ -27,6 +27,23 @@ namespace visitor {
         return functionTable.find( std::pair(f.identifier, f.paramTypes));
     }
 
+    auto Interpreter::find(const interpreter::Array<int>& v) {
+        return intArrayTable.find(v.identifier);
+    }
+    auto Interpreter::find(const interpreter::Array<float>& v) {
+        return floatArrayTable.find(v.identifier);
+    }
+    auto Interpreter::find(const interpreter::Array<bool>& v) {
+        return boolArrayTable.find(v.identifier);
+    }
+    auto Interpreter::find(const interpreter::Array<std::string>& v) {
+        return stringArrayTable.find(v.identifier);
+    }
+
+    auto Interpreter::find(const interpreter::Array<char> &v) {
+        return charArrayTable.find(v.identifier);
+    }
+
     bool Interpreter::insert(const interpreter::Variable<int>& v){
         if(v.type.empty()){
             throw VariableTypeException();
@@ -61,11 +78,6 @@ namespace visitor {
         }
         auto result = find(v);
         if(found(result)){
-            // found the variable already
-            // add the value
-            // since we know that the result exists, then we can use the [] without any 'side effect' of creating a new entry
-            // unfortunately intTable[identifier] kills the cpp compiler
-            // so in order to pop_back a value from the values vector we have to completely replace the object
             // Copy the result variable
             interpreter::Variable<float> cpy(result -> second);
             // add the new value
@@ -89,11 +101,6 @@ namespace visitor {
         }
         auto result = find(v);
         if(found(result)){
-            // found the variable already
-            // add the value
-            // since we know that the result exists, then we can use the [] without any 'side effect' of creating a new entry
-            // unfortunately intTable[identifier] kills the cpp compiler
-            // so in order to pop_back a value from the values vector we have to completely replace the object
             // Copy the result variable
             interpreter::Variable<bool> cpy(result -> second);
             // add the new value
@@ -117,11 +124,6 @@ namespace visitor {
         }
         auto result = find(v);
         if(found(result)){
-            // found the variable already
-            // add the value
-            // since we know that the result exists, then we can use the [] without any 'side effect' of creating a new entry
-            // unfortunately intTable[identifier] kills the cpp compiler
-            // so in order to pop_back a value from the values vector we have to completely replace the object
             // Copy the result variable
             interpreter::Variable<std::string> cpy(result -> second);
             // add the new value
@@ -145,11 +147,6 @@ namespace visitor {
         }
         auto result = find(v);
         if(found(result)){
-            // found the variable already
-            // add the value
-            // since we know that the result exists, then we can use the [] without any 'side effect' of creating a new entry
-            // unfortunately intTable[identifier] kills the cpp compiler
-            // so in order to pop_back a value from the values vector we have to completely replace the object
             // Copy the result variable
             interpreter::Variable<char> cpy(result -> second);
             // add the new value
@@ -163,6 +160,126 @@ namespace visitor {
         }else{
             // The variable doesnt exist so we add a new one
             auto ret = charTable.insert(std::pair<std::string, interpreter::Variable<char>>(v.identifier, v) );
+            return ret.second;
+        }
+    }
+
+    bool Interpreter::insert(const interpreter::Array<int>& v){
+        if(v.type.empty()){
+            throw VariableTypeException();
+        }
+        auto result = find(v);
+        if(found(result)){
+            // found the variable already
+            // add the value
+            // since we know that the result exists, then we can use the [] without any 'side effect' of creating a new entry
+            // unfortunately intTable[identifier] kills the cpp compiler
+            // so in order to pop_back a value from the values vector we have to completely replace the object
+            // Copy the result variable
+            interpreter::Array<int> cpy(result -> second);
+            // pop the value from the copy
+            cpy.values.emplace_back(v.latestValue);
+            cpy.latestValue = v.latestValue;
+            // remove the result
+            intArrayTable.erase(result);
+            // insert the copy
+            insert(cpy);
+            return false;
+        }else{
+            // The variable doesnt exist so we add a new one
+            auto ret = intArrayTable.insert(std::pair<std::string, interpreter::Array<int>>(v.identifier, v) );
+            return ret.second;
+        }
+    }
+
+    bool Interpreter::insert(const interpreter::Array<float>& v){
+        if(v.type.empty()){
+            throw VariableTypeException();
+        }
+        auto result = find(v);
+        if(found(result)){
+            // Copy the result variable
+            interpreter::Array<float> cpy(result -> second);
+            // add the new value
+            cpy.values.emplace_back(v.latestValue);
+            cpy.latestValue = v.latestValue;
+            // remove the result
+            floatArrayTable.erase(result);
+            // insert the copy
+            insert(cpy);
+            return false;
+        }else{
+            // The variable doesnt exist so we add a new one
+            auto ret = floatArrayTable.insert(std::pair<std::string, interpreter::Array<float>>(v.identifier, v) );
+            return ret.second;
+        }
+    }
+
+    bool Interpreter::insert(const interpreter::Array<bool>& v){
+        if(v.type.empty()){
+            throw VariableTypeException();
+        }
+        auto result = find(v);
+        if(found(result)){
+            // Copy the result variable
+            interpreter::Array<bool> cpy(result -> second);
+            // add the new value
+            cpy.values.emplace_back(v.latestValue);
+            cpy.latestValue = v.latestValue;
+            // remove the result
+            boolArrayTable.erase(result);
+            // insert the copy
+            insert(cpy);
+            return false;
+        }else{
+            // The variable doesnt exist so we add a new one
+            auto ret = boolArrayTable.insert(std::pair<std::string, interpreter::Array<bool>>(v.identifier, v) );
+            return ret.second;
+        }
+    }
+
+    bool Interpreter::insert(const interpreter::Array<std::string>& v){
+        if(v.type.empty()){
+            throw VariableTypeException();
+        }
+        auto result = find(v);
+        if(found(result)){
+            // Copy the result variable
+            interpreter::Array<std::string> cpy(result -> second);
+            // add the new value
+            cpy.values.emplace_back(v.latestValue);
+            cpy.latestValue = v.latestValue;
+            // remove the result
+            stringArrayTable.erase(result);
+            // insert the copy
+            insert(cpy);
+            return false;
+        }else{
+            // The variable doesnt exist so we add a new one
+            auto ret = stringArrayTable.insert(std::pair<std::string, interpreter::Array<std::string>>(v.identifier, v) );
+            return ret.second;
+        }
+    }
+
+    bool Interpreter::insert(const interpreter::Array<char> &v) {
+        if(v.type.empty()){
+            throw VariableTypeException();
+        }
+        auto result = find(v);
+        if(found(result)){
+            // Copy the result variable
+            interpreter::Array<char> cpy(result -> second);
+            // add the new value
+            cpy.values.emplace_back(v.latestValue);
+            cpy.latestValue = v.latestValue;
+            // remove the result
+            charArrayTable.erase(result);
+            // insert the copy
+            insert(cpy);
+            return false;
+        }else{
+            // The variable doesnt exist so we add a new one
+            auto ret = charArrayTable.insert(std::pair<std::string, interpreter::Array<char>>(v.identifier, v) );
             return ret.second;
         }
     }
@@ -204,6 +321,32 @@ namespace visitor {
         return result != functionTable.end();
     }
 
+    bool Interpreter::found(
+            std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>, interpreter::Array<int>>>
+            result){
+        return result != intArrayTable.end();
+    }
+    bool Interpreter::found(
+            std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>, interpreter::Array<float>>>
+            result){
+        return result != floatArrayTable.end();
+    }
+    bool Interpreter::found(
+            std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>, interpreter::Array<bool>>>
+            result){
+        return result != boolArrayTable.end();
+    }
+    bool Interpreter::found(
+            std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>, interpreter::Array<std::string>>>
+            result){
+        return result != stringArrayTable.end();
+    }
+    bool Interpreter::found(
+            std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>, interpreter::Array<char>>>
+            result){
+        return result != charArrayTable.end();
+    }
+
 
     template<> int Interpreter::pop_back<int>(const std::string &identifier) {
         auto result = find(interpreter::Variable<int>(identifier));
@@ -239,9 +382,6 @@ namespace visitor {
         if(!found(result)){
             throw std::runtime_error("Failed to find variable with identifier " + identifier);
         }
-        // unfortunately floatTable[identifier] kills the cpp compiler
-        // so in order to pop_back a value from the values vector we have to completely replace the object
-        // Check if the result has no values variable
         // If the vector is empty we get a sigsev
         if(result->second.values.empty()){
             result->second.values.emplace_back(0);
@@ -267,10 +407,6 @@ namespace visitor {
         if(!found(result)){
             throw std::runtime_error("Failed to find variable with identifier " + identifier);
         }
-        // unfortunately boolTable[identifier] kills the cpp compiler
-        // so in order to pop_back a value from the values vector we have to completely replace the object
-        // Check if the result has no values variable
-        // If the vector is empty we get a sigsev
         // Copy the result variable
         if(result->second.values.empty()){
             result->second.values.emplace_back(0);
@@ -295,9 +431,6 @@ namespace visitor {
         if(!found(result)){
             throw std::runtime_error("Failed to find variable with identifier " + identifier);
         }
-        // unfortunately stringTable[identifier] kills the cpp compiler
-        // so in order to pop_back a value from the values vector we have to completely replace the object
-        // Check if the result has no values variable
         // If the vector is empty we get a sigsev
         if(result->second.values.empty()){
             result->second.values.emplace_back("0");
@@ -323,9 +456,6 @@ namespace visitor {
         if(!found(result)){
             throw std::runtime_error("Failed to find variable with identifier " + identifier);
         }
-        // unfortunately boolTable[identifier] kills the cpp compiler
-        // so in order to pop_back a value from the values vector we have to completely replace the object
-        // Check if the result has no values variable
         // If the vector is empty we get a sigsev
         // Copy the result variable
         if(result->second.values.empty()){
@@ -344,6 +474,138 @@ namespace visitor {
         // insert the copy
         insert(cpy);
         return ' ';
+    }
+
+    template<> std::vector<int> Interpreter::pop_back<std::vector<int>>(const std::string &identifier) {
+        auto result = find(interpreter::Array<int>(identifier));
+        if(!found(result)){
+            throw std::runtime_error("Failed to find variable with identifier " + identifier);
+        }
+        // unfortunately intTable[identifier] kills the cpp compiler
+        // so in order to pop_back a value from the values vector we have to completely replace the object
+        // Check if the result has no values variable
+        // If the vector is empty we get a sigsev
+        if(result->second.values.empty()){
+            result->second.values.emplace_back(std::vector<int>());
+        }
+        // Copy the result variable
+        interpreter::Array<int> cpy(result -> second);
+        // pop the value from the copy
+        cpy.values.pop_back();
+        if(!cpy.values.empty()) {
+            cpy.latestValue = cpy.values.back();
+        }else{
+            cpy.latestValue = std::vector<int>();
+        }
+        // remove the result=
+        intArrayTable.erase(result);
+        // insert the copy
+        insert(cpy);
+
+        return std::vector<int>();
+    }
+
+    template<> std::vector<float> Interpreter::pop_back<std::vector<float>>(const std::string &identifier) {
+        auto result = find(interpreter::Array<float>(identifier));
+        if(!found(result)){
+            throw std::runtime_error("Failed to find variable with identifier " + identifier);
+        }
+        // If the vector is empty we get a sigsev
+        if(result->second.values.empty()){
+            result->second.values.emplace_back(std::vector<float>());
+        }
+        // Copy the result variable
+        interpreter::Array<float> cpy (result -> second);
+        // pop the value from the copy
+        cpy.values.pop_back();
+        if(!cpy.values.empty()) {
+            cpy.latestValue = cpy.values.back();
+        }else{
+            cpy.latestValue = std::vector<float>();
+        }
+        // remove the result=
+        floatArrayTable.erase(result);
+        // insert the copy
+        insert(cpy);
+
+        return std::vector<float>();
+    }
+
+    template<> std::vector<bool> Interpreter::pop_back<std::vector<bool>>(const std::string &identifier) {
+        auto result = find(interpreter::Array<bool>(identifier));
+        if(!found(result)){
+            throw std::runtime_error("Failed to find variable with identifier " + identifier);
+        }
+        // Copy the result variable
+        if(result->second.values.empty()){
+            result->second.values.emplace_back(std::vector<bool>());
+        }
+        interpreter::Array<bool> cpy(result -> second);
+        // pop the value from the copy
+        cpy.values.pop_back();
+        if(!cpy.values.empty()) {
+            cpy.latestValue = cpy.values.back();
+        }else{
+            cpy.latestValue = std::vector<bool>();
+        }
+        // remove the result=
+        boolArrayTable.erase(result);
+        // insert the copy
+        insert(cpy);
+
+        return std::vector<bool>();
+    }
+
+    template<> std::vector<std::string> Interpreter::pop_back<std::vector<std::string>>(const std::string &identifier) {
+        auto result = find(interpreter::Array<std::string>(identifier));
+        if(!found(result)){
+            throw std::runtime_error("Failed to find variable with identifier " + identifier);
+        }
+        // If the vector is empty we get a sigsev
+        if(result->second.values.empty()){
+            result->second.values.emplace_back(std::vector<std::string>());
+        }
+        // Copy the result variable
+        interpreter::Array<std::string> cpy(result -> second);
+        // pop the value from the copy
+        cpy.values.pop_back();
+        if(!cpy.values.empty()) {
+            cpy.latestValue = cpy.values.back();
+        }else{
+            cpy.latestValue = std::vector<std::string>();
+        }
+        // remove the result
+        stringArrayTable.erase(result);
+        // insert the copy
+        insert(cpy);
+
+        return std::vector<std::string>();
+    }
+
+    template<> std::vector<char> Interpreter::pop_back<std::vector<char>>(const std::string &identifier) {
+        auto result = find(interpreter::Array<char>(identifier));
+        if(!found(result)){
+            throw std::runtime_error("Failed to find variable with identifier " + identifier);
+        }
+        // If the vector is empty we get a sigsev
+        // Copy the result variable
+        if(result->second.values.empty()){
+            result->second.values.emplace_back(0);
+        }
+        interpreter::Array<char> cpy(result -> second);
+        // pop the value from the copy
+        cpy.values.pop_back();
+        if(!cpy.values.empty()) {
+            cpy.latestValue = cpy.values.back();
+        }else{
+            cpy.latestValue = std::vector<char>();
+        }
+        // remove the result=
+        charArrayTable.erase(result);
+        // insert the copy
+        insert(cpy);
+
+        return std::vector<char>();
     }
 
     template<> int Interpreter::get<int>(const std::string& identifier) {
@@ -416,6 +678,76 @@ namespace visitor {
         return ret;
     }
 
+    template<> std::vector<int> Interpreter::get<std::vector<int>>(const std::string& identifier) {
+        auto result = find(interpreter::Array<int>(identifier));
+        if(!found(result)){
+            throw std::runtime_error("Failed to find variable with identifier " + identifier);
+        }
+        auto ret = result -> second.latestValue;
+        // pop_back case
+        if(identifier == "0CurrentVariable") {
+            pop_back<int>("0CurrentVariable");
+        }
+        // return the popped value
+        return ret;
+    }
+
+    template<> std::vector<float> Interpreter::get<std::vector<float>>(const std::string& identifier) {
+        auto result = find(interpreter::Array<float>(identifier));
+        if(!found(result)){
+            throw std::runtime_error("Failed to find variable with identifier " + identifier);
+        }
+        auto ret = result -> second.latestValue;
+        // pop_back case
+        if(identifier == "0CurrentVariable") {
+            pop_back<std::vector<float>>("0CurrentVariable");
+        }
+        // return the popped value
+        return ret;
+    }
+
+    template<> std::vector<bool> Interpreter::get<std::vector<bool>>(const std::string& identifier) {
+        auto result = find(interpreter::Array<bool>(identifier));
+        if(!found(result)){
+            throw std::runtime_error("Failed to find variable with identifier " + identifier);
+        }
+        auto ret = result -> second.latestValue;
+        // pop_back case
+        if(identifier == "0CurrentVariable") {
+            pop_back<std::vector<bool>>("0CurrentVariable");
+        }
+        // return the popped value
+        return ret;
+    }
+
+    template<> std::vector<std::string> Interpreter::get<std::vector<std::string>>(const std::string& identifier) {
+        auto result = find(interpreter::Array<std::string>(identifier));
+        if(!found(result)) {
+            throw std::runtime_error("Failed to find variable with identifier " + identifier);
+        }
+        auto ret = result->second.latestValue;
+        // pop_back case
+        if(identifier == "0CurrentVariable"){
+            pop_back<std::vector<std::string>>("0CurrentVariable");
+        }
+        // return the popped value
+        return ret;
+    }
+
+    template<> std::vector<char> Interpreter::get<std::vector<char>>(const std::string& identifier) {
+        auto result = find(interpreter::Array<char>(identifier));
+        if(!found(result)){
+            throw std::runtime_error("Failed to find variable with identifier " + identifier);
+        }
+        auto ret = result -> second.latestValue;
+        // pop_back case
+        if(identifier == "0CurrentVariable") {
+            pop_back<std::vector<char>>("0CurrentVariable");
+        }
+        // return the popped value
+        return ret;
+    }
+
     // Tools
 
     void Interpreter::visit(parser::ASTProgramNode *programNode) {
@@ -477,11 +809,11 @@ namespace visitor {
         // create array
         if(currentType == "int"){
             std::vector<int> arr;
-
             for(const auto& item : arrayLiteralNode->expressions){
                 item->accept(this);
                 arr.emplace_back(get<int>(currentID));
             }
+            interpreter::Variable<std::vector<int>> a("int", "literal", true, arr, arrayLiteralNode->lineNumber);
         }else if(currentType == "float"){
             std::vector<float> arr;
 
