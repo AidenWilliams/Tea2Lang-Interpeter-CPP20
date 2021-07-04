@@ -581,6 +581,11 @@ namespace visitor{
                                          + currentType +
                                          ".\nImplicit and Automatic Typecasting is not supported by TeaLang.");
             }
+        }else{
+            // add this to the struct as well (if we are in a struct)
+            if(!structID.empty()){
+                structScope->insertTo(Struct(structID), f);
+            }
         }
         // Close function scope
         // This discards any declared variable in the foo() section
@@ -616,6 +621,8 @@ namespace visitor{
         // insert struct to the struct table, this allows us to build the variable and function lists in the struct
         // inside the block
         s.defineLineNumber(structNode->lineNumber);
+        //insert scope
+        scope->insert(s);
         structID = s.identifier;
         structScope = scope;
         scopes.emplace_back(std::make_shared<Scope>(true));
