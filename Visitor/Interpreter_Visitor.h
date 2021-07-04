@@ -37,6 +37,12 @@ namespace interpreter {
         ~Variable() = default;
         T latestValue;
         std::vector<T> values;
+
+        T operator[](int iloc) const {
+            if(array){
+                return latestValue.at(iloc);
+            }
+        }
     };
 
     class Function : public visitor::Function{
@@ -183,10 +189,12 @@ namespace visitor {
         std::string currentID;
         // function block
         bool function;
-        //                      Type, Identifier
-        std::vector<std::pair<std::string, std::string>> toPop;
         // array flag
         bool array;
+        //iloc
+        int iloc;
+        //                      Type, Identifier
+        std::vector<std::pair<std::string, std::string>> toPop;
     public:
         Interpreter(){
             // insert the interpreter variables these being the literal and 0CurrentVariable for each type
@@ -212,6 +220,7 @@ namespace visitor {
             charArrayTable.insert(interpreter::Variable<std::vector<char>> ("char", "literal", true, {' '}, 0));
             function = false;
             array = false;
+            iloc = -1;
         };
         ~Interpreter() = default;
         auto find(const interpreter::Function& f);

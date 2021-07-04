@@ -244,7 +244,7 @@ namespace visitor{
         }
     }
 
-    void SemanticAnalyser::visit(parser::ASTIdentifierNode *identifierNode) {
+    void SemanticAnalyser::visit(parser::ASTIdentifierNode *identifierNode) {//TODO::HANDLE variable[] case
         // There are 2 cases here
         // one where this is a normal variable (i.e. no '.')
         // the other when the identifier is referencing another variable

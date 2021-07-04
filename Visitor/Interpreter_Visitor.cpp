@@ -81,13 +81,13 @@ namespace visitor {
 
     void Interpreter::visit(parser::ASTArrayLiteralNode *arrayLiteralNode) {
         array = true;
-        // create array
         if(currentType == "int"){
             std::vector<int> arr;
             for(const auto& item : arrayLiteralNode->expressions){
                 item->accept(this);
                 arr.emplace_back(intTable.get(currentID).latestValue);
             }
+            currentType = "int";
             interpreter::Variable<std::vector<int>> a("int", "literal", true, arr, arrayLiteralNode->lineNumber);
         }else if(currentType == "float"){
             std::vector<float> arr;
@@ -96,6 +96,7 @@ namespace visitor {
                 item->accept(this);
                 arr.emplace_back(floatTable.get(currentID).latestValue);
             }
+            currentType = "float";
         }else if(currentType == "bool"){
             std::vector<bool> arr;
 
@@ -103,6 +104,7 @@ namespace visitor {
                 item->accept(this);
                 arr.emplace_back(boolTable.get(currentID).latestValue);
             }
+            currentType = "bool";
         }else if(currentType == "string"){
             std::vector<std::string> arr;
 
@@ -110,6 +112,7 @@ namespace visitor {
                 item->accept(this);
                 arr.emplace_back(stringTable.get(currentID).latestValue);
             }
+            currentType = "string";
         }else if(currentType == "char"){
             std::vector<char> arr;
 
@@ -117,8 +120,8 @@ namespace visitor {
                 item->accept(this);
                 arr.emplace_back(charTable.get(currentID).latestValue);
             }
+            currentType = "char";
         }
-        currentType = "object";
         currentID = "literal";
     }
 
@@ -153,6 +156,11 @@ namespace visitor {
                                                       false,
                                                       charTable.get(currentID).latestValue,
                                                       binaryNode -> lineNumber));
+        }else{
+            // should never get here
+            throw std::runtime_error("Expression on line " + std::to_string(binaryNode -> lineNumber)
+                                     + " has incorrect operator " + binaryNode -> op
+                                     + " acting on expression of type " + currentType);
         }
 
         // Accept right expression
@@ -526,16 +534,95 @@ namespace visitor {
         currentID = "0CurrentVariable";
     }
 
-    void Interpreter::visit(parser::ASTIdentifierNode *identifierNode) {
+    void Interpreter::visit(parser::ASTIdentifierNode *identifierNode) {//TODO::HANDLE variable[] case
+        // two cases 1 where iloc is defined (array) the other when it isnt (other types)
+        if(identifierNode->ilocExprNode == nullptr){
+            // Build variable shells
+            interpreter::Variable<int> i(identifierNode -> identifier);
+            interpreter::Variable<float> f(identifierNode -> identifier);
+            interpreter::Variable<bool> b(identifierNode -> identifier);
+            interpreter::Variable<std::string> s(identifierNode -> identifier);
+            interpreter::Variable<char> c(identifierNode -> identifier);
+            //struct
+            // Check that a variable with this identifier exists
+            auto resultI = intTable.find(i);
+            if(intTable.found(resultI)) {
+                // if identifier has been found
+                // change current Type
+                currentType = resultI -> second.type;
+                // change current ID
+                currentID = resultI -> second.identifier;
+                // Then return
+                return;
+            }
+            auto resultF = floatTable.find(f);
+            if(floatTable.found(resultF)) {
+                // if identifier has been found
+                // change current Type
+                currentType = resultF -> second.type;
+                // change current ID
+                currentID = resultF -> second.identifier;
+                // Then return
+                return;
+            }
+            auto resultB = boolTable.find(b);
+            if(boolTable.found(resultB)) {
+                // if identifier has been found
+                // change current Type
+                currentType = resultB -> second.type;
+                // change current ID
+                currentID = resultB -> second.identifier;
+                // Then return
+                return;
+            }
+            auto resultS = stringTable.find(s);
+            if(stringTable.found(resultS)) {
+                // if identifier has been found
+                // change current Type
+                currentType = resultS -> second.type;
+                // change current ID
+                currentID = resultS -> second.identifier;
+                // Then return
+                return;
+            }
+            auto resultC = charTable.find(c);
+            if(charTable.found(resultC)) {
+                // if identifier has been found
+                // change current Type
+                currentType = resultC -> second.type;
+                // change current ID
+                currentID = resultC -> second.identifier;
+                // Then return
+                return;
+            }
+        }
+        // array cases
+
+        // get array iloc
+        auto _cId = currentID;
+        auto _cType = currentType;
+        identifierNode->ilocExprNode->accept(this);
+        if(currentType == "int"){
+            iloc = intTable.get(currentID).latestValue;
+        }else if(currentType == "float"){
+            iloc = floatTable.get(currentID).latestValue;
+        }else{
+            throw std::runtime_error("Variable with identifier " + identifierNode->getID() + " called on line "
+                                     + std::to_string(identifierNode->lineNumber) + " has not incorrect value between [].");
+        }
+        currentID = _cId;
+        currentType = _cType;
         // Build variable shells
-        interpreter::Variable<int> i(identifierNode -> identifier);
-        interpreter::Variable<float> f(identifierNode -> identifier);
-        interpreter::Variable<bool> b(identifierNode -> identifier);
-        interpreter::Variable<std::string> s(identifierNode -> identifier);
-        interpreter::Variable<char> c(identifierNode -> identifier);
+        interpreter::Variable<std::vector<int>> i(identifierNode -> identifier);
+        interpreter::Variable<std::vector<float>> f(identifierNode -> identifier);
+        interpreter::Variable<std::vector<bool>> b(identifierNode -> identifier);
+        interpreter::Variable<std::vector<std::string>> s(identifierNode -> identifier);
+        interpreter::Variable<std::vector<char>> c(identifierNode -> identifier);
+        //struct
+        array = true;
         // Check that a variable with this identifier exists
-        auto resultI = intTable.find(i);
-        if(intTable.found(resultI)) {
+        auto resultI = intArrayTable.find(i);
+        if(intArrayTable.found(resultI)) {
             // if identifier has been found
             // change current Type
             currentType = resultI -> second.type;
@@ -544,8 +631,8 @@ namespace visitor {
             // Then return
             return;
         }
-        auto resultF = floatTable.find(f);
-        if(floatTable.found(resultF)) {
+        auto resultF = floatArrayTable.find(f);
+        if(floatArrayTable.found(resultF)) {
             // if identifier has been found
             // change current Type
             currentType = resultF -> second.type;
@@ -554,8 +641,8 @@ namespace visitor {
             // Then return
             return;
         }
-        auto resultB = boolTable.find(b);
-        if(boolTable.found(resultB)) {
+        auto resultB = boolArrayTable.find(b);
+        if(boolArrayTable.found(resultB)) {
             // if identifier has been found
             // change current Type
             currentType = resultB -> second.type;
@@ -564,8 +651,8 @@ namespace visitor {
             // Then return
             return;
         }
-        auto resultS = stringTable.find(s);
-        if(stringTable.found(resultS)) {
+        auto resultS = stringArrayTable.find(s);
+        if(stringArrayTable.found(resultS)) {
             // if identifier has been found
             // change current Type
             currentType = resultS -> second.type;
@@ -574,8 +661,8 @@ namespace visitor {
             // Then return
             return;
         }
-        auto resultC = charTable.find(c);
-        if(charTable.found(resultC)) {
+        auto resultC = charArrayTable.find(c);
+        if(charArrayTable.found(resultC)) {
             // if identifier has been found
             // change current Type
             currentType = resultC -> second.type;
@@ -586,7 +673,7 @@ namespace visitor {
         }
         // Variable hasn't been found (should never get here)
         throw std::runtime_error("Variable with identifier " + i.identifier + " called on line "
-                                 + std::to_string(i.lineNumber) + " has not been declared.");
+                                 + std::to_string(identifierNode->lineNumber) + " has not been declared.");
     }
 
     void Interpreter::visit(parser::ASTUnaryNode *unaryNode) {
@@ -755,7 +842,50 @@ namespace visitor {
 //        declarationNode -> identifier -> accept(this);
 
         // Visit the expression to get the current Type and Current Id
-        declarationNode -> exprNode -> accept(this);
+        if(declarationNode->exprNode != nullptr){
+            declarationNode->exprNode->accept(this);
+        }else{
+            // array declaration case
+            if(declarationNode->identifier->ilocExprNode != nullptr){
+                // amend array
+                if(currentType == "int"){
+                    intArrayTable.insert (
+                            interpreter::Variable<std::vector<int>>(currentType, declarationNode -> identifier -> identifier,
+                                                                    true, std::vector<int>(iloc), declarationNode -> lineNumber)
+                    );
+                }else if(currentType == "float"){
+                    floatArrayTable.insert (
+                            interpreter::Variable<std::vector<float>>(currentType, declarationNode -> identifier -> identifier,
+                                                         true, std::vector<float>(iloc), declarationNode -> lineNumber)
+                    );
+                }else if(currentType == "bool"){
+                    boolArrayTable.insert (
+                            interpreter::Variable<std::vector<bool>>(currentType, declarationNode -> identifier -> identifier,
+                                                        true, std::vector<bool>(iloc), declarationNode -> lineNumber)
+                    );
+                }else if(currentType == "string"){
+                    stringArrayTable.insert (
+                            interpreter::Variable<std::vector<std::string>>(currentType, declarationNode -> identifier -> identifier,
+                                                               true, std::vector<std::string>(iloc), declarationNode -> lineNumber)
+                    );
+                }else if(currentType == "char"){
+                    charArrayTable.insert (
+                            interpreter::Variable<std::vector<char>>(currentType, declarationNode -> identifier -> identifier,
+                                                        true, std::vector<char>(iloc), declarationNode -> lineNumber)
+                    );
+                }
+                // TODO::Update THIS
+                if(function){
+                    toPop.emplace_back(std::make_pair(currentType, declarationNode -> identifier -> identifier));
+                }
+                return;
+            }else{
+               // struct case
+               // find struct build
+               // insert new struct variable
+            }
+        }
+
         // Now we have an updated current type and id
         // Create a variable with this information
 
@@ -767,26 +897,49 @@ namespace visitor {
         // Insert the new variable
         if(currentType == "int"){
             intTable.insert (
-                    interpreter::Variable<int>(currentType, declarationNode -> identifier -> identifier, array, intTable.get(currentID).latestValue, declarationNode -> lineNumber)
+                    interpreter::Variable<int>(currentType, declarationNode -> identifier -> identifier, false, intTable.get(currentID).latestValue, declarationNode -> lineNumber)
             );
         }else if(currentType == "float"){
             floatTable.insert (
-                    interpreter::Variable<float>(currentType, declarationNode -> identifier -> identifier, array, floatTable.get(currentID).latestValue, declarationNode -> lineNumber)
+                    interpreter::Variable<float>(currentType, declarationNode -> identifier -> identifier, false, floatTable.get(currentID).latestValue, declarationNode -> lineNumber)
             );
         }else if(currentType == "bool"){
             boolTable.insert (
-                    interpreter::Variable<bool>(currentType, declarationNode -> identifier -> identifier, array, boolTable.get(currentID).latestValue, declarationNode -> lineNumber)
+                    interpreter::Variable<bool>(currentType, declarationNode -> identifier -> identifier, false, boolTable.get(currentID).latestValue, declarationNode -> lineNumber)
             );
         }else if(currentType == "string"){
             stringTable.insert (
-                    interpreter::Variable<std::string>(currentType, declarationNode -> identifier -> identifier, array, stringTable.get(currentID).latestValue, declarationNode -> lineNumber)
+                    interpreter::Variable<std::string>(currentType, declarationNode -> identifier -> identifier, false, stringTable.get(currentID).latestValue, declarationNode -> lineNumber)
             );
         }else if(currentType == "char"){
             charTable.insert (
-                    interpreter::Variable<char>(currentType, declarationNode -> identifier -> identifier, array, charTable.get(currentID).latestValue, declarationNode -> lineNumber)
+                    interpreter::Variable<char>(currentType, declarationNode -> identifier -> identifier, false, charTable.get(currentID).latestValue, declarationNode -> lineNumber)
             );
         }
-        array = false;
+        if(array){
+            if(currentType == "int"){
+                intArrayTable.insert (
+                        interpreter::Variable<std::vector<int>>(currentType, declarationNode -> identifier -> identifier, true, intArrayTable.get(currentID).latestValue, declarationNode -> lineNumber)
+                );
+            }else if(currentType == "float"){
+                floatArrayTable.insert (
+                        interpreter::Variable<std::vector<float>>(currentType, declarationNode -> identifier -> identifier, true, floatArrayTable.get(currentID).latestValue, declarationNode -> lineNumber)
+                );
+            }else if(currentType == "bool"){
+                boolArrayTable.insert (
+                        interpreter::Variable<std::vector<bool>>(currentType, declarationNode -> identifier -> identifier, true, boolArrayTable.get(currentID).latestValue, declarationNode -> lineNumber)
+                );
+            }else if(currentType == "string"){
+                stringArrayTable.insert (
+                        interpreter::Variable<std::vector<std::string>>(currentType, declarationNode -> identifier -> identifier, true, stringArrayTable.get(currentID).latestValue, declarationNode -> lineNumber)
+                );
+            }else if(currentType == "char array"){
+                charArrayTable.insert (
+                        interpreter::Variable<std::vector<char>>(currentType, declarationNode -> identifier -> identifier, true, charArrayTable.get(currentID).latestValue, declarationNode -> lineNumber)
+                );
+            }
+            array = false;
+        }
 
         if(function){
             toPop.emplace_back(std::make_pair(currentType, declarationNode -> identifier -> identifier));
@@ -800,12 +953,131 @@ namespace visitor {
         // These two variables define the found variable
         std::string type = currentType;
         std::string id = currentID;
+        // the array variable will also tell us if an array is being accessed right now
+        bool accessing_array = array;
         // Visit the expression to get the current Type and Current Id
+        array = false;
         assignmentNode -> exprNode -> accept(this);
+        bool assigning_array = array;
         // Now we have an updated current type and id
         // These two variables define what we will give id
         // Replace the variable value
         // Replacement can be done by popping then inserting
+
+        // accessing_array assignment cases
+
+        if(accessing_array){
+            if(assignmentNode->identifier->ilocExprNode != nullptr) {
+                // get array iloc
+                assignmentNode->identifier->ilocExprNode->accept(this);
+                if(currentType == "int"){
+                    auto result = intArrayTable.find(interpreter::Variable<std::vector<int>>(id));
+                    if(!intArrayTable.found(result)){
+                        throw std::runtime_error("Failed to find variable with identifier " + id);
+                    }
+                    std::vector<int> cpy = (result -> second.values)[0];
+                    cpy[iloc] = intTable.get(currentID).latestValue;
+                    // remove the old array
+                    intArrayTable.pop_back(id);
+                    // insert the copy
+                    intArrayTable.insert (
+                            interpreter::Variable<std::vector<int>>(type, id, false, cpy, assignmentNode -> lineNumber)
+                    );
+                }else if(currentType == "float"){
+                    auto result = floatArrayTable.find(interpreter::Variable<std::vector<float>>(id));
+                    if(!floatArrayTable.found(result)){
+                        throw std::runtime_error("Failed to find variable with identifier " + id);
+                    }
+                    std::vector<float> cpy = (result -> second.values)[0];
+                    cpy[iloc] = floatTable.get(currentID).latestValue;
+                    // remove the old array
+                    floatArrayTable.pop_back(id);
+                    // insert the copy
+                    floatArrayTable.insert (
+                            interpreter::Variable<std::vector<float>>(type, id, false, cpy, assignmentNode -> lineNumber)
+                    );
+                }else if(currentType == "bool"){
+                    auto result = boolArrayTable.find(interpreter::Variable<std::vector<bool>>(id));
+                    if(!boolArrayTable.found(result)){
+                        throw std::runtime_error("Failed to find variable with identifier " + id);
+                    }
+                    std::vector<bool> cpy = (result -> second.values)[0];
+                    cpy[iloc] = boolTable.get(currentID).latestValue;
+                    // remove the old array
+                    boolArrayTable.pop_back(id);
+                    // insert the copy
+                    boolArrayTable.insert (
+                            interpreter::Variable<std::vector<bool>>(type, id, false, cpy, assignmentNode -> lineNumber)
+                    );
+                }else if(currentType == "string"){
+                    auto result = stringArrayTable.find(interpreter::Variable<std::vector<std::string>>(id));
+                    if(!stringArrayTable.found(result)){
+                        throw std::runtime_error("Failed to find variable with identifier " + id);
+                    }
+                    std::vector<std::string> cpy = (result -> second.values)[0];
+                    cpy[iloc] = stringTable.get(currentID).latestValue;
+                    // remove the old array
+                    stringArrayTable.pop_back(id);
+                    // insert the copy
+                    stringArrayTable.pop_back(id);
+                    stringArrayTable.insert (
+                            interpreter::Variable<std::vector<std::string>>(type, id, false, cpy, assignmentNode -> lineNumber)
+                    );
+                }else if(currentType == "char"){
+                    auto result = charArrayTable.find(interpreter::Variable<std::vector<char>>(id));
+                    if(!charArrayTable.found(result)){
+                        throw std::runtime_error("Failed to find variable with identifier " + id);
+                    }
+                    std::vector<char> cpy = (result -> second.values)[0];
+                    cpy[iloc] = charTable.get(currentID).latestValue;
+                    // remove the old array
+                    charArrayTable.pop_back(id);
+                    // insert the copy
+                    charArrayTable.insert (
+                            interpreter::Variable<std::vector<char>>(type, id, false, cpy, assignmentNode -> lineNumber)
+                    );
+                }
+                if(function){
+                    toPop.emplace_back(std::make_pair(currentType, assignmentNode -> identifier -> identifier));
+                }
+                array = false;
+                return;
+            }
+        }
+
+        // assigning_array cases
+
+        if(assigning_array){
+
+            if(currentType == "int"){
+                intArrayTable.insert (
+                        interpreter::Variable<std::vector<int>>(currentType, assignmentNode -> identifier -> identifier, true, intArrayTable.get(currentID).latestValue, assignmentNode -> lineNumber)
+                );
+            }else if(currentType == "float"){
+                floatArrayTable.insert (
+                        interpreter::Variable<std::vector<float>>(currentType, assignmentNode -> identifier -> identifier, true, floatArrayTable.get(currentID).latestValue, assignmentNode -> lineNumber)
+                );
+            }else if(currentType == "bool"){
+                boolArrayTable.insert (
+                        interpreter::Variable<std::vector<bool>>(currentType, assignmentNode -> identifier -> identifier, true, boolArrayTable.get(currentID).latestValue, assignmentNode -> lineNumber)
+                );
+            }else if(currentType == "string"){
+                stringArrayTable.insert (
+                        interpreter::Variable<std::vector<std::string>>(currentType, assignmentNode -> identifier -> identifier, true, stringArrayTable.get(currentID).latestValue, assignmentNode -> lineNumber)
+                );
+            }else if(currentType == "char array"){
+                charArrayTable.insert (
+                        interpreter::Variable<std::vector<char>>(currentType, assignmentNode -> identifier -> identifier, true, charArrayTable.get(currentID).latestValue, assignmentNode -> lineNumber)
+                );
+            }
+            if(function){
+                toPop.emplace_back(std::make_pair(currentType, assignmentNode -> identifier -> identifier));
+            }
+            array = false;
+            return;
+        }
+
+        // Normal variable cases
         if(currentType == "int"){
             intTable.pop_back(id);
             intTable.insert (
@@ -840,16 +1112,38 @@ namespace visitor {
     void Interpreter::visit(parser::ASTPrintNode *printNode) {
         // Visit expression node to get current type
         printNode -> exprNode -> accept(this);
-
         if(currentType == "int"){
-            std::cout << intTable.get(currentID).latestValue << std::endl;
+            if(array){
+                std::cout << intArrayTable.get(currentID).latestValue.at(iloc) << std::endl;
+            }else{
+                std::cout << intTable.get(currentID).latestValue << std::endl;
+            }
         }else if(currentType == "float"){
-            std::cout << floatTable.get(currentID).latestValue << std::endl;
+            if(array){
+                std::cout << floatArrayTable.get(currentID).latestValue.at(iloc) << std::endl;
+            }else{
+                std::cout << floatTable.get(currentID).latestValue << std::endl;
+            }
         }else if(currentType == "bool"){
-            std::cout << (boolTable.get(currentID).latestValue ? "true" : "false") << std::endl;
+            if(array){
+                std::cout << (boolArrayTable.get(currentID).latestValue.at(iloc) ? "true" : "false") << std::endl;
+            }else{
+                std::cout << (boolTable.get(currentID).latestValue ? "true" : "false") << std::endl;
+            }
         }else if(currentType == "string"){
-            std::cout << stringTable.get(currentID).latestValue << std::endl;
+            if(array){
+                std::cout << stringArrayTable.get(currentID).latestValue.at(iloc) << std::endl;
+            }else{
+                std::cout << stringTable.get(currentID).latestValue << std::endl;
+            }
+        }else if(currentType == "char"){
+            if(array){
+                std::cout << charArrayTable.get(currentID).latestValue.at(iloc) << std::endl;
+            }else{
+                std::cout << charTable.get(currentID).latestValue << std::endl;
+            }
         }
+        array = false;
     }
 
     void Interpreter::visit(parser::ASTBlockNode *blockNode) {
