@@ -29,7 +29,7 @@ namespace interpreter {
         {};
 
         Variable(Variable const &v) :
-                visitor::Variable(v.type, v.identifier, v.lineNumber),
+                visitor::Variable(v.type, v.identifier, v.array, v.lineNumber),
                 latestValue(v.latestValue),
                 values(v.values)
         {};
@@ -76,8 +76,9 @@ namespace visitor {
         std::map<std::string, interpreter::Variable<bool>>          boolTable;
         std::map<std::string, interpreter::Variable<std::string>>   stringTable;
         // Python equivalent of:
-        // functionTable = {identifier: { identifier, [ARGUMENT_TYPES,], lineNumber}}
-        std::map<std::string, interpreter::Function> functionTable;
+        // Python equivalent of:
+        // functionTable = {{identifier, [ARGUMENT_TYPES,]}: {TYPE, identifier, [ARGUMENT_TYPES,], lineNumber}}
+        std::map<std::pair<std::string, std::vector<std::string>>, interpreter::Function> functionTable;
 
         // type, identifier
         std::string currentType;
@@ -101,33 +102,30 @@ namespace visitor {
         };
         ~Interpreter() = default;
 
+        auto find(const interpreter::Variable<int>& v);
+        auto find(const interpreter::Variable<float>& v);
+        auto find(const interpreter::Variable<bool>& v);
+        auto find(const interpreter::Variable<std::string>& v);
+        auto find(const interpreter::Function& f);
+
         bool insert(const interpreter::Variable<int>& v);
         bool insert(const interpreter::Variable<float>& v);
         bool insert(const interpreter::Variable<bool>& v);
         bool insert(const interpreter::Variable<std::string>& v);
         bool insert(const interpreter::Function& f);
 
-        std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>, interpreter::Variable<int>>>
-        find(const interpreter::Variable<int>& v);
-        std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>,  interpreter::Variable<float>>>
-        find(const  interpreter::Variable<float>& v);
-        std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>, interpreter::Variable<bool>>>
-        find(const interpreter::Variable<bool>& v);
-        std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>, interpreter::Variable<std::string>>>
-        find(const interpreter::Variable<std::string>& v);
-        std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>, interpreter::Function>>
-        find(const interpreter::Function& f);
-
         bool found(std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>, interpreter::Variable<int>>> result);
         bool found(std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>, interpreter::Variable<float>>> result);
         bool found(std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>, interpreter::Variable<bool>>> result);
         bool found(std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>, interpreter::Variable<std::string>>> result);
-        bool found(std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>, interpreter::Function>> result);
+        bool found(std::_Rb_tree_iterator<std::pair<const std::pair<std::basic_string<char, std::char_traits<char>, std::allocator<char>>, std::vector<std::basic_string<char, std::char_traits<char>, std::allocator<char>>>>, interpreter::Function>> result);
+
+
+        template<typename T>
+        T pop_back(const std::string& identifier);
 
         template<typename T>
         T get(const std::string& identifier = "0CurrentVariable");
-        template<typename T>
-        T pop_back(const std::string& identifier);
 
 
         void visit(parser::ASTProgramNode* programNode) override;
