@@ -19,6 +19,10 @@ namespace visitor {
         return stringTable.find(v.identifier);
     }
 
+    auto Interpreter::find(const interpreter::Variable<char> &v) {
+        return charTable.find(v.identifier);
+    }
+
     auto Interpreter::find(const interpreter::Function& f) {
         return functionTable.find( std::pair(f.identifier, f.paramTypes));
     }
@@ -135,6 +139,34 @@ namespace visitor {
         }
     }
 
+    bool Interpreter::insert(const interpreter::Variable<char> &v) {
+        if(v.type.empty()){
+            throw VariableTypeException();
+        }
+        auto result = find(v);
+        if(found(result)){
+            // found the variable already
+            // add the value
+            // since we know that the result exists, then we can use the [] without any 'side effect' of creating a new entry
+            // unfortunately intTable[identifier] kills the cpp compiler
+            // so in order to pop_back a value from the values vector we have to completely replace the object
+            // Copy the result variable
+            interpreter::Variable<char> cpy(result -> second);
+            // add the new value
+            cpy.values.emplace_back(v.latestValue);
+            cpy.latestValue = v.latestValue;
+            // remove the result
+            charTable.erase(result);
+            // insert the copy
+            insert(cpy);
+            return false;
+        }else{
+            // The variable doesnt exist so we add a new one
+            auto ret = charTable.insert(std::pair<std::string, interpreter::Variable<char>>(v.identifier, v) );
+            return ret.second;
+        }
+    }
+
     bool Interpreter::insert(const interpreter::Function& f){
         if (f.type.empty()){
             throw FunctionTypeException();
@@ -159,6 +191,11 @@ namespace visitor {
     bool Interpreter::found(
             std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>, interpreter::Variable<std::string>>> result) {
         return result != stringTable.end();
+    }
+
+    bool Interpreter::found(
+            std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>, interpreter::Variable<char>>> result) {
+        return result != charTable.end();
     }
 
     bool Interpreter::found(
@@ -380,6 +417,20 @@ namespace visitor {
         insert(v);
         currentType = "string";
         currentID = "literal";
+    }
+
+    void Interpreter::visit(parser::ASTLiteralNode<char> *literalNode) {
+        interpreter::Variable<char> v("char", "literal", false, literalNode -> val, literalNode -> lineNumber);
+        // remove previous literal
+        pop_back<char>("literal");
+        insert(v);
+        currentType = "char";
+        currentID = "literal";
+
+    }
+
+    void Interpreter::visit(parser::ASTArrayLiteralNode *arrayLiteralNode) {
+
     }
 
     void Interpreter::visit(parser::ASTBinaryNode *binaryNode) {
@@ -1169,14 +1220,6 @@ namespace visitor {
                 if(it == toPop.end()) break;
             }
         }
-
-    }
-
-    void Interpreter::visit(parser::ASTLiteralNode<char> *literalNode) {
-
-    }
-
-    void Interpreter::visit(parser::ASTArrayLiteralNode *arrayLiteralNode) {
 
     }
 

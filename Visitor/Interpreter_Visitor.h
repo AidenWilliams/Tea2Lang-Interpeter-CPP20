@@ -75,6 +75,7 @@ namespace visitor {
         std::map<std::string, interpreter::Variable<float>>         floatTable;
         std::map<std::string, interpreter::Variable<bool>>          boolTable;
         std::map<std::string, interpreter::Variable<std::string>>   stringTable;
+        std::map<std::string, interpreter::Variable<char>>          charTable;
         // Python equivalent of:
         // Python equivalent of:
         // functionTable = {{identifier, [ARGUMENT_TYPES,]}: {TYPE, identifier, [ARGUMENT_TYPES,], lineNumber}}
@@ -98,6 +99,8 @@ namespace visitor {
             insert(interpreter::Variable<bool> ("bool", "literal", false, false, 0));
             insert(interpreter::Variable<std::string>("string", "0CurrentVariable", false, "", 0));
             insert(interpreter::Variable<std::string> ("string", "literal", false, "", 0));
+            insert(interpreter::Variable<char>("char", "0CurrentVariable", false, ' ', 0));
+            insert(interpreter::Variable<char> ("char", "literal", false, ' ', 0));
             function = false;
         };
         ~Interpreter() = default;
@@ -106,18 +109,21 @@ namespace visitor {
         auto find(const interpreter::Variable<float>& v);
         auto find(const interpreter::Variable<bool>& v);
         auto find(const interpreter::Variable<std::string>& v);
+        auto find(const interpreter::Variable<char>& v);
         auto find(const interpreter::Function& f);
 
         bool insert(const interpreter::Variable<int>& v);
         bool insert(const interpreter::Variable<float>& v);
         bool insert(const interpreter::Variable<bool>& v);
         bool insert(const interpreter::Variable<std::string>& v);
+        bool insert(const interpreter::Variable<char>& v);
         bool insert(const interpreter::Function& f);
 
         bool found(std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>, interpreter::Variable<int>>> result);
         bool found(std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>, interpreter::Variable<float>>> result);
         bool found(std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>, interpreter::Variable<bool>>> result);
         bool found(std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>, interpreter::Variable<std::string>>> result);
+        bool found(std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>, interpreter::Variable<char>>> result);
         bool found(std::_Rb_tree_iterator<std::pair<const std::pair<std::basic_string<char, std::char_traits<char>, std::allocator<char>>, std::vector<std::basic_string<char, std::char_traits<char>, std::allocator<char>>>>, interpreter::Function>> result);
 
 
