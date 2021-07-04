@@ -27,10 +27,6 @@ namespace visitor {
         return functionTable.find( std::pair(f.identifier, f.paramTypes));
     }
 
-    auto Interpreter::find(const std::string& o) {
-        return objectTable.find(o);
-    }
-
     bool Interpreter::insert(const interpreter::Variable<int>& v){
         if(v.type.empty()){
             throw VariableTypeException();
@@ -180,11 +176,6 @@ namespace visitor {
         return ret.second;
     }
 
-    bool Interpreter::insert(const std::string& o, void* ptr){
-        auto ret = objectTable.insert(std::pair<std::string, void*>(o, ptr) );
-        return ret.second;
-    }
-
     bool Interpreter::found(
             std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>, interpreter::Variable<int>>> result) {
         return result != intTable.end();
@@ -213,10 +204,6 @@ namespace visitor {
         return result != functionTable.end();
     }
 
-    bool Interpreter::found(
-            std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>, interpreter::Object>> result) {
-        return result != objectTable.end();
-    }
 
     template<> int Interpreter::pop_back<int>(const std::string &identifier) {
         auto result = find(interpreter::Variable<int>(identifier));
@@ -333,34 +320,6 @@ namespace visitor {
 
     template<> char Interpreter::pop_back<char>(const std::string &identifier) {
         auto result = find(interpreter::Variable<char>(identifier));
-        if(!found(result)){
-            throw std::runtime_error("Failed to find variable with identifier " + identifier);
-        }
-        // unfortunately boolTable[identifier] kills the cpp compiler
-        // so in order to pop_back a value from the values vector we have to completely replace the object
-        // Check if the result has no values variable
-        // If the vector is empty we get a sigsev
-        // Copy the result variable
-        if(result->second.values.empty()){
-            result->second.values.emplace_back(0);
-        }
-        interpreter::Variable<char> cpy(result -> second);
-        // pop the value from the copy
-        cpy.values.pop_back();
-        if(!cpy.values.empty()) {
-            cpy.latestValue = cpy.values.back();
-        }else{
-            cpy.latestValue = false;
-        }
-        // remove the result=
-        charTable.erase(result);
-        // insert the copy
-        insert(cpy);
-        return ' ';
-    }
-
-    template<> void* Interpreter::pop_back<void*>(const std::string &identifier) {
-        auto result = find(identifier);
         if(!found(result)){
             throw std::runtime_error("Failed to find variable with identifier " + identifier);
         }

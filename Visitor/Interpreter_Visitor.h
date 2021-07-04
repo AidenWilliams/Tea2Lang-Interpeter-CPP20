@@ -64,15 +64,6 @@ namespace interpreter {
         std::vector<std::string> paramIDs;
         std::shared_ptr<parser::ASTBlockNode> blockNode;
     };
-
-    class Object{
-    public:
-
-        explicit Object(void* ptr) : ptr(ptr) {};
-
-        ~Object() = default;
-        void* ptr;
-    };
 }
 
 namespace visitor {
@@ -88,9 +79,6 @@ namespace visitor {
         // Python equivalent of:
         // functionTable = {{identifier, [ARGUMENT_TYPES,]}: {TYPE, identifier, [ARGUMENT_TYPES,], lineNumber}}
         std::map<std::pair<std::string, std::vector<std::string>>, interpreter::Function> functionTable;
-        // "Python" equivalent of:
-        // objectTable = {identifier: pointer}
-        std::map<std::string, interpreter::Object> objectTable;
 
         // type, identifier
         std::string currentType;
@@ -117,11 +105,7 @@ namespace visitor {
             function = false;
             array = false;
         };
-        ~Interpreter(){
-            for(auto x : objectTable){
-                delete &x.second;
-            }
-        };
+        ~Interpreter() = default;
 
         auto find(const interpreter::Variable<int>& v);
         auto find(const interpreter::Variable<float>& v);
@@ -130,16 +114,12 @@ namespace visitor {
         auto find(const interpreter::Variable<char>& v);
         auto find(const interpreter::Function& f);
 
-        auto find(const std::string& o);
-
         bool insert(const interpreter::Variable<int>& v);
         bool insert(const interpreter::Variable<float>& v);
         bool insert(const interpreter::Variable<bool>& v);
         bool insert(const interpreter::Variable<std::string>& v);
         bool insert(const interpreter::Variable<char>& v);
         bool insert(const interpreter::Function& f);
-
-        bool insert(const std::string& o, void* ptr);
 
         bool found(std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>, interpreter::Variable<int>>> result);
         bool found(std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>, interpreter::Variable<float>>> result);
@@ -148,7 +128,6 @@ namespace visitor {
         bool found(std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>, interpreter::Variable<char>>> result);
         bool found(std::_Rb_tree_iterator<std::pair<const std::pair<std::basic_string<char, std::char_traits<char>, std::allocator<char>>, std::vector<std::basic_string<char, std::char_traits<char>, std::allocator<char>>>>, interpreter::Function>> result);
 
-        bool found(std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>, interpreter::Object>> result);
 
         template<typename T>
         T pop_back(const std::string& identifier);
