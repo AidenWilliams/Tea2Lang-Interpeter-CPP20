@@ -106,12 +106,14 @@ namespace visitor {
             scopes.emplace_back(std::make_shared<Scope>());
             currentType = std::string();
             returns = false;
+            arrayLimit = 0;
         };
         ~SemanticAnalyser() = default;
 
         std::vector<std::shared_ptr<Scope>> scopes;
         std::string currentType;
         bool returns;
+        unsigned int arrayLimit;
 
         void visit(parser::ASTProgramNode* programNode) override;
 

@@ -19,7 +19,7 @@ namespace visitor{
         if (f.type.empty()){
             throw FunctionTypeException();
         }
-        auto ret = functionTable.insert(std::pair<std::string, Function>(f.identifier, f) );o
+        auto ret = functionTable.insert(std::pair<std::string, Function>(f.identifier, f) );
         return ret.second;
     }
 
@@ -75,11 +75,24 @@ namespace visitor{
     }
 
     void SemanticAnalyser::visit(parser::ASTLiteralNode<char> *literalNode) {
-
+        currentType = "char";
     }
 
     void SemanticAnalyser::visit(parser::ASTArrayLiteralNode *arrayLiteralNode) {
-
+        // start going over the items in the array
+        auto _cType = currentType; // maybe move after begin of loop?
+        int i = 0;
+        for(auto &item : arrayLiteralNode->expressions){
+            item->accept(this);
+            // are the types still matching?
+            if(_cType != currentType){
+                throw std::runtime_error("The " + std::to_string(i) + " th item's type on line "
+                                         + std::to_string(arrayLiteralNode->lineNumber) +" does not match "
+                                         + "The previous type. The type should be "
+                                         + _cType);
+            }
+            i++;
+        }
     }
 
     void SemanticAnalyser::visit(parser::ASTBinaryNode *binaryNode) {
@@ -100,7 +113,7 @@ namespace visitor{
         }
 
         // check op type
-        if (currentType == "string") {
+        if (currentType == "string" || currentType == "char") {
             switch (lexer::determineOperatorType(binaryNode->op)) {
                 // string accepted operators
                 case lexer::TOK_NOT_EQAUL_TO:
@@ -156,6 +169,11 @@ namespace visitor{
                                              + " has incorrect operator " + binaryNode->op
                                              + " acting between expressions of type " + currentType);
             }
+        }else{
+            // structs (operator overloading is not a feature)
+            throw std::runtime_error("Expression on line " + std::to_string(binaryNode->lineNumber)
+                                     + " has incorrect operator " + binaryNode->op
+                                     + " acting between expressions of type " + currentType);
         }
     }
 
@@ -182,11 +200,7 @@ namespace visitor{
         // Go over exprNode
         unaryNode -> exprNode -> accept(this);
         // Handle different cases
-        if (currentType == "string") {
-            throw std::runtime_error("Expression on line " + std::to_string(unaryNode->lineNumber)
-                                     + " has incorrect operator " + unaryNode->op
-                                     + " acting for expression of type " + currentType);
-        }else if (currentType == "int" || currentType == "float") {
+        if (currentType == "int" || currentType == "float") {
             if(unaryNode -> op != "-")
                 throw std::runtime_error("Expression on line " + std::to_string(unaryNode->lineNumber)
                                          + " has incorrect operator " + unaryNode->op
@@ -197,6 +211,11 @@ namespace visitor{
                                          + " has incorrect operator " + unaryNode->op
                                          + " acting for expression of type " + currentType);
 
+        }else{
+            // string char and structs (operator overloading is not a feature)
+            throw std::runtime_error("Expression on line " + std::to_string(unaryNode->lineNumber)
+                                     + " has incorrect operator " + unaryNode->op
+                                     + " acting for expression of type " + currentType);
         }
     }
 
@@ -290,9 +309,22 @@ namespace visitor{
                                      + std::to_string(v.lineNumber) + " already declared on line "
                                      + std::to_string(result->second.lineNumber));
         }
+        // set the currentType to declarationNode->type
+        // this will help initialise array literals, as well as allow insertion for when exprNode is null
+        // if this is not an array then the current Type will simply be overwritten
+        currentType = declarationNode->type;
+        // There are 2 cases here
+        // One where there is a default constructor (structs & arrays)
+        // and the other is the classic Tealang
+        // the parser sets exprNode to an expression if an = is found
+        // this allows for the construction of structs and arrays
+        // if = is not found than the variable must be either a struct or an array with [SIZE]
+        // but this is handled by the parser so here we only need to check if exprNode is null
         // Go check the expression node
         // This will change the current type
-        declarationNode->exprNode->accept(this);
+        if(declarationNode->exprNode != nullptr)
+            declarationNode->exprNode->accept(this);
+
         // Check current type with the declaration type
         // since the language does not perform any implicit/automatic typecast (as said in spec)
         if(declarationNode->type == currentType){
