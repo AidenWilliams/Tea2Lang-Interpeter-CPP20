@@ -128,7 +128,7 @@ int main(int argc, char **argv) {
     if (std::string("-l") == argv[1]){
 //        std::cout << "TESTING LEXER" << std::endl;
         lexer::Lexer lexer;
-        lexer.extractLexemes(_program_2);
+        lexer.extractLexemes(argv[2]);
         std::cout << "value: type" << std::endl;
         int j = 0;
         for (const auto& i: lexer.tokens){

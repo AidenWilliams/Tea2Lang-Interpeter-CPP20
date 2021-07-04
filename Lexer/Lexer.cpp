@@ -116,6 +116,7 @@ namespace lexer {
         if (isClosingCurly(c)) return CLOSING_CURLY;
         if (isPunctuation(c)) return PUNCTUATION;
         if (isQuatiationMark(c)) return QUOTATION_MARK;
+        if (isApostrophe(c)) return APOSTROPHE;
         if (isNewline(c)) return NEWLINE;
         if (isEquals(c)) return EQUALS;
         if (isExclamation(c)) return EXCLAMATION;

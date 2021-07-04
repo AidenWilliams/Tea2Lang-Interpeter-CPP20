@@ -80,10 +80,13 @@ namespace visitor{
 
     void SemanticAnalyser::visit(parser::ASTArrayLiteralNode *arrayLiteralNode) {
         // start going over the items in the array
-        auto _cType = currentType; // maybe move after begin of loop?
+        auto _cType = currentType;
         int i = 0;
         for(auto &item : arrayLiteralNode->expressions){
             item->accept(this);
+            if(i == 0 && _cType == "auto"){
+                _cType = currentType;
+            }
             // are the types still matching?
             if(_cType != currentType){
                 throw std::runtime_error("The " + std::to_string(i) + " th item's type on line "
@@ -309,10 +312,6 @@ namespace visitor{
                                      + std::to_string(v.lineNumber) + " already declared on line "
                                      + std::to_string(result->second.lineNumber));
         }
-        // set the currentType to declarationNode->type
-        // this will help initialise array literals, as well as allow insertion for when exprNode is null
-        // if this is not an array then the current Type will simply be overwritten
-        currentType = declarationNode->type;
         // There are 2 cases here
         // One where there is a default constructor (structs & arrays)
         // and the other is the classic Tealang
@@ -322,17 +321,32 @@ namespace visitor{
         // but this is handled by the parser so here we only need to check if exprNode is null
         // Go check the expression node
         // This will change the current type
-        if(declarationNode->exprNode != nullptr)
+        if(declarationNode->exprNode != nullptr){
             declarationNode->exprNode->accept(this);
+        }else{
+            currentType = declarationNode->type;
+        }
 
+        // handle auto here
+        if(declarationNode->type == "auto" || lexer::isStruct(declarationNode->type)){
+            if(currentType == "auto"){
+                throw std::runtime_error("Variable " + v.identifier + " was declared of type auto on line "
+                                         + std::to_string(v.lineNumber) + " but has not been assigned a value of a defined type.");
+
+            }
+            v.type = currentType;
+        }
+        // set the currentType to declarationNode->type
+        // this will help initialise array literals
         // Check current type with the declaration type
         // since the language does not perform any implicit/automatic typecast (as said in spec)
-        if(declarationNode->type == currentType){
+        // auto is handled at the interpreter
+        if(declarationNode->type == currentType || declarationNode->type == "auto"){
             scope->insert(v);
         }else{
             // throw an error since type casting is not supported
             throw std::runtime_error("Variable " + v.identifier + " was declared of type " + v.type + " on line "
-                                     + std::to_string(v.lineNumber) + " but has been assigned invalid value of type"
+                                     + std::to_string(v.lineNumber) + " but has been assigned invalid value of type "
                                      + currentType + ".\nImplicit and Automatic Typecasting is not supported by TeaLang.");
         }
     }
@@ -483,7 +497,7 @@ namespace visitor{
             // Check current type with the declaration type
             // since the language does not perform any implicit/automatic typecast (as said in spec)
             throw std::runtime_error("Function " + f.identifier + " was declared of type " + f.type + " on line "
-                                     + std::to_string(f.lineNumber) + " but has been assigned invalid value of type"
+                                     + std::to_string(f.lineNumber) + " but has been assigned invalid value of type "
                                      + currentType +
                                      ".\nImplicit and Automatic Typecasting is not supported by TeaLang.");
         }
