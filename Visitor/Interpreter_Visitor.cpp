@@ -5,283 +5,9 @@
 #include "Interpreter_Visitor.h"
 
 namespace visitor {
-    // Tools
-    auto Interpreter::find(const interpreter::Variable<int>& v) {
-        return intTable.find(v.identifier);
-    }
-    auto Interpreter::find(const interpreter::Variable<float>& v) {
-        return floatTable.find(v.identifier);
-    }
-    auto Interpreter::find(const interpreter::Variable<bool>& v) {
-        return boolTable.find(v.identifier);
-    }
-    auto Interpreter::find(const interpreter::Variable<std::string>& v) {
-        return stringTable.find(v.identifier);
-    }
-
-    auto Interpreter::find(const interpreter::Variable<char> &v) {
-        return charTable.find(v.identifier);
-    }
 
     auto Interpreter::find(const interpreter::Function& f) {
         return functionTable.find( std::pair(f.identifier, f.paramTypes));
-    }
-
-    auto Interpreter::find(const interpreter::Array<int>& v) {
-        return intArrayTable.find(v.identifier);
-    }
-    auto Interpreter::find(const interpreter::Array<float>& v) {
-        return floatArrayTable.find(v.identifier);
-    }
-    auto Interpreter::find(const interpreter::Array<bool>& v) {
-        return boolArrayTable.find(v.identifier);
-    }
-    auto Interpreter::find(const interpreter::Array<std::string>& v) {
-        return stringArrayTable.find(v.identifier);
-    }
-
-    auto Interpreter::find(const interpreter::Array<char> &v) {
-        return charArrayTable.find(v.identifier);
-    }
-
-    bool Interpreter::insert(const interpreter::Variable<int>& v){
-        if(v.type.empty()){
-            throw VariableTypeException();
-        }
-        auto result = find(v);
-        if(found(result)){
-            // found the variable already
-            // add the value
-            // since we know that the result exists, then we can use the [] without any 'side effect' of creating a new entry
-            // unfortunately intTable[identifier] kills the cpp compiler
-            // so in order to pop_back a value from the values vector we have to completely replace the object
-            // Copy the result variable
-            interpreter::Variable<int> cpy(result -> second);
-            // pop the value from the copy
-            cpy.values.emplace_back(v.latestValue);
-            cpy.latestValue = v.latestValue;
-            // remove the result
-            intTable.erase(result);
-            // insert the copy
-            insert(cpy);
-            return false;
-        }else{
-            // The variable doesnt exist so we add a new one
-            auto ret = intTable.insert(std::pair<std::string, interpreter::Variable<int>>(v.identifier, v) );
-            return ret.second;
-        }
-    }
-
-    bool Interpreter::insert(const interpreter::Variable<float>& v){
-        if(v.type.empty()){
-            throw VariableTypeException();
-        }
-        auto result = find(v);
-        if(found(result)){
-            // Copy the result variable
-            interpreter::Variable<float> cpy(result -> second);
-            // add the new value
-            cpy.values.emplace_back(v.latestValue);
-            cpy.latestValue = v.latestValue;
-            // remove the result
-            floatTable.erase(result);
-            // insert the copy
-            insert(cpy);
-            return false;
-        }else{
-            // The variable doesnt exist so we add a new one
-            auto ret = floatTable.insert(std::pair<std::string, interpreter::Variable<float>>(v.identifier, v) );
-            return ret.second;
-        }
-    }
-
-    bool Interpreter::insert(const interpreter::Variable<bool>& v){
-        if(v.type.empty()){
-            throw VariableTypeException();
-        }
-        auto result = find(v);
-        if(found(result)){
-            // Copy the result variable
-            interpreter::Variable<bool> cpy(result -> second);
-            // add the new value
-            cpy.values.emplace_back(v.latestValue);
-            cpy.latestValue = v.latestValue;
-            // remove the result
-            boolTable.erase(result);
-            // insert the copy
-            insert(cpy);
-            return false;
-        }else{
-            // The variable doesnt exist so we add a new one
-            auto ret = boolTable.insert(std::pair<std::string, interpreter::Variable<bool>>(v.identifier, v) );
-            return ret.second;
-        }
-    }
-
-    bool Interpreter::insert(const interpreter::Variable<std::string>& v){
-        if(v.type.empty()){
-            throw VariableTypeException();
-        }
-        auto result = find(v);
-        if(found(result)){
-            // Copy the result variable
-            interpreter::Variable<std::string> cpy(result -> second);
-            // add the new value
-            cpy.values.emplace_back(v.latestValue);
-            cpy.latestValue = v.latestValue;
-            // remove the result
-            stringTable.erase(result);
-            // insert the copy
-            insert(cpy);
-            return false;
-        }else{
-            // The variable doesnt exist so we add a new one
-            auto ret = stringTable.insert(std::pair<std::string, interpreter::Variable<std::string>>(v.identifier, v) );
-            return ret.second;
-        }
-    }
-
-    bool Interpreter::insert(const interpreter::Variable<char> &v) {
-        if(v.type.empty()){
-            throw VariableTypeException();
-        }
-        auto result = find(v);
-        if(found(result)){
-            // Copy the result variable
-            interpreter::Variable<char> cpy(result -> second);
-            // add the new value
-            cpy.values.emplace_back(v.latestValue);
-            cpy.latestValue = v.latestValue;
-            // remove the result
-            charTable.erase(result);
-            // insert the copy
-            insert(cpy);
-            return false;
-        }else{
-            // The variable doesnt exist so we add a new one
-            auto ret = charTable.insert(std::pair<std::string, interpreter::Variable<char>>(v.identifier, v) );
-            return ret.second;
-        }
-    }
-
-    bool Interpreter::insert(const interpreter::Array<int>& v){
-        if(v.type.empty()){
-            throw VariableTypeException();
-        }
-        auto result = find(v);
-        if(found(result)){
-            // found the variable already
-            // add the value
-            // since we know that the result exists, then we can use the [] without any 'side effect' of creating a new entry
-            // unfortunately intTable[identifier] kills the cpp compiler
-            // so in order to pop_back a value from the values vector we have to completely replace the object
-            // Copy the result variable
-            interpreter::Array<int> cpy(result -> second);
-            // pop the value from the copy
-            cpy.values.emplace_back(v.latestValue);
-            cpy.latestValue = v.latestValue;
-            // remove the result
-            intArrayTable.erase(result);
-            // insert the copy
-            insert(cpy);
-            return false;
-        }else{
-            // The variable doesnt exist so we add a new one
-            auto ret = intArrayTable.insert(std::pair<std::string, interpreter::Array<int>>(v.identifier, v) );
-            return ret.second;
-        }
-    }
-
-    bool Interpreter::insert(const interpreter::Array<float>& v){
-        if(v.type.empty()){
-            throw VariableTypeException();
-        }
-        auto result = find(v);
-        if(found(result)){
-            // Copy the result variable
-            interpreter::Array<float> cpy(result -> second);
-            // add the new value
-            cpy.values.emplace_back(v.latestValue);
-            cpy.latestValue = v.latestValue;
-            // remove the result
-            floatArrayTable.erase(result);
-            // insert the copy
-            insert(cpy);
-            return false;
-        }else{
-            // The variable doesnt exist so we add a new one
-            auto ret = floatArrayTable.insert(std::pair<std::string, interpreter::Array<float>>(v.identifier, v) );
-            return ret.second;
-        }
-    }
-
-    bool Interpreter::insert(const interpreter::Array<bool>& v){
-        if(v.type.empty()){
-            throw VariableTypeException();
-        }
-        auto result = find(v);
-        if(found(result)){
-            // Copy the result variable
-            interpreter::Array<bool> cpy(result -> second);
-            // add the new value
-            cpy.values.emplace_back(v.latestValue);
-            cpy.latestValue = v.latestValue;
-            // remove the result
-            boolArrayTable.erase(result);
-            // insert the copy
-            insert(cpy);
-            return false;
-        }else{
-            // The variable doesnt exist so we add a new one
-            auto ret = boolArrayTable.insert(std::pair<std::string, interpreter::Array<bool>>(v.identifier, v) );
-            return ret.second;
-        }
-    }
-
-    bool Interpreter::insert(const interpreter::Array<std::string>& v){
-        if(v.type.empty()){
-            throw VariableTypeException();
-        }
-        auto result = find(v);
-        if(found(result)){
-            // Copy the result variable
-            interpreter::Array<std::string> cpy(result -> second);
-            // add the new value
-            cpy.values.emplace_back(v.latestValue);
-            cpy.latestValue = v.latestValue;
-            // remove the result
-            stringArrayTable.erase(result);
-            // insert the copy
-            insert(cpy);
-            return false;
-        }else{
-            // The variable doesnt exist so we add a new one
-            auto ret = stringArrayTable.insert(std::pair<std::string, interpreter::Array<std::string>>(v.identifier, v) );
-            return ret.second;
-        }
-    }
-
-    bool Interpreter::insert(const interpreter::Array<char> &v) {
-        if(v.type.empty()){
-            throw VariableTypeException();
-        }
-        auto result = find(v);
-        if(found(result)){
-            // Copy the result variable
-            interpreter::Array<char> cpy(result -> second);
-            // add the new value
-            cpy.values.emplace_back(v.latestValue);
-            cpy.latestValue = v.latestValue;
-            // remove the result
-            charArrayTable.erase(result);
-            // insert the copy
-            insert(cpy);
-            return false;
-        }else{
-            // The variable doesnt exist so we add a new one
-            auto ret = charArrayTable.insert(std::pair<std::string, interpreter::Array<char>>(v.identifier, v) );
-            return ret.second;
-        }
     }
 
     bool Interpreter::insert(const interpreter::Function& f){
@@ -294,461 +20,10 @@ namespace visitor {
     }
 
     bool Interpreter::found(
-            std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>, interpreter::Variable<int>>> result) {
-        return result != intTable.end();
-    }
-    bool Interpreter::found(
-            std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>, interpreter::Variable<float>>> result) {
-        return result != floatTable.end();
-    }
-    bool Interpreter::found(
-            std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>, interpreter::Variable<bool>>> result) {
-        return result != boolTable.end();
-    }
-    bool Interpreter::found(
-            std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>, interpreter::Variable<std::string>>> result) {
-        return result != stringTable.end();
-    }
-
-    bool Interpreter::found(
-            std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>, interpreter::Variable<char>>> result) {
-        return result != charTable.end();
-    }
-
-    bool Interpreter::found(
             std::_Rb_tree_iterator<std::pair<const std::pair<std::basic_string<char, std::char_traits<char>, std::allocator<char>>, std::vector<std::basic_string<char, std::char_traits<char>, std::allocator<char>>>>, interpreter::Function>>
             result) {
         return result != functionTable.end();
     }
-
-    bool Interpreter::found(
-            std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>, interpreter::Array<int>>>
-            result){
-        return result != intArrayTable.end();
-    }
-    bool Interpreter::found(
-            std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>, interpreter::Array<float>>>
-            result){
-        return result != floatArrayTable.end();
-    }
-    bool Interpreter::found(
-            std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>, interpreter::Array<bool>>>
-            result){
-        return result != boolArrayTable.end();
-    }
-    bool Interpreter::found(
-            std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>, interpreter::Array<std::string>>>
-            result){
-        return result != stringArrayTable.end();
-    }
-    bool Interpreter::found(
-            std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>, interpreter::Array<char>>>
-            result){
-        return result != charArrayTable.end();
-    }
-
-
-    template<> int Interpreter::pop_back<int>(const std::string &identifier) {
-        auto result = find(interpreter::Variable<int>(identifier));
-        if(!found(result)){
-            throw std::runtime_error("Failed to find variable with identifier " + identifier);
-        }
-        // unfortunately intTable[identifier] kills the cpp compiler
-        // so in order to pop_back a value from the values vector we have to completely replace the object
-        // Check if the result has no values variable
-        // If the vector is empty we get a sigsev
-        if(result->second.values.empty()){
-            result->second.values.emplace_back(0);
-        }
-        // Copy the result variable
-        interpreter::Variable<int> cpy(result -> second);
-        // pop the value from the copy
-        cpy.values.pop_back();
-        if(!cpy.values.empty()) {
-            cpy.latestValue = cpy.values.back();
-        }else{
-            cpy.latestValue = 0;
-        }
-        // remove the result=
-        intTable.erase(result);
-        // insert the copy
-        insert(cpy);
-        // make sure to also remove variable from block variables
-        return 1;
-    }
-
-    template<> float Interpreter::pop_back<float>(const std::string &identifier) {
-        auto result = find(interpreter::Variable<float>(identifier));
-        if(!found(result)){
-            throw std::runtime_error("Failed to find variable with identifier " + identifier);
-        }
-        // If the vector is empty we get a sigsev
-        if(result->second.values.empty()){
-            result->second.values.emplace_back(0);
-        }
-        // Copy the result variable
-        interpreter::Variable<float> cpy (result -> second);
-        // pop the value from the copy
-        cpy.values.pop_back();
-        if(!cpy.values.empty()) {
-            cpy.latestValue = cpy.values.back();
-        }else{
-            cpy.latestValue = 0;
-        }
-        // remove the result=
-        floatTable.erase(result);
-        // insert the copy
-        insert(cpy);
-        return 1;
-    }
-
-    template<> bool Interpreter::pop_back<bool>(const std::string &identifier) {
-        auto result = find(interpreter::Variable<bool>(identifier));
-        if(!found(result)){
-            throw std::runtime_error("Failed to find variable with identifier " + identifier);
-        }
-        // Copy the result variable
-        if(result->second.values.empty()){
-            result->second.values.emplace_back(0);
-        }
-        interpreter::Variable<bool> cpy(result -> second);
-        // pop the value from the copy
-        cpy.values.pop_back();
-        if(!cpy.values.empty()) {
-            cpy.latestValue = cpy.values.back();
-        }else{
-            cpy.latestValue = false;
-        }
-        // remove the result=
-        boolTable.erase(result);
-        // insert the copy
-        insert(cpy);
-        return true;
-    }
-
-    template<> std::string Interpreter::pop_back<std::string>(const std::string &identifier) {
-        auto result = find(interpreter::Variable<std::string>(identifier));
-        if(!found(result)){
-            throw std::runtime_error("Failed to find variable with identifier " + identifier);
-        }
-        // If the vector is empty we get a sigsev
-        if(result->second.values.empty()){
-            result->second.values.emplace_back("0");
-        }
-        // Copy the result variable
-        interpreter::Variable<std::string> cpy(result -> second);
-        // pop the value from the copy
-        cpy.values.pop_back();
-        if(!cpy.values.empty()) {
-            cpy.latestValue = cpy.values.back();
-        }else{
-            cpy.latestValue = "";
-        }
-        // remove the result
-        stringTable.erase(result);
-        // insert the copy
-        insert(cpy);
-        return "1";
-    }
-
-    template<> char Interpreter::pop_back<char>(const std::string &identifier) {
-        auto result = find(interpreter::Variable<char>(identifier));
-        if(!found(result)){
-            throw std::runtime_error("Failed to find variable with identifier " + identifier);
-        }
-        // If the vector is empty we get a sigsev
-        // Copy the result variable
-        if(result->second.values.empty()){
-            result->second.values.emplace_back(0);
-        }
-        interpreter::Variable<char> cpy(result -> second);
-        // pop the value from the copy
-        cpy.values.pop_back();
-        if(!cpy.values.empty()) {
-            cpy.latestValue = cpy.values.back();
-        }else{
-            cpy.latestValue = false;
-        }
-        // remove the result=
-        charTable.erase(result);
-        // insert the copy
-        insert(cpy);
-        return ' ';
-    }
-
-    template<> std::vector<int> Interpreter::pop_back<std::vector<int>>(const std::string &identifier) {
-        auto result = find(interpreter::Array<int>(identifier));
-        if(!found(result)){
-            throw std::runtime_error("Failed to find variable with identifier " + identifier);
-        }
-        // unfortunately intTable[identifier] kills the cpp compiler
-        // so in order to pop_back a value from the values vector we have to completely replace the object
-        // Check if the result has no values variable
-        // If the vector is empty we get a sigsev
-        if(result->second.values.empty()){
-            result->second.values.emplace_back(std::vector<int>());
-        }
-        // Copy the result variable
-        interpreter::Array<int> cpy(result -> second);
-        // pop the value from the copy
-        cpy.values.pop_back();
-        if(!cpy.values.empty()) {
-            cpy.latestValue = cpy.values.back();
-        }else{
-            cpy.latestValue = std::vector<int>();
-        }
-        // remove the result=
-        intArrayTable.erase(result);
-        // insert the copy
-        insert(cpy);
-
-        return std::vector<int>();
-    }
-
-    template<> std::vector<float> Interpreter::pop_back<std::vector<float>>(const std::string &identifier) {
-        auto result = find(interpreter::Array<float>(identifier));
-        if(!found(result)){
-            throw std::runtime_error("Failed to find variable with identifier " + identifier);
-        }
-        // If the vector is empty we get a sigsev
-        if(result->second.values.empty()){
-            result->second.values.emplace_back(std::vector<float>());
-        }
-        // Copy the result variable
-        interpreter::Array<float> cpy (result -> second);
-        // pop the value from the copy
-        cpy.values.pop_back();
-        if(!cpy.values.empty()) {
-            cpy.latestValue = cpy.values.back();
-        }else{
-            cpy.latestValue = std::vector<float>();
-        }
-        // remove the result=
-        floatArrayTable.erase(result);
-        // insert the copy
-        insert(cpy);
-
-        return std::vector<float>();
-    }
-
-    template<> std::vector<bool> Interpreter::pop_back<std::vector<bool>>(const std::string &identifier) {
-        auto result = find(interpreter::Array<bool>(identifier));
-        if(!found(result)){
-            throw std::runtime_error("Failed to find variable with identifier " + identifier);
-        }
-        // Copy the result variable
-        if(result->second.values.empty()){
-            result->second.values.emplace_back(std::vector<bool>());
-        }
-        interpreter::Array<bool> cpy(result -> second);
-        // pop the value from the copy
-        cpy.values.pop_back();
-        if(!cpy.values.empty()) {
-            cpy.latestValue = cpy.values.back();
-        }else{
-            cpy.latestValue = std::vector<bool>();
-        }
-        // remove the result=
-        boolArrayTable.erase(result);
-        // insert the copy
-        insert(cpy);
-
-        return std::vector<bool>();
-    }
-
-    template<> std::vector<std::string> Interpreter::pop_back<std::vector<std::string>>(const std::string &identifier) {
-        auto result = find(interpreter::Array<std::string>(identifier));
-        if(!found(result)){
-            throw std::runtime_error("Failed to find variable with identifier " + identifier);
-        }
-        // If the vector is empty we get a sigsev
-        if(result->second.values.empty()){
-            result->second.values.emplace_back(std::vector<std::string>());
-        }
-        // Copy the result variable
-        interpreter::Array<std::string> cpy(result -> second);
-        // pop the value from the copy
-        cpy.values.pop_back();
-        if(!cpy.values.empty()) {
-            cpy.latestValue = cpy.values.back();
-        }else{
-            cpy.latestValue = std::vector<std::string>();
-        }
-        // remove the result
-        stringArrayTable.erase(result);
-        // insert the copy
-        insert(cpy);
-
-        return std::vector<std::string>();
-    }
-
-    template<> std::vector<char> Interpreter::pop_back<std::vector<char>>(const std::string &identifier) {
-        auto result = find(interpreter::Array<char>(identifier));
-        if(!found(result)){
-            throw std::runtime_error("Failed to find variable with identifier " + identifier);
-        }
-        // If the vector is empty we get a sigsev
-        // Copy the result variable
-        if(result->second.values.empty()){
-            result->second.values.emplace_back(0);
-        }
-        interpreter::Array<char> cpy(result -> second);
-        // pop the value from the copy
-        cpy.values.pop_back();
-        if(!cpy.values.empty()) {
-            cpy.latestValue = cpy.values.back();
-        }else{
-            cpy.latestValue = std::vector<char>();
-        }
-        // remove the result=
-        charArrayTable.erase(result);
-        // insert the copy
-        insert(cpy);
-
-        return std::vector<char>();
-    }
-
-    template<> int Interpreter::get<int>(const std::string& identifier) {
-        auto result = find(interpreter::Variable<int>(identifier));
-        if(!found(result)){
-            throw std::runtime_error("Failed to find variable with identifier " + identifier);
-        }
-        int ret = result -> second.latestValue;
-        // pop_back case
-        if(identifier == "0CurrentVariable") {
-            pop_back<int>("0CurrentVariable");
-        }
-        // return the popped value
-        return ret;
-    }
-
-    template<> float Interpreter::get<float>(const std::string& identifier) {
-        auto result = find(interpreter::Variable<float>(identifier));
-        if(!found(result)){
-            throw std::runtime_error("Failed to find variable with identifier " + identifier);
-        }
-        float ret = result -> second.latestValue;
-        // pop_back case
-        if(identifier == "0CurrentVariable") {
-            pop_back<float>("0CurrentVariable");
-        }
-        // return the popped value
-        return ret;
-    }
-
-    template<> bool Interpreter::get<bool>(const std::string& identifier) {
-        auto result = find(interpreter::Variable<bool>(identifier));
-        if(!found(result)){
-            throw std::runtime_error("Failed to find variable with identifier " + identifier);
-        }
-        bool ret = result -> second.latestValue;
-        // pop_back case
-        if(identifier == "0CurrentVariable") {
-            pop_back<bool>("0CurrentVariable");
-        }
-        // return the popped value
-        return ret;
-    }
-
-    template<> std::string Interpreter::get<std::string>(const std::string& identifier) {
-        auto result = find(interpreter::Variable<std::string>(identifier));
-        if(!found(result)) {
-            throw std::runtime_error("Failed to find variable with identifier " + identifier);
-        }
-        std::string ret = result->second.latestValue;
-        // pop_back case
-        if(identifier == "0CurrentVariable"){
-            pop_back<std::string>("0CurrentVariable");
-        }
-        // return the popped value
-        return ret;
-    }
-
-    template<> char Interpreter::get<char>(const std::string& identifier) {
-        auto result = find(interpreter::Variable<char>(identifier));
-        if(!found(result)){
-            throw std::runtime_error("Failed to find variable with identifier " + identifier);
-        }
-        float ret = result -> second.latestValue;
-        // pop_back case
-        if(identifier == "0CurrentVariable") {
-            pop_back<char>("0CurrentVariable");
-        }
-        // return the popped value
-        return ret;
-    }
-
-    template<> std::vector<int> Interpreter::get<std::vector<int>>(const std::string& identifier) {
-        auto result = find(interpreter::Array<int>(identifier));
-        if(!found(result)){
-            throw std::runtime_error("Failed to find variable with identifier " + identifier);
-        }
-        auto ret = result -> second.latestValue;
-        // pop_back case
-        if(identifier == "0CurrentVariable") {
-            pop_back<int>("0CurrentVariable");
-        }
-        // return the popped value
-        return ret;
-    }
-
-    template<> std::vector<float> Interpreter::get<std::vector<float>>(const std::string& identifier) {
-        auto result = find(interpreter::Array<float>(identifier));
-        if(!found(result)){
-            throw std::runtime_error("Failed to find variable with identifier " + identifier);
-        }
-        auto ret = result -> second.latestValue;
-        // pop_back case
-        if(identifier == "0CurrentVariable") {
-            pop_back<std::vector<float>>("0CurrentVariable");
-        }
-        // return the popped value
-        return ret;
-    }
-
-    template<> std::vector<bool> Interpreter::get<std::vector<bool>>(const std::string& identifier) {
-        auto result = find(interpreter::Array<bool>(identifier));
-        if(!found(result)){
-            throw std::runtime_error("Failed to find variable with identifier " + identifier);
-        }
-        auto ret = result -> second.latestValue;
-        // pop_back case
-        if(identifier == "0CurrentVariable") {
-            pop_back<std::vector<bool>>("0CurrentVariable");
-        }
-        // return the popped value
-        return ret;
-    }
-
-    template<> std::vector<std::string> Interpreter::get<std::vector<std::string>>(const std::string& identifier) {
-        auto result = find(interpreter::Array<std::string>(identifier));
-        if(!found(result)) {
-            throw std::runtime_error("Failed to find variable with identifier " + identifier);
-        }
-        auto ret = result->second.latestValue;
-        // pop_back case
-        if(identifier == "0CurrentVariable"){
-            pop_back<std::vector<std::string>>("0CurrentVariable");
-        }
-        // return the popped value
-        return ret;
-    }
-
-    template<> std::vector<char> Interpreter::get<std::vector<char>>(const std::string& identifier) {
-        auto result = find(interpreter::Array<char>(identifier));
-        if(!found(result)){
-            throw std::runtime_error("Failed to find variable with identifier " + identifier);
-        }
-        auto ret = result -> second.latestValue;
-        // pop_back case
-        if(identifier == "0CurrentVariable") {
-            pop_back<std::vector<char>>("0CurrentVariable");
-        }
-        // return the popped value
-        return ret;
-    }
-
-    // Tools
 
     void Interpreter::visit(parser::ASTProgramNode *programNode) {
         // For each statement, accept
@@ -761,8 +36,8 @@ namespace visitor {
     void Interpreter::visit(parser::ASTLiteralNode<int> *literalNode) {
         interpreter::Variable<int> v("int", "literal", false, literalNode -> val, literalNode -> lineNumber);
         // remove previous literal
-        pop_back<int>("literal");
-        insert(v);
+        intTable.pop_back("literal");
+        intTable.insert(v);
         currentType = "int";
         currentID = "literal";
     }
@@ -770,8 +45,8 @@ namespace visitor {
     void Interpreter::visit(parser::ASTLiteralNode<float> *literalNode) {
         interpreter::Variable<float> v("float", "literal", false, literalNode -> val, literalNode -> lineNumber);
         // remove previous literal
-        pop_back<float>("literal");
-        insert(v);
+        floatTable.pop_back("literal");
+        floatTable.insert(v);
         currentType = "float";
         currentID = "literal";
     }
@@ -779,8 +54,8 @@ namespace visitor {
     void Interpreter::visit(parser::ASTLiteralNode<bool> *literalNode) {
         interpreter::Variable<bool> v("bool", "literal", false, literalNode -> val, literalNode -> lineNumber);
         // remove previous literal
-        pop_back<bool>("literal");
-        insert(v);
+        boolTable.pop_back("literal");
+        boolTable.insert(v);
         currentType = "bool";
         currentID = "literal";
     }
@@ -788,8 +63,8 @@ namespace visitor {
     void Interpreter::visit(parser::ASTLiteralNode<std::string> *literalNode) {
         interpreter::Variable<std::string> v("string", "literal", false, literalNode -> val, literalNode -> lineNumber);
         // remove previous literal
-        pop_back<std::string>("literal");
-        insert(v);
+        stringTable.pop_back("literal");
+        stringTable.insert(v);
         currentType = "string";
         currentID = "literal";
     }
@@ -797,8 +72,8 @@ namespace visitor {
     void Interpreter::visit(parser::ASTLiteralNode<char> *literalNode) {
         interpreter::Variable<char> v("char", "literal", false, literalNode -> val, literalNode -> lineNumber);
         // remove previous literal
-        pop_back<char>("literal");
-        insert(v);
+        charTable.pop_back("literal");
+        charTable.insert(v);
         currentType = "char";
         currentID = "literal";
 
@@ -811,7 +86,7 @@ namespace visitor {
             std::vector<int> arr;
             for(const auto& item : arrayLiteralNode->expressions){
                 item->accept(this);
-                arr.emplace_back(get<int>(currentID));
+                arr.emplace_back(intTable.get(currentID).latestValue);
             }
             interpreter::Variable<std::vector<int>> a("int", "literal", true, arr, arrayLiteralNode->lineNumber);
         }else if(currentType == "float"){
@@ -819,28 +94,28 @@ namespace visitor {
 
             for(const auto& item : arrayLiteralNode->expressions){
                 item->accept(this);
-                arr.emplace_back(get<float>(currentID));
+                arr.emplace_back(floatTable.get(currentID).latestValue);
             }
         }else if(currentType == "bool"){
             std::vector<bool> arr;
 
             for(const auto& item : arrayLiteralNode->expressions){
                 item->accept(this);
-                arr.emplace_back(get<bool>(currentID));
+                arr.emplace_back(boolTable.get(currentID).latestValue);
             }
         }else if(currentType == "string"){
             std::vector<std::string> arr;
 
             for(const auto& item : arrayLiteralNode->expressions){
                 item->accept(this);
-                arr.emplace_back(get<std::string>(currentID));
+                arr.emplace_back(stringTable.get(currentID).latestValue);
             }
         }else if(currentType == "char"){
             std::vector<char> arr;
 
             for(const auto& item : arrayLiteralNode->expressions){
                 item->accept(this);
-                arr.emplace_back(get<char>(currentID));
+                arr.emplace_back(charTable.get(currentID).latestValue);
             }
         }
         currentType = "object";
@@ -854,29 +129,29 @@ namespace visitor {
         binaryNode -> left -> accept(this);
         // Push left node into 0CurrentVariable
         if(currentType == "int"){
-            insert(interpreter::Variable<int>("int", "0CurrentVariable",
+            intTable.insert(interpreter::Variable<int>("int", "0CurrentVariable",
                                                       false,
-                                                      get<int>(currentID),
+                                                      intTable.get(currentID).latestValue,
                                                       binaryNode -> lineNumber));
         }else if(currentType == "float"){
-            insert(interpreter::Variable<float>("float", "0CurrentVariable",
+            floatTable.insert(interpreter::Variable<float>("float", "0CurrentVariable",
                                                       false,
-                                                      get<float>(currentID),
+                                                      floatTable.get(currentID).latestValue,
                                                       binaryNode -> lineNumber));
         }else if(currentType == "bool"){
-            insert(interpreter::Variable<bool>("bool", "0CurrentVariable",
+            boolTable.insert(interpreter::Variable<bool>("bool", "0CurrentVariable",
                                                       false,
-                                                      get<bool>(currentID),
+                                                      boolTable.get(currentID).latestValue,
                                                       binaryNode -> lineNumber));
         }else if(currentType == "string"){
-            insert(interpreter::Variable<std::string>("string", "0CurrentVariable",
+            stringTable.insert(interpreter::Variable<std::string>("string", "0CurrentVariable",
                                                       false,
-                                                      get<std::string>(currentID),
+                                                      stringTable.get(currentID).latestValue,
                                                       binaryNode -> lineNumber));
         }else if(currentType == "char"){
-            insert(interpreter::Variable<char>("char", "0CurrentVariable",
+            charTable.insert(interpreter::Variable<char>("char", "0CurrentVariable",
                                                       false,
-                                                      get<char>(currentID),
+                                                      charTable.get(currentID).latestValue,
                                                       binaryNode -> lineNumber));
         }
 
@@ -903,103 +178,103 @@ namespace visitor {
                  *
                  */
                 case lexer::TOK_NOT_EQAUL_TO:
-                    insert(interpreter::Variable<bool>("bool", "0CurrentVariable",
+                    boolTable.insert(interpreter::Variable<bool>("bool", "0CurrentVariable",
                                                        false,
-                                                       get<int>()
+                                                       intTable.get().latestValue
                                                        !=
-                                                       get<int>(currentID),
+                                                       intTable.get(currentID).latestValue,
                                                        binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "bool";
                     break;
                 case lexer::TOK_EQAUL_TO:
-                    insert(interpreter::Variable<bool>("bool", "0CurrentVariable",
+                    boolTable.insert(interpreter::Variable<bool>("bool", "0CurrentVariable",
                                                        false,
-                                                       get<int>()
+                                                       intTable.get().latestValue
                                                        ==
-                                                       get<int>(currentID),
+                                                       intTable.get(currentID).latestValue,
                                                        binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "bool";
                     break;
                 case lexer::TOK_MORE_THAN:
-                    insert(interpreter::Variable<bool>("bool", "0CurrentVariable",
+                    boolTable.insert(interpreter::Variable<bool>("bool", "0CurrentVariable",
                                                        false,
-                                                       get<int>()
+                                                       intTable.get().latestValue
                                                        >
-                                                       get<int>(currentID),
+                                                       intTable.get(currentID).latestValue,
                                                        binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "bool";
                     break;
                 case lexer::TOK_LESS_THAN:
-                    insert(interpreter::Variable<bool>("bool", "0CurrentVariable",
+                    boolTable.insert(interpreter::Variable<bool>("bool", "0CurrentVariable",
                                                        false,
-                                                       get<int>()
+                                                       intTable.get().latestValue
                                                        <
-                                                       get<int>(currentID),
+                                                       intTable.get(currentID).latestValue,
                                                        binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "bool";
                     break;
                 case lexer::TOK_MORE_THAN_EQUAL_TO:
-                    insert(interpreter::Variable<bool>("bool", "0CurrentVariable",
+                    boolTable.insert(interpreter::Variable<bool>("bool", "0CurrentVariable",
                                                        false,
-                                                       get<int>()
+                                                       intTable.get().latestValue
                                                        >=
-                                                       get<int>(currentID),
+                                                       intTable.get(currentID).latestValue,
                                                        binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "bool";
                     break;
                 case lexer::TOK_LESS_THAN_EQUAL_TO:
-                    insert(interpreter::Variable<bool>("bool", "0CurrentVariable",
+                    boolTable.insert(interpreter::Variable<bool>("bool", "0CurrentVariable",
                                                        false,
-                                                       get<int>()
+                                                       intTable.get().latestValue
                                                       <=
-                                                      get<int>(currentID),
+                                                      intTable.get(currentID).latestValue,
                                                       binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "bool";
                     break;
                 // int and float accepted operators
                 case lexer::TOK_PLUS:
-                    insert(interpreter::Variable<int>("int", "0CurrentVariable",
+                    intTable.insert(interpreter::Variable<int>("int", "0CurrentVariable",
                                                        false,
-                                                       get<int>()
+                                                       intTable.get().latestValue
                                                        +
-                                                       get<int>(currentID),
+                                                       intTable.get(currentID).latestValue,
                                                        binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "int";
                     break;
                 case lexer::TOK_ASTERISK:
-                    insert(interpreter::Variable<int>("int", "0CurrentVariable",
+                    intTable.insert(interpreter::Variable<int>("int", "0CurrentVariable",
                                                        false,
-                                                       get<int>()
+                                                       intTable.get().latestValue
                                                       *
-                                                      get<int>(currentID),
+                                                      intTable.get(currentID).latestValue,
                                                       binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "int";
                     break;
                 case lexer::TOK_DIVIDE:
                     // if divide by 0 happens, gcc will raise its own error, no need to change the structure to accomodate for this
-                    insert(interpreter::Variable<int>("int", "0CurrentVariable",
+                    intTable.insert(interpreter::Variable<int>("int", "0CurrentVariable",
                                                        false,
-                                                       get<int>()
+                                                       intTable.get().latestValue
                                                       /
-                                                      get<int>(currentID),
+                                                      intTable.get(currentID).latestValue,
                                                       binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "int";
                     break;
                 case lexer::TOK_MINUS:
-                    insert(interpreter::Variable<int>("int", "0CurrentVariable",
+                    intTable.insert(interpreter::Variable<int>("int", "0CurrentVariable",
                                                        false,
-                                                       get<int>()
+                                                       intTable.get().latestValue
                                                       -
-                                                      get<int>(currentID),
+                                                      intTable.get(currentID).latestValue,
                                                       binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "int";
@@ -1013,103 +288,103 @@ namespace visitor {
         }else if(currentType == "float") {
             switch (lexer::determineOperatorType(binaryNode -> op)) {
                 case lexer::TOK_NOT_EQAUL_TO:
-                    insert(interpreter::Variable<bool>("bool", "0CurrentVariable",
+                    boolTable.insert(interpreter::Variable<bool>("bool", "0CurrentVariable",
                                                        false,
-                                                       get<float>()
+                                                       floatTable.get().latestValue
                                                        !=
-                                                       get<float>(currentID),
+                                                       floatTable.get(currentID).latestValue,
                                                        binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "bool";
                     break;
                 case lexer::TOK_EQAUL_TO:
-                    insert(interpreter::Variable<bool>("bool", "0CurrentVariable",
+                    boolTable.insert(interpreter::Variable<bool>("bool", "0CurrentVariable",
                                                        false,
-                                                       get<float>()
+                                                       floatTable.get().latestValue
                                                        ==
-                                                       get<float>(currentID),
+                                                       floatTable.get(currentID).latestValue,
                                                        binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "bool";
                     break;
                 case lexer::TOK_MORE_THAN:
-                    insert(interpreter::Variable<bool>("bool", "0CurrentVariable",
+                    boolTable.insert(interpreter::Variable<bool>("bool", "0CurrentVariable",
                                                        false,
-                                                       get<float>()
+                                                       floatTable.get().latestValue
                                                        >
-                                                       get<float>(currentID),
+                                                       floatTable.get(currentID).latestValue,
                                                        binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "bool";
                     break;
                 case lexer::TOK_LESS_THAN:
-                    insert(interpreter::Variable<bool>("bool", "0CurrentVariable",
+                    boolTable.insert(interpreter::Variable<bool>("bool", "0CurrentVariable",
                                                        false,
-                                                       get<float>()
+                                                       floatTable.get().latestValue
                                                        <
-                                                       get<float>(currentID),
+                                                       floatTable.get(currentID).latestValue,
                                                        binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "bool";
                     break;
                 case lexer::TOK_MORE_THAN_EQUAL_TO:
-                    insert(interpreter::Variable<bool>("bool", "0CurrentVariable",
+                    boolTable.insert(interpreter::Variable<bool>("bool", "0CurrentVariable",
                                                        false,
-                                                       get<float>()
+                                                       floatTable.get().latestValue
                                                        >=
-                                                       get<float>(currentID),
+                                                       floatTable.get(currentID).latestValue,
                                                        binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "bool";
                     break;
                 case lexer::TOK_LESS_THAN_EQUAL_TO:
-                    insert(interpreter::Variable<bool>("bool", "0CurrentVariable",
+                    boolTable.insert(interpreter::Variable<bool>("bool", "0CurrentVariable",
                                                        false,
-                                                       get<float>()
+                                                       floatTable.get().latestValue
                                                        <=
-                                                       get<float>(currentID),
+                                                       floatTable.get(currentID).latestValue,
                                                        binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "bool";
                     break;
                     // int and float accepted operators
                 case lexer::TOK_PLUS:
-                    insert(interpreter::Variable<float>("float", "0CurrentVariable",
+                    floatTable.insert(interpreter::Variable<float>("float", "0CurrentVariable",
                                                        false,
-                                                       get<float>()
+                                                       floatTable.get().latestValue
                                                        +
-                                                       get<float>(currentID),
+                                                       floatTable.get(currentID).latestValue,
                                                        binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "float";
                     break;
                 case lexer::TOK_ASTERISK:
-                    insert(interpreter::Variable<float>("float", "0CurrentVariable",
+                    floatTable.insert(interpreter::Variable<float>("float", "0CurrentVariable",
                                                        false,
-                                                       get<float>()
+                                                       floatTable.get().latestValue
                                                         *
-                                                        get<float>(currentID),
+                                                        floatTable.get(currentID).latestValue,
                                                         binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "float";
                     break;
                 case lexer::TOK_DIVIDE:
                     // if divide by 0 happens, gcc will raise its own error, no need to change the structure to accomodate for this
-                    insert(interpreter::Variable<float>("float", "0CurrentVariable",
+                    floatTable.insert(interpreter::Variable<float>("float", "0CurrentVariable",
                                                        false,
-                                                       get<float>()
+                                                       floatTable.get().latestValue
                                                         /
-                                                        get<float>(currentID),
+                                                        floatTable.get(currentID).latestValue,
                                                         binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "float";
                     break;
                 case lexer::TOK_MINUS:
-                    insert(interpreter::Variable<float>("float", "0CurrentVariable",
+                    floatTable.insert(interpreter::Variable<float>("float", "0CurrentVariable",
                                                        false,
-                                                       get<float>()
+                                                       floatTable.get().latestValue
                                                         -
-                                                        get<float>(currentID),
+                                                        floatTable.get(currentID).latestValue,
                                                         binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "float";
@@ -1123,81 +398,81 @@ namespace visitor {
         }else if(currentType == "bool"){
             switch (lexer::determineOperatorType(binaryNode -> op)) {
                 case lexer::TOK_NOT_EQAUL_TO:
-                    insert(interpreter::Variable<bool>("bool", "0CurrentVariable",
+                    boolTable.insert(interpreter::Variable<bool>("bool", "0CurrentVariable",
                                                        false,
-                                                       get<bool>()
+                                                       boolTable.get().latestValue
                                                         !=
-                                                        get<bool>(currentID),
+                                                        boolTable.get(currentID).latestValue,
                                                         binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "bool";
                     break;
                 case lexer::TOK_EQAUL_TO:
-                    insert(interpreter::Variable<bool>("bool", "0CurrentVariable",
+                    boolTable.insert(interpreter::Variable<bool>("bool", "0CurrentVariable",
                                                        false,
-                                                       get<bool>()
+                                                       boolTable.get().latestValue
                                                        ==
-                                                       get<bool>(currentID),
+                                                       boolTable.get(currentID).latestValue,
                                                        binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "bool";
                     break;
                 case lexer::TOK_AND:
-                    insert(interpreter::Variable<bool>("bool", "0CurrentVariable",
+                    boolTable.insert(interpreter::Variable<bool>("bool", "0CurrentVariable",
                                                        false,
-                                                       get<bool>()
+                                                       boolTable.get().latestValue
                                                        &&
-                                                       get<bool>(currentID),
+                                                       boolTable.get(currentID).latestValue,
                                                        binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "0CurrentVariable";
                     break;
                 case lexer::TOK_OR:
-                    insert(interpreter::Variable<bool>("bool", "0CurrentVariable",
+                    boolTable.insert(interpreter::Variable<bool>("bool", "0CurrentVariable",
                                                        false,
-                                                       get<bool>()
+                                                       boolTable.get().latestValue
                                                        ||
-                                                       get<bool>(currentID),
+                                                       boolTable.get(currentID).latestValue,
                                                        binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "bool";
                     break;
                 case lexer::TOK_MORE_THAN:
-                    insert(interpreter::Variable<bool>("bool", "0CurrentVariable",
+                    boolTable.insert(interpreter::Variable<bool>("bool", "0CurrentVariable",
                                                        false,
-                                                       get<bool>()
+                                                       boolTable.get().latestValue
                                                        >
-                                                       get<bool>(currentID),
+                                                       boolTable.get(currentID).latestValue,
                                                        binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "bool";
                     break;
                 case lexer::TOK_LESS_THAN:
-                    insert(interpreter::Variable<bool>("bool", "0CurrentVariable",
+                    boolTable.insert(interpreter::Variable<bool>("bool", "0CurrentVariable",
                                                        false,
-                                                       get<bool>()
+                                                       boolTable.get().latestValue
                                                        <
-                                                       get<bool>(currentID),
+                                                       boolTable.get(currentID).latestValue,
                                                        binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "bool";
                     break;
                 case lexer::TOK_MORE_THAN_EQUAL_TO:
-                    insert(interpreter::Variable<bool>("bool", "0CurrentVariable",
+                    boolTable.insert(interpreter::Variable<bool>("bool", "0CurrentVariable",
                                                        false,
-                                                       get<bool>()
+                                                       boolTable.get().latestValue
                                                        >=
-                                                       get<bool>(currentID),
+                                                       boolTable.get(currentID).latestValue,
                                                        binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "0CurrentVariable";
                     break;
                 case lexer::TOK_LESS_THAN_EQUAL_TO:
-                    insert(interpreter::Variable<bool>("bool", "0CurrentVariable",
+                    boolTable.insert(interpreter::Variable<bool>("bool", "0CurrentVariable",
                                                        false,
-                                                       get<bool>()
+                                                       boolTable.get().latestValue
                                                        <=
-                                                       get<bool>(currentID),
+                                                       boolTable.get(currentID).latestValue,
                                                        binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "bool";
@@ -1211,31 +486,31 @@ namespace visitor {
         }else if(currentType == "string") {
             switch (lexer::determineOperatorType(binaryNode -> op)) {
                 case lexer::TOK_NOT_EQAUL_TO:
-                    insert(interpreter::Variable<bool>("bool", "0CurrentVariable",
+                    boolTable.insert(interpreter::Variable<bool>("bool", "0CurrentVariable",
                                                        false,
-                                                       get<std::string>()
+                                                       stringTable.get().latestValue
                                                        !=
-                                                       get<std::string>(currentID),
+                                                       stringTable.get(currentID).latestValue,
                                                        binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "bool";
                     break;
                 case lexer::TOK_EQAUL_TO:
-                    insert(interpreter::Variable<bool>("bool", "0CurrentVariable",
+                    boolTable.insert(interpreter::Variable<bool>("bool", "0CurrentVariable",
                                                        false,
-                                                       get<std::string>()
+                                                       stringTable.get().latestValue
                                                        ==
-                                                       get<std::string>(currentID),
+                                                       stringTable.get(currentID).latestValue,
                                                        binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "bool";
                     break;
                 case lexer::TOK_PLUS:
-                    insert(interpreter::Variable<std::string>("string", "0CurrentVariable",
+                    stringTable.insert(interpreter::Variable<std::string>("string", "0CurrentVariable",
                                                               false,
-                                                              get<std::string>()
+                                                              stringTable.get().latestValue
                                                               +
-                                                              get<std::string>(currentID),
+                                                              stringTable.get(currentID).latestValue,
                                                               binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "string";
@@ -1257,9 +532,10 @@ namespace visitor {
         interpreter::Variable<float> f(identifierNode -> identifier);
         interpreter::Variable<bool> b(identifierNode -> identifier);
         interpreter::Variable<std::string> s(identifierNode -> identifier);
+        interpreter::Variable<char> c(identifierNode -> identifier);
         // Check that a variable with this identifier exists
-        auto resultI = find(i);
-        if(found(resultI)) {
+        auto resultI = intTable.find(i);
+        if(intTable.found(resultI)) {
             // if identifier has been found
             // change current Type
             currentType = resultI -> second.type;
@@ -1268,8 +544,8 @@ namespace visitor {
             // Then return
             return;
         }
-        auto resultF = find(f);
-        if(found(resultF)) {
+        auto resultF = floatTable.find(f);
+        if(floatTable.found(resultF)) {
             // if identifier has been found
             // change current Type
             currentType = resultF -> second.type;
@@ -1278,8 +554,8 @@ namespace visitor {
             // Then return
             return;
         }
-        auto resultB = find(b);
-        if(found(resultB)) {
+        auto resultB = boolTable.find(b);
+        if(boolTable.found(resultB)) {
             // if identifier has been found
             // change current Type
             currentType = resultB -> second.type;
@@ -1288,13 +564,23 @@ namespace visitor {
             // Then return
             return;
         }
-        auto resultS = find(s);
-        if(found(resultS)) {
+        auto resultS = stringTable.find(s);
+        if(stringTable.found(resultS)) {
             // if identifier has been found
             // change current Type
             currentType = resultS -> second.type;
             // change current ID
             currentID = resultS -> second.identifier;
+            // Then return
+            return;
+        }
+        auto resultC = charTable.find(c);
+        if(charTable.found(resultC)) {
+            // if identifier has been found
+            // change current Type
+            currentType = resultC -> second.type;
+            // change current ID
+            currentID = resultC -> second.identifier;
             // Then return
             return;
         }
@@ -1308,11 +594,11 @@ namespace visitor {
         unaryNode -> exprNode -> accept(this);
         // now we check the type
         if(currentType == "int"){
-            insert(interpreter::Variable<int>("int", "string", false, get<int>(currentID) * -1, unaryNode -> lineNumber));
+            intTable.insert(interpreter::Variable<int>("int", "string", false, intTable.get(currentID).latestValue * -1, unaryNode -> lineNumber));
         }else if(currentType == "float"){
-            insert(interpreter::Variable<float>("float", "0CurrentVariable", false, get<float>(currentID) * -1, unaryNode -> lineNumber));
+            floatTable.insert(interpreter::Variable<float>("float", "0CurrentVariable", false, floatTable.get(currentID).latestValue * -1, unaryNode -> lineNumber));
         }else if(currentType == "bool"){
-            insert(interpreter::Variable<bool>("bool", "0CurrentVariable", false, ! get<bool>(currentID), unaryNode -> lineNumber));
+            boolTable.insert(interpreter::Variable<bool>("bool", "0CurrentVariable", false, ! boolTable.get(currentID).latestValue, unaryNode -> lineNumber));
         }else{
             // should get here
             throw std::runtime_error("Expression on line " + std::to_string(unaryNode -> lineNumber)
@@ -1357,13 +643,13 @@ namespace visitor {
                  * this temporarily overwrites any global variable
                  * Once the block is function block is visited we pop back these variables to clear memory
                 */
-                insert(interpreter::Variable<int>("int", f.paramIDs.at(i), false, get<int>(currentID), functionCallNode -> lineNumber));
+                intTable.insert(interpreter::Variable<int>("int", f.paramIDs.at(i), false, intTable.get(currentID).latestValue, functionCallNode -> lineNumber));
             }else if(currentType == "float"){
-                insert(interpreter::Variable<float>("float", f.paramIDs.at(i), false, get<float>(currentID), functionCallNode -> lineNumber));
+                floatTable.insert(interpreter::Variable<float>("float", f.paramIDs.at(i), false, floatTable.get(currentID).latestValue, functionCallNode -> lineNumber));
             }else if(currentType == "bool"){
-                insert(interpreter::Variable<bool>("bool", f.paramIDs.at(i), false, get<bool>(currentID), functionCallNode -> lineNumber));
+                boolTable.insert(interpreter::Variable<bool>("bool", f.paramIDs.at(i), false, boolTable.get(currentID).latestValue, functionCallNode -> lineNumber));
             }else if(currentType == "string"){
-                insert(interpreter::Variable<std::string>("string", f.paramIDs.at(i), false, get<std::string>(currentID), functionCallNode -> lineNumber));
+                stringTable.insert(interpreter::Variable<std::string>("string", f.paramIDs.at(i), false, stringTable.get(currentID).latestValue, functionCallNode -> lineNumber));
             }
         }
         // Ok so now we have updated the arguments, so we can call the actual function to run
@@ -1376,13 +662,15 @@ namespace visitor {
              * Now we pop the variables
             */
             if(pair.first == "int"){
-                pop_back<int>(pair.second);
+                intTable.pop_back(pair.second);
             }else if(pair.first == "float"){
-                pop_back<float>(pair.second);
+                floatTable.pop_back(pair.second);
             }else if(pair.first == "bool"){
-                pop_back<bool>(pair.second);
+                boolTable.pop_back(pair.second);
             }else if(pair.first == "string"){
-                pop_back<std::string>(pair.second);
+                stringTable.pop_back(pair.second);
+            }else if(pair.first == "char"){
+                charTable.pop_back(pair.second);
             }
         }
         toPop = std::vector<std::pair<std::string, std::string>>();
@@ -1427,13 +715,13 @@ namespace visitor {
                  * this temporarily overwrites any global variable
                  * Once the block is function block is visited we pop back these variables to clear memory
                 */
-                insert(interpreter::Variable<int>("int", f.paramIDs.at(i), false, get<int>(currentID), sFunctionCallNode -> lineNumber));
+                intTable.insert(interpreter::Variable<int>("int", f.paramIDs.at(i), false, intTable.get(currentID).latestValue, sFunctionCallNode -> lineNumber));
             }else if(currentType == "float"){
-                insert(interpreter::Variable<float>("float", f.paramIDs.at(i), false, get<float>(currentID), sFunctionCallNode -> lineNumber));
+                floatTable.insert(interpreter::Variable<float>("float", f.paramIDs.at(i), false, floatTable.get(currentID).latestValue, sFunctionCallNode -> lineNumber));
             }else if(currentType == "bool"){
-                insert(interpreter::Variable<bool>("bool", f.paramIDs.at(i), false, get<bool>(currentID), sFunctionCallNode -> lineNumber));
-            }else if(currentType == "string"){
-                insert(interpreter::Variable<std::string>("string", f.paramIDs.at(i), false, get<std::string>(currentID), sFunctionCallNode -> lineNumber));
+                boolTable.insert(interpreter::Variable<bool>("bool", f.paramIDs.at(i), false, boolTable.get(currentID).latestValue, sFunctionCallNode -> lineNumber));
+            }else if(currentType == "string"){stringTable.insert(interpreter::Variable<std::string>
+                ("string", f.paramIDs.at(i), false, stringTable.get(currentID).latestValue, sFunctionCallNode -> lineNumber));
             }
         }
         // Ok so now we have updated the arguments, so we can call the actual function to run
@@ -1446,13 +734,15 @@ namespace visitor {
              * Now we pop the variables
             */
             if(pair.first == "int"){
-                pop_back<int>(pair.second);
+                intTable.pop_back(pair.second);
             }else if(pair.first == "float"){
-                pop_back<float>(pair.second);
+                floatTable.pop_back(pair.second);
             }else if(pair.first == "bool"){
-                pop_back<bool>(pair.second);
+                boolTable.pop_back(pair.second);
             }else if(pair.first == "string"){
-                pop_back<std::string>(pair.second);
+                stringTable.pop_back(pair.second);
+            }else if(pair.first == "char"){
+                charTable.pop_back(pair.second);
             }
         }
         toPop = std::vector<std::pair<std::string, std::string>>();
@@ -1476,24 +766,24 @@ namespace visitor {
         }
         // Insert the new variable
         if(currentType == "int"){
-            insert (
-                    interpreter::Variable<int>(currentType, declarationNode -> identifier -> identifier, array, get<int>(currentID), declarationNode -> lineNumber)
+            intTable.insert (
+                    interpreter::Variable<int>(currentType, declarationNode -> identifier -> identifier, array, intTable.get(currentID).latestValue, declarationNode -> lineNumber)
             );
         }else if(currentType == "float"){
-            insert (
-                    interpreter::Variable<float>(currentType, declarationNode -> identifier -> identifier, array, get<float>(currentID), declarationNode -> lineNumber)
+            floatTable.insert (
+                    interpreter::Variable<float>(currentType, declarationNode -> identifier -> identifier, array, floatTable.get(currentID).latestValue, declarationNode -> lineNumber)
             );
         }else if(currentType == "bool"){
-            insert (
-                    interpreter::Variable<bool>(currentType, declarationNode -> identifier -> identifier, array, get<bool>(currentID), declarationNode -> lineNumber)
+            boolTable.insert (
+                    interpreter::Variable<bool>(currentType, declarationNode -> identifier -> identifier, array, boolTable.get(currentID).latestValue, declarationNode -> lineNumber)
             );
         }else if(currentType == "string"){
-            insert (
-                    interpreter::Variable<std::string>(currentType, declarationNode -> identifier -> identifier, array, get<std::string>(currentID), declarationNode -> lineNumber)
+            stringTable.insert (
+                    interpreter::Variable<std::string>(currentType, declarationNode -> identifier -> identifier, array, stringTable.get(currentID).latestValue, declarationNode -> lineNumber)
             );
         }else if(currentType == "char"){
-            insert (
-                    interpreter::Variable<char>(currentType, declarationNode -> identifier -> identifier, array, get<char>(currentID), declarationNode -> lineNumber)
+            charTable.insert (
+                    interpreter::Variable<char>(currentType, declarationNode -> identifier -> identifier, array, charTable.get(currentID).latestValue, declarationNode -> lineNumber)
             );
         }
         array = false;
@@ -1517,24 +807,29 @@ namespace visitor {
         // Replace the variable value
         // Replacement can be done by popping then inserting
         if(currentType == "int"){
-            get<int>(id);
-            insert (
-                    interpreter::Variable<int>(type, id, false, get<int>(currentID), assignmentNode -> lineNumber)
+            intTable.pop_back(id);
+            intTable.insert (
+                    interpreter::Variable<int>(type, id, false, intTable.get(currentID).latestValue, assignmentNode -> lineNumber)
             );
         }else if(currentType == "float"){
-            get<float>(id);
-            insert (
-                    interpreter::Variable<float>(type, id, false, get<float>(currentID), assignmentNode -> lineNumber)
+            floatTable.pop_back(id);
+            floatTable.insert (
+                    interpreter::Variable<float>(type, id, false, floatTable.get(currentID).latestValue, assignmentNode -> lineNumber)
             );
         }else if(currentType == "bool"){
-            get<bool>(id);
-            insert (
-                    interpreter::Variable<bool>(type, id, false, get<bool>(currentID), assignmentNode -> lineNumber)
+            boolTable.pop_back(id);
+            boolTable.insert (
+                    interpreter::Variable<bool>(type, id, false, boolTable.get(currentID).latestValue, assignmentNode -> lineNumber)
             );
         }else if(currentType == "string"){
-            get<std::string>(id);
-            insert (
-                    interpreter::Variable<std::string>(type, id, false, get<std::string>(currentID), assignmentNode -> lineNumber)
+            stringTable.pop_back(id);
+            stringTable.insert (
+                    interpreter::Variable<std::string>(type, id, false, stringTable.get(currentID).latestValue, assignmentNode -> lineNumber)
+            );
+        }else if(currentType == "char"){
+            charTable.pop_back(id);
+            charTable.insert (
+                    interpreter::Variable<char>(type, id, false, charTable.get(currentID).latestValue, assignmentNode -> lineNumber)
             );
         }
         if(function){
@@ -1547,13 +842,13 @@ namespace visitor {
         printNode -> exprNode -> accept(this);
 
         if(currentType == "int"){
-            std::cout << get<int>(currentID) << std::endl;
+            std::cout << intTable.get(currentID).latestValue << std::endl;
         }else if(currentType == "float"){
-            std::cout << get<float>(currentID) << std::endl;
+            std::cout << floatTable.get(currentID).latestValue << std::endl;
         }else if(currentType == "bool"){
-            std::cout << (get<bool>(currentID) ? "true" : "false") << std::endl;
+            std::cout << (boolTable.get(currentID).latestValue ? "true" : "false") << std::endl;
         }else if(currentType == "string"){
-            std::cout << get<std::string>(currentID) << std::endl;
+            std::cout << stringTable.get(currentID).latestValue << std::endl;
         }
     }
 
@@ -1567,7 +862,7 @@ namespace visitor {
         // Get the condition
         ifNode -> condition -> accept(this);
         // follow the if structure
-        if(get<bool>(currentID)){
+        if(boolTable.get(currentID).latestValue){
             // do the if block
             ifNode -> ifBlock -> accept(this);
         }else{
@@ -1584,7 +879,7 @@ namespace visitor {
         // Get the condition
         forNode -> condition -> accept(this);
 
-        while(get<bool>(currentID)){
+        while(boolTable.get(currentID).latestValue){
             // do the loop block
             forNode -> loopBlock -> accept(this);
 
@@ -1600,7 +895,7 @@ namespace visitor {
         // Get the condition
         whileNode -> condition -> accept(this);
 
-        while(get<bool>(currentID)){
+        while(boolTable.get(currentID).latestValue){
             // do the loop block
             whileNode -> loopBlock -> accept(this);
 
