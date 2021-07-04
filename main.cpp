@@ -158,7 +158,7 @@ int main(int argc, char **argv) {
     }else if (std::string("-s") == argv[1]) {
 //        std::cout << "TESTING Semantic Analyzer" << std::endl;
         lexer::Lexer lexer;
-        lexer.extractLexemes(argv[2]); //_program_
+        lexer.extractLexemes(_program_2); //_program_
 
         parser::Parser parser(lexer.tokens);
         auto programNode = std::shared_ptr<parser::ASTProgramNode>(parser.parseProgram());

@@ -40,7 +40,17 @@ namespace visitor{
 
     bool Scope::found(
             std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>, Function>> result) {
-        return result != functionTable.end();;
+        return result != functionTable.end();
+    }
+
+    bool Scope::erase(
+            std::_Rb_tree_iterator<std::pair<const std::basic_string<char, std::char_traits<char>, std::allocator<char>>, Function>> result) {
+        if(found(result)){
+            functionTable.erase(result);
+            return true;
+        }else{
+            return false;
+        }
     }
     // Semantic Scope
 
@@ -496,12 +506,18 @@ namespace visitor{
         }
         // Check that the return type matches with the function type
         if(functionDeclarationNode->type != currentType) {
-            // Check current type with the declaration type
-            // since the language does not perform any implicit/automatic typecast (as said in spec)
-            throw std::runtime_error("Function " + f.identifier + " was declared of type " + f.type + " on line "
-                                     + std::to_string(f.lineNumber) + " but has been assigned invalid value of type "
-                                     + currentType +
-                                     ".\nImplicit and Automatic Typecasting is not supported by TeaLang.");
+            if(functionDeclarationNode->type == "auto"){
+                // remove function and re insert it with the new type
+                scope->erase(scope->find(f));
+                scope->insert(Function(currentType, functionDeclarationNode->identifier->getID(), paramTypes, functionDeclarationNode->lineNumber));
+            }else{
+                // Check current type with the declaration type
+                // since the language does not perform any implicit/automatic typecast (as said in spec)
+                throw std::runtime_error("Function " + f.identifier + " was declared of type " + f.type + " on line "
+                                         + std::to_string(f.lineNumber) + " but has been assigned invalid value of type "
+                                         + currentType +
+                                         ".\nImplicit and Automatic Typecasting is not supported by TeaLang.");
+            }
         }
         // Close function scope
         // This discards any declared variable in the foo() section
