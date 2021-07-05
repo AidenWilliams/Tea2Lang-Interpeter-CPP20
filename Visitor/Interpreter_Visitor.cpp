@@ -167,7 +167,11 @@ namespace visitor {
         }
 
         // Accept right expression
+        std::string _struct_copy = structID;
+        // clear for now
+        structID = "";
         binaryNode -> right -> accept(this);
+        structID = _struct_copy;
         // We know both variables have the same type
         // So we check the currentType's type to see which operations we can do
         // check op type
@@ -571,16 +575,21 @@ namespace visitor {
         array = false;
     }
 
-    void Interpreter::visit(parser::ASTIdentifierNode *identifierNode) {//TODO::HANDLE variable[] case
+    void Interpreter::visit(parser::ASTIdentifierNode *identifierNode) {
         // two cases 1 where iloc is defined (array) the other when it isnt (other types)
+        std::string id = "";
+        if(!structID.empty()){
+            id += structID + ".";
+        }
+        id += identifierNode -> getID();
         if(identifierNode->ilocExprNode == nullptr){
             // Build variable shells
             array = false;
-            interpreter::Variable<int> i(identifierNode -> identifier);
-            interpreter::Variable<float> f(identifierNode -> identifier);
-            interpreter::Variable<bool> b(identifierNode -> identifier);
-            interpreter::Variable<std::string> s(identifierNode -> identifier);
-            interpreter::Variable<char> c(identifierNode -> identifier);
+            interpreter::Variable<int> i(id);
+            interpreter::Variable<float> f(id);
+            interpreter::Variable<bool> b(id);
+            interpreter::Variable<std::string> s(id);
+            interpreter::Variable<char> c(id);
             //struct
             // Check that a variable with this identifier exists
             auto resultI = intTable.find(i);
@@ -655,11 +664,11 @@ namespace visitor {
             iloc = -1;
         }
         // Build variable shells
-        interpreter::Variable<std::vector<int>> i(identifierNode -> identifier);
-        interpreter::Variable<std::vector<float>> f(identifierNode -> identifier);
-        interpreter::Variable<std::vector<bool>> b(identifierNode -> identifier);
-        interpreter::Variable<std::vector<std::string>> s(identifierNode -> identifier);
-        interpreter::Variable<std::vector<char>> c(identifierNode -> identifier);
+        interpreter::Variable<std::vector<int>> i(id);
+        interpreter::Variable<std::vector<float>> f(id);
+        interpreter::Variable<std::vector<bool>> b(id);
+        interpreter::Variable<std::vector<std::string>> s(id);
+        interpreter::Variable<std::vector<char>> c(id);
         //struct
         array = true;
         // Check that a variable with this identifier exists
@@ -714,8 +723,9 @@ namespace visitor {
             return;
         }
         // Variable hasn't been found (should never get here)
-        throw std::runtime_error("Variable with identifier " + i.identifier + " called on line "
-                                 + std::to_string(identifierNode->lineNumber) + " has not been declared.");
+        // iof not found than it is a struct
+        currentType = struct_variable.find((structID.empty() ? identifierNode->getID() : structID))->second;
+        currentID = identifierNode->getID();
     }
 
     void Interpreter::visit(parser::ASTUnaryNode *unaryNode) {
@@ -747,7 +757,7 @@ namespace visitor {
             paramTypes.emplace_back(currentType);
         }
         // Generate Function
-        interpreter::Function f(functionCallNode -> identifier -> identifier, paramTypes);
+        interpreter::Function f(functionCallNode -> identifier -> getID(), paramTypes);
         // find actual function
         auto result = find(f);
         if(!found(result)) {
@@ -764,6 +774,13 @@ namespace visitor {
             // This visit updates the currentID and currentType
             // store current ID so that we dont need to visit the parameters again to pop their values
             toPop.emplace_back(interpreter::Popable(currentType, f.paramIDs.at(i), array));
+            if(lexer::isStruct(currentType)){
+//                parser::ASTDeclarationNode declarationNode(currentType,
+//                                                           std::make_shared<parser::ASTIdentifierNode>(f.paramIDs.at(i), nullptr, nullptr, functionCallNode->lineNumber),
+//                                                           nullptr, functionCallNode->lineNumber);
+//                declarationNode.accept(this);
+
+            }else
             if(currentType == "int"){
                 /* Update the currentID variable by emplacing back
                  * to f.paramIDs.at(i) variable
@@ -800,6 +817,18 @@ namespace visitor {
         }
         // Ok so now we have updated the arguments, so we can call the actual function to run
         function = true;
+
+        if(!functionCallNode->identifier->isEmpty()){
+            auto parent = parser::ASTIdentifierNode(functionCallNode->identifier->identifier, functionCallNode->identifier->getChild(), functionCallNode->identifier->ilocExprNode, functionCallNode->identifier->lineNumber);
+            auto child = parent.getChild();
+            structID = "";
+            while(child != nullptr){
+                structID += functionCallNode->identifier->identifier;
+                parent = parser::ASTIdentifierNode(child);
+                child = child->getChild();
+            }
+        }
+
         f.blockNode -> accept(this);
         function = false;
         // the function has completed its run now we pop back the variables we added
@@ -836,7 +865,7 @@ namespace visitor {
             paramTypes.emplace_back(currentType);
         }
         // Generate Function
-        interpreter::Function f(sFunctionCallNode -> identifier -> identifier, paramTypes);
+        interpreter::Function f(sFunctionCallNode -> identifier -> getID(), paramTypes);
         // find actual function
         auto result = find(f);
         if(! found(result)) {
@@ -853,6 +882,13 @@ namespace visitor {
             // This visit updates the currentID and currentType
             // store current ID so that we dont need to visit the parameters again to pop their values
             toPop.emplace_back(interpreter::Popable(currentType, f.paramIDs.at(i), array));
+            if(lexer::isStruct(currentType)){
+//                parser::ASTDeclarationNode declarationNode(currentType,
+//                                                           std::make_shared<parser::ASTIdentifierNode>(f.paramIDs.at(i), nullptr, nullptr, sFunctionCallNode->lineNumber),
+//                                                           nullptr, sFunctionCallNode->lineNumber);
+//                declarationNode.accept(this);
+
+            }else
             if(currentType == "int"){
                 /* Update the currentID variable by emplacing back
                  * to f.paramIDs.at(i) variable
@@ -889,6 +925,18 @@ namespace visitor {
         }
         // Ok so now we have updated the arguments, so we can call the actual function to run
         function = true;
+
+        if(!sFunctionCallNode->identifier->isEmpty()){
+            auto parent = parser::ASTIdentifierNode(sFunctionCallNode->identifier->identifier, sFunctionCallNode->identifier->getChild(), sFunctionCallNode->identifier->ilocExprNode, sFunctionCallNode->identifier->lineNumber);
+            auto child = parent.getChild();
+            structID = "";
+            while(child != nullptr){
+                structID += sFunctionCallNode->identifier->identifier;
+                parent = parser::ASTIdentifierNode(child);
+                child = child->getChild();
+            }
+        }
+
         f.blockNode -> accept(this);
         function = false;
         // the function has completed its run now we pop back the variables we added
@@ -940,38 +988,47 @@ namespace visitor {
                 // amend array
                 if(currentType == "int"){
                     intArrayTable.insert (
-                            interpreter::Variable<std::vector<int>>(currentType, declarationNode -> identifier -> identifier,
+                            interpreter::Variable<std::vector<int>>(currentType, structID + declarationNode -> identifier -> getID(),
                                                                     true, std::vector<int>(size), declarationNode -> lineNumber)
                     );
                 }else if(currentType == "float"){
                     floatArrayTable.insert (
-                            interpreter::Variable<std::vector<float>>(currentType, declarationNode -> identifier -> identifier,
+                            interpreter::Variable<std::vector<float>>(currentType, structID + declarationNode -> identifier -> getID(),
                                                          true, std::vector<float>(size), declarationNode -> lineNumber)
                     );
                 }else if(currentType == "bool"){
                     boolArrayTable.insert (
-                            interpreter::Variable<std::vector<bool>>(currentType, declarationNode -> identifier -> identifier,
+                            interpreter::Variable<std::vector<bool>>(currentType, structID + declarationNode -> identifier -> getID(),
                                                         true, std::vector<bool>(size), declarationNode -> lineNumber)
                     );
                 }else if(currentType == "string"){
                     stringArrayTable.insert (
-                            interpreter::Variable<std::vector<std::string>>(currentType, declarationNode -> identifier -> identifier,
+                            interpreter::Variable<std::vector<std::string>>(currentType, structID + declarationNode -> identifier -> getID(),
                                                                true, std::vector<std::string>(size), declarationNode -> lineNumber)
                     );
                 }else if(currentType == "char"){
                     charArrayTable.insert (
-                            interpreter::Variable<std::vector<char>>(currentType, declarationNode -> identifier -> identifier,
+                            interpreter::Variable<std::vector<char>>(currentType, structID + declarationNode -> identifier -> getID(),
                                                         true, std::vector<char>(size), declarationNode -> lineNumber)
                     );
                 }
                 if(function){
-                    toPop.emplace_back(interpreter::Popable(currentType, declarationNode -> identifier -> identifier, true));
+                    toPop.emplace_back(interpreter::Popable(currentType, structID + declarationNode -> identifier -> getID(), true));
                 }
                 return;
             }else{
-               // struct case
-               // find struct build
-               // insert new struct variable
+                // struct case
+                // find struct build
+                // insert new struct variable
+                // ignore self
+                if(declarationNode -> identifier -> getID() != "self") {
+                    structID = declarationNode->identifier->getID() + ".";
+                    listOfStructs.emplace_back(declarationNode->identifier->getID());
+                    struct_variable.insert(std::make_pair(declarationNode->identifier->getID(), declarationNode->type));
+                    structTable.find(declarationNode->type)->second.structNode->accept(this);
+                    structID = "";
+                }
+                return;
             }
         }
 
@@ -982,48 +1039,48 @@ namespace visitor {
 
         if(currentType == "int"){
             array ? intArrayTable.insert (
-                    interpreter::Variable<std::vector<int>>(currentType, declarationNode -> identifier -> identifier, true, intArrayTable.get(currentID).latestValue, declarationNode -> lineNumber)
+                    interpreter::Variable<std::vector<int>>(currentType, structID + declarationNode -> identifier -> getID(), true, intArrayTable.get(currentID).latestValue, declarationNode -> lineNumber)
             )
             :
             intTable.insert (
-                    interpreter::Variable<int>(currentType, declarationNode -> identifier -> identifier, false, intTable.get(currentID).latestValue, declarationNode -> lineNumber)
+                    interpreter::Variable<int>(currentType, structID + declarationNode -> identifier -> getID(), false, intTable.get(currentID).latestValue, declarationNode -> lineNumber)
             );
         }else if(currentType == "float"){
             array ? floatArrayTable.insert (
-                    interpreter::Variable<std::vector<float>>(currentType, declarationNode -> identifier -> identifier, true, floatArrayTable.get(currentID).latestValue, declarationNode -> lineNumber)
+                    interpreter::Variable<std::vector<float>>(currentType, structID + declarationNode -> identifier -> getID(), true, floatArrayTable.get(currentID).latestValue, declarationNode -> lineNumber)
             )
             :
             floatTable.insert (
-                    interpreter::Variable<float>(currentType, declarationNode -> identifier -> identifier, false, floatTable.get(currentID).latestValue, declarationNode -> lineNumber)
+                    interpreter::Variable<float>(currentType, structID + declarationNode -> identifier -> getID(), false, floatTable.get(currentID).latestValue, declarationNode -> lineNumber)
             );
         }else if(currentType == "bool"){
             array ? boolArrayTable.insert (
-                    interpreter::Variable<std::vector<bool>>(currentType, declarationNode -> identifier -> identifier, true, boolArrayTable.get(currentID).latestValue, declarationNode -> lineNumber)
+                    interpreter::Variable<std::vector<bool>>(currentType, structID + declarationNode -> identifier -> getID(), true, boolArrayTable.get(currentID).latestValue, declarationNode -> lineNumber)
             )
             :
             boolTable.insert (
-                    interpreter::Variable<bool>(currentType, declarationNode -> identifier -> identifier, false, boolTable.get(currentID).latestValue, declarationNode -> lineNumber)
+                    interpreter::Variable<bool>(currentType, structID + declarationNode -> identifier -> getID(), false, boolTable.get(currentID).latestValue, declarationNode -> lineNumber)
             );
         }else if(currentType == "string"){
             array ? stringArrayTable.insert (
-                    interpreter::Variable<std::vector<std::string>>(currentType, declarationNode -> identifier -> identifier, true, stringArrayTable.get(currentID).latestValue, declarationNode -> lineNumber)
+                    interpreter::Variable<std::vector<std::string>>(currentType, structID + declarationNode -> identifier -> getID(), true, stringArrayTable.get(currentID).latestValue, declarationNode -> lineNumber)
             )
             :
             stringTable.insert (
-                    interpreter::Variable<std::string>(currentType, declarationNode -> identifier -> identifier, false, stringTable.get(currentID).latestValue, declarationNode -> lineNumber)
+                    interpreter::Variable<std::string>(currentType, structID + declarationNode -> identifier -> getID(), false, stringTable.get(currentID).latestValue, declarationNode -> lineNumber)
             );
         }else if(currentType == "char"){
             array ? charArrayTable.insert (
-                    interpreter::Variable<std::vector<char>>(currentType, declarationNode -> identifier -> identifier, true, charArrayTable.get(currentID).latestValue, declarationNode -> lineNumber)
+                    interpreter::Variable<std::vector<char>>(currentType, structID + declarationNode -> identifier -> getID(), true, charArrayTable.get(currentID).latestValue, declarationNode -> lineNumber)
             )
             :
             charTable.insert (
-                    interpreter::Variable<char>(currentType, declarationNode -> identifier -> identifier, false, charTable.get(currentID).latestValue, declarationNode -> lineNumber)
+                    interpreter::Variable<char>(currentType, structID + declarationNode -> identifier -> getID(), false, charTable.get(currentID).latestValue, declarationNode -> lineNumber)
             );
         }
 
         if(function){
-            toPop.emplace_back(interpreter::Popable(currentType, declarationNode -> identifier -> identifier, array));
+            toPop.emplace_back(interpreter::Popable(currentType, structID + declarationNode -> identifier -> getID(), array));
         }
         array = false;
     }
@@ -1186,12 +1243,13 @@ namespace visitor {
             );
         }
         if(function){
-            toPop.emplace_back(interpreter::Popable(currentType, assignmentNode -> identifier -> identifier, false));
+            toPop.emplace_back(interpreter::Popable(currentType, id, false));
         }
     }
 
     void Interpreter::visit(parser::ASTPrintNode *printNode) {
         // Visit expression node to get current type
+        structID = "";
         printNode -> exprNode -> accept(this);
         if(currentType == "int"){
             std::cout << (array ? intArrayTable.get(currentID).latestValue.at(iloc) : intTable.get(currentID).latestValue) << std::endl;
@@ -1276,7 +1334,7 @@ namespace visitor {
         // Insert the new function
         insert (
                 interpreter::Function(functionDeclarationNode->type,
-                                      functionDeclarationNode -> identifier -> identifier,
+                                      structID + functionDeclarationNode -> identifier -> getID(),
                                       paramTypes, paramIDs,functionDeclarationNode->functionBlock,
                                       functionDeclarationNode -> lineNumber)
         );
@@ -1289,16 +1347,38 @@ namespace visitor {
         auto save = interpreter::Popable(currentType, currentID, array);
         // find the return
         for (auto it = toPop.begin(); it != toPop.end(); ++it){
-            if(it->id == save.id){
-                toPop.erase(it);
-                if(it == toPop.end()) break;
+            if(lexer::isStruct(save.type)){
+                // match begin of toPop with save.id + "."
+                bool ok_so_far = false;
+                bool _struct = false;
+                bool fullstop = false;
+                if(structID.empty()) structID = currentID;
+                for(int i = 0; i < it->id.size(); ++i){
+                    if(!_struct){
+                        ok_so_far = (structID.at(i) == it->id.at(i));
+                        _struct = (i == structID.size()-1);
+                    }
+                    fullstop = '.' == it->id.at(i);
+                    if(fullstop) break;
+                }
+                if(ok_so_far && _struct && fullstop){
+                    toPop.erase(it);
+                    if(it == toPop.end()) --it; //risky
+                }
+            }else{
+                if(it->id == save.id){
+                    toPop.erase(it);
+                    if(it == toPop.end()) --it; //risky
+                }
             }
         }
 
     }
 
     void Interpreter::visit(parser::ASTStructNode *structNode) {
-        std::cout << "helloo" << std::endl;
+        // visit the block to define the functions
+        structTable.insert(std::pair<std::string, interpreter::Struct>
+                (std::make_pair(structNode->identifier->getID(), interpreter::Struct(structNode->identifier->getID(), structNode->structBlock))));
     }
     // Statements
 }

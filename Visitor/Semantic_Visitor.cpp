@@ -251,7 +251,6 @@ namespace visitor{
         auto parent = parser::ASTIdentifierNode(identifierNode->identifier, identifierNode->getChild(), identifierNode->ilocExprNode, identifierNode->lineNumber);
         auto child = identifierNode->getChild();
         bool found = false;
-        std::vector<std::string> path; // path of structs with the last element being the variable
         while(child != nullptr){
             // we have found a child
             // this means that the identifier of identifierNode must be a struct
@@ -358,7 +357,6 @@ namespace visitor{
         auto parent = parser::ASTIdentifierNode(functionCallNode->identifier);
         auto child = parent.getChild();
         bool found = false;
-        std::vector<std::string> path; // path of structs with the last element being the variable
         while(child != nullptr){
             // we have found a child
             // this means that the identifier of identifierNode must be a struct
@@ -450,7 +448,6 @@ namespace visitor{
         auto parent = parser::ASTIdentifierNode(sFunctionCallNode->identifier);
         auto child = parent.getChild();
         bool found = false;
-        std::vector<std::string> path; // path of structs with the last element being the variable
         while(child != nullptr){
             // we have found a child
             // this means that the identifier of identifierNode must be a struct

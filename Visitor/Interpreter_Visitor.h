@@ -41,11 +41,6 @@ namespace interpreter {
         T latestValue;
         std::vector<T> values;
         int size;
-        T operator[](int iloc) const {
-            if(array){
-                return latestValue.at(iloc);
-            }
-        }
     };
 
     class Function : public visitor::Function{
@@ -135,10 +130,6 @@ namespace interpreter {
         if(!found(result)){
             throw std::runtime_error("Failed to find variable with identifier " + identifier);
         }
-        // If the vector is empty we get a sigsev
-//        if(result->second.values.empty()){
-////            result->second.values.emplace_back(0);
-//        }
         // Copy the result variable
         Value cpy (result -> second);
         // pop the value from the copy
@@ -155,7 +146,6 @@ namespace interpreter {
         self.erase(result);
         // insert the copy
         insert(cpy);
-
     }
 
     template<typename Key, typename Value>
@@ -172,6 +162,20 @@ namespace interpreter {
         // return the popped value
         return ret;
     }
+
+
+    class Struct{
+    public:
+        Struct(std::string id, std::shared_ptr<parser::ASTBlockNode> structNode) :
+                id(std::move(id)),
+                structNode(structNode)
+        {};
+
+        ~Struct() = default;
+
+        std::string id;
+        std::shared_ptr<parser::ASTBlockNode> structNode;
+    };
 
     class Popable{
     public:
@@ -211,6 +215,14 @@ namespace visitor {
         // type, identifier
         std::string currentType;
         std::string currentID;
+        std::string structID;
+        std::string returnId;
+        std::string returnType;
+        std::string self;
+        std::map<std::string, interpreter::Struct> structTable;
+        // variable name, struct name
+        std::map<std::string, std::string> struct_variable;
+        std::vector<std::string> listOfStructs;
         // function block
         bool function;
         // array flag
@@ -245,6 +257,7 @@ namespace visitor {
             function = false;
             array = false;
             iloc = -1;
+            structID = "";
         };
         ~Interpreter() = default;
         auto find(const interpreter::Function& f);

@@ -78,21 +78,22 @@ int main(int argc, char **argv) {
             "print Average(arr2, 4.0); //6.92\n"
             "\n"
             "tlstruct Vector{\n"
+            "    let self : Vector;\n"
             "    let x : float = 0.0;\n"
             "    let y : float = 0.0;\n"
             "    let z : float = 0.0;\n"
             "\n"
-            "    int Scale(s : float){\n" //40
+            "    Vector Scale(s : float){\n" //40
             "        x=x*s;\n"
             "        y=y*s;\n"
             "        z=z*s;\n"
-            "        return 0;//Because functions always return something\n"
+            "        return self;//Because functions always return something\n"
             "    }\n"
-            "    int Translate(tx : float,ty : float,tz : float){\n"
+            "    Vector Translate(tx : float,ty : float,tz : float){\n"
             "        x=x+tx;\n"
             "        y=y+ty;\n"
             "        z=z+tz;\n"
-            "        return 0;//Language does not support void\n" //50
+            "        return self;//Language does not support void\n" //50
             "    }\n"
             "}\n"
             "\n"
@@ -121,10 +122,10 @@ int main(int argc, char **argv) {
             "\n"
             "v3.Translate(1.0, 1.0, 1.0);\n"
             "\n"
-            "let v4 : Vector=Add(v1, v3);\n"
-            "print v3.x;//5.0\n" //80
-            "print v3.y;//6.2\n"
-            "print v3.z;//5.0";
+            "let v4 : Vector = Add(v1, v3);\n"//80
+            "print v4.x;//5.0\n"
+            "print v4.y;//6.2\n"
+            "print v4.z;//5.0";
     if (std::string("-l") == argv[1]){
 //        std::cout << "TESTING LEXER" << std::endl;
         lexer::Lexer lexer;
@@ -172,7 +173,7 @@ int main(int argc, char **argv) {
 //        std::cout << "TESTING Interpreter" <<  std::endl;
 
         lexer::Lexer lexer;
-        lexer.extractLexemes(_program_); //argv[2]
+        lexer.extractLexemes(_program_2); //argv[2]
 
         parser::Parser parser(lexer.tokens);
         auto programNode = std::shared_ptr<parser::ASTProgramNode>(parser.parseProgram());
