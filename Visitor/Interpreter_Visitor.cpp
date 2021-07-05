@@ -323,7 +323,7 @@ namespace visitor {
                                                        false,
                                                        floatTable.get().latestValue
                                                        >
-                                                       (array ? (array ? floatArrayTable.get(currentID).latestValue.at(iloc) : floatTable.get(currentID).latestValue) : floatArrayTable.get(currentID).latestValue.at(iloc)),
+                                                       (array ? floatArrayTable.get(currentID).latestValue.at(iloc) : floatTable.get(currentID).latestValue),
                                                        binaryNode -> lineNumber));
                     // Update Current Type to the that of the type being inserted
                     currentType = "bool";

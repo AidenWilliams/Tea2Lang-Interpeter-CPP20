@@ -172,7 +172,7 @@ int main(int argc, char **argv) {
 //        std::cout << "TESTING Interpreter" <<  aasdasdstd::endl;
 
         lexer::Lexer lexer;
-        lexer.extractLexemes(_program_2); //argv[2]
+        lexer.extractLexemes(_program_); //argv[2]
 
         parser::Parser parser(lexer.tokens);
         auto programNode = std::shared_ptr<parser::ASTProgramNode>(parser.parseProgram());
