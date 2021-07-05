@@ -19,25 +19,28 @@ namespace interpreter {
     public:
         Variable(const std::string& type, const std::string& identifier, bool array, T value, unsigned int lineNumber) :
                 visitor::Variable(type, identifier, array, lineNumber),
-                latestValue(value)
+                latestValue(value),
+                size(0)
                 {
                     values.emplace_back(value);
                 };
 
         explicit Variable(const std::string& identifier) :
-                visitor::Variable(identifier)
+                visitor::Variable(identifier),
+                size(0)
         {};
 
         Variable(Variable const &v) :
                 visitor::Variable(v.type, v.identifier, v.array, v.lineNumber),
                 latestValue(v.latestValue),
-                values(v.values)
+                values(v.values),
+                size(v.size)
         {};
 
         ~Variable() = default;
         T latestValue;
         std::vector<T> values;
-
+        int size;
         T operator[](int iloc) const {
             if(array){
                 return latestValue.at(iloc);
@@ -105,6 +108,7 @@ namespace interpreter {
             Value cpy(result -> second);
             // add the new value
             cpy.values.emplace_back(v.latestValue);
+            ++cpy.size;
             cpy.latestValue = v.latestValue;
             // remove the result
             self.erase(result);
@@ -113,6 +117,7 @@ namespace interpreter {
             return false;
         }else{
             // The variable doesnt exist so we add a new one
+            v.size = v.values.size();
             auto ret = self.insert(std::pair<Key, Value>(v.identifier, v) );
             return ret.second;
         }
@@ -137,16 +142,20 @@ namespace interpreter {
         // Copy the result variable
         Value cpy (result -> second);
         // pop the value from the copy
-        cpy.values.pop_back();
-        if(!cpy.values.empty()) {
+        --cpy.size;
+        if(cpy.size == -1){
+            cpy.size = 0;
+        }else{
+            cpy.values.erase(cpy.values.begin() + cpy.size);
+        }
+        if(cpy.size != 0){
             cpy.latestValue = cpy.values.back();
-        }//else{
-//            cpy.latestValue = nullptr;
-//        }
+        }
         // remove the result=
         self.erase(result);
         // insert the copy
         insert(cpy);
+
     }
 
     template<typename Key, typename Value>
@@ -163,6 +172,21 @@ namespace interpreter {
         // return the popped value
         return ret;
     }
+
+    class Popable{
+    public:
+        Popable(std::string type, std::string id, bool array) :
+            type(std::move(type)),
+            id(std::move(id)),
+            array(array)
+        {};
+
+        ~Popable() = default;
+
+        std::string type;
+        std::string id;
+        bool array;
+    };
 }
 
 namespace visitor {
@@ -193,8 +217,8 @@ namespace visitor {
         bool array;
         //iloc
         int iloc;
-        //                      Type, Identifier
-        std::vector<std::pair<std::string, std::string>> toPop;
+        //                      Type, Identifier, array
+        std::vector<interpreter::Popable> toPop;
     public:
         Interpreter(){
             // insert the interpreter variables these being the literal and 0CurrentVariable for each type

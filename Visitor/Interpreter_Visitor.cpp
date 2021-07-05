@@ -40,6 +40,7 @@ namespace visitor {
         intTable.insert(v);
         currentType = "int";
         currentID = "literal";
+        array = false;
     }
 
     void Interpreter::visit(parser::ASTLiteralNode<float> *literalNode) {
@@ -49,6 +50,7 @@ namespace visitor {
         floatTable.insert(v);
         currentType = "float";
         currentID = "literal";
+        array = false;
     }
 
     void Interpreter::visit(parser::ASTLiteralNode<bool> *literalNode) {
@@ -58,6 +60,7 @@ namespace visitor {
         boolTable.insert(v);
         currentType = "bool";
         currentID = "literal";
+        array = false;
     }
 
     void Interpreter::visit(parser::ASTLiteralNode<std::string> *literalNode) {
@@ -76,11 +79,10 @@ namespace visitor {
         charTable.insert(v);
         currentType = "char";
         currentID = "literal";
-
+        array = false;
     }
 
     void Interpreter::visit(parser::ASTArrayLiteralNode *arrayLiteralNode) {
-        array = true;
         if(currentType == "int"){
             std::vector<int> arr;
             for(const auto& item : arrayLiteralNode->expressions){
@@ -88,7 +90,7 @@ namespace visitor {
                 arr.emplace_back(intTable.get(currentID).latestValue);
             }
             currentType = "int";
-            interpreter::Variable<std::vector<int>> a("int", "literal", true, arr, arrayLiteralNode->lineNumber);
+            intArrayTable.insert(interpreter::Variable<std::vector<int>>("int", "literal", true, arr, arrayLiteralNode->lineNumber));
         }else if(currentType == "float"){
             std::vector<float> arr;
 
@@ -96,7 +98,7 @@ namespace visitor {
                 item->accept(this);
                 arr.emplace_back(floatTable.get(currentID).latestValue);
             }
-            currentType = "float";
+            floatArrayTable.insert(interpreter::Variable<std::vector<float>>("int", "literal", true, arr, arrayLiteralNode->lineNumber));
         }else if(currentType == "bool"){
             std::vector<bool> arr;
 
@@ -104,7 +106,7 @@ namespace visitor {
                 item->accept(this);
                 arr.emplace_back(boolTable.get(currentID).latestValue);
             }
-            currentType = "bool";
+            boolArrayTable.insert(interpreter::Variable<std::vector<bool>>("int", "literal", true, arr, arrayLiteralNode->lineNumber));
         }else if(currentType == "string"){
             std::vector<std::string> arr;
 
@@ -112,7 +114,7 @@ namespace visitor {
                 item->accept(this);
                 arr.emplace_back(stringTable.get(currentID).latestValue);
             }
-            currentType = "string";
+            stringArrayTable.insert(interpreter::Variable<std::vector<std::string>>("int", "literal", true, arr, arrayLiteralNode->lineNumber));
         }else if(currentType == "char"){
             std::vector<char> arr;
 
@@ -120,8 +122,9 @@ namespace visitor {
                 item->accept(this);
                 arr.emplace_back(charTable.get(currentID).latestValue);
             }
-            currentType = "char";
+            charArrayTable.insert(interpreter::Variable<std::vector<char>>("int", "literal", true, arr, arrayLiteralNode->lineNumber));
         }
+        array = true;
         currentID = "literal";
     }
 
@@ -555,9 +558,6 @@ namespace visitor {
                     // Update Current Type to the that of the type being inserted
                     currentType = "bool";
                     break;
-                    // Update Current Type to the that of the type being inserted
-                    currentType = "string";
-                    break;
                 default:
                     // Should never get here because of the semantic pass but still included because of the default case
                     throw std::runtime_error("Expression on line " + std::to_string(binaryNode->lineNumber)
@@ -567,12 +567,15 @@ namespace visitor {
         }
         // Update Current ID
         currentID = "0CurrentVariable";
+        // ensure array is off
+        array = false;
     }
 
     void Interpreter::visit(parser::ASTIdentifierNode *identifierNode) {//TODO::HANDLE variable[] case
         // two cases 1 where iloc is defined (array) the other when it isnt (other types)
         if(identifierNode->ilocExprNode == nullptr){
             // Build variable shells
+            array = false;
             interpreter::Variable<int> i(identifierNode -> identifier);
             interpreter::Variable<float> f(identifierNode -> identifier);
             interpreter::Variable<bool> b(identifierNode -> identifier);
@@ -750,7 +753,7 @@ namespace visitor {
         if(!found(result)) {
             // Should never get here
             throw std::runtime_error("Function with identifier " + f.identifier + " called on line "
-                                     + std::to_string(f.lineNumber) + " has not been declared.");
+                                     + std::to_string(functionCallNode->lineNumber) + " has not been declared.");
         }
         f = result->second;
         // go over the function parameters
@@ -760,39 +763,39 @@ namespace visitor {
             functionCallNode -> parameters.at(i) -> accept(this);
             // This visit updates the currentID and currentType
             // store current ID so that we dont need to visit the parameters again to pop their values
-            toPop.emplace_back(std::make_pair(currentType, f.paramIDs.at(i)));
-            if(!array){
-                if(currentType == "int"){
-                    /* Update the currentID variable by emplacing back
-                     * to f.paramIDs.at(i) variable
-                     * what is found inside the variable with identifier currentID
-                     * which we got from visiting the parameter expression
-                     * this temporarily overwrites any global variable
-                     * Once the block is function block is visited we pop back these variables to clear memory
-                    */
-                    intTable.insert(interpreter::Variable<int>("int", f.paramIDs.at(i), false, intTable.get(currentID).latestValue, functionCallNode -> lineNumber));
-                }else if(currentType == "float"){
-                    floatTable.insert(interpreter::Variable<float>("float", f.paramIDs.at(i), false, floatTable.get(currentID).latestValue, functionCallNode -> lineNumber));
-                }else if(currentType == "bool"){
-                    boolTable.insert(interpreter::Variable<bool>("bool", f.paramIDs.at(i), false, boolTable.get(currentID).latestValue, functionCallNode -> lineNumber));
-                }else if(currentType == "string"){
-                    stringTable.insert(interpreter::Variable<std::string>("string", f.paramIDs.at(i), false, stringTable.get(currentID).latestValue, functionCallNode -> lineNumber));
-                }else if(currentType == "char"){
-                    charTable.insert(interpreter::Variable<char>("char", f.paramIDs.at(i), false, charTable.get(currentID).latestValue, functionCallNode -> lineNumber));
-                }
-            }else{
-
-                if(currentType == "int"){
-                    intArrayTable.insert(interpreter::Variable<std::vector<int>>("int", f.paramIDs.at(i), true, intArrayTable.get(currentID).latestValue, functionCallNode -> lineNumber));
-                }else if(currentType == "float"){
-                    floatArrayTable.insert(interpreter::Variable<std::vector<float>>("float", f.paramIDs.at(i), true, floatArrayTable.get(currentID).latestValue, functionCallNode -> lineNumber));
-                }else if(currentType == "bool"){
-                    boolArrayTable.insert(interpreter::Variable<std::vector<bool>>("bool", f.paramIDs.at(i), true, boolArrayTable.get(currentID).latestValue, functionCallNode -> lineNumber));
-                }else if(currentType == "string"){
-                    stringArrayTable.insert(interpreter::Variable<std::vector<std::string>>("string", f.paramIDs.at(i), true, stringArrayTable.get(currentID).latestValue, functionCallNode -> lineNumber));
-                }else if(currentType == "char"){
-                    charArrayTable.insert(interpreter::Variable<std::vector<char>>("char", f.paramIDs.at(i), true, charArrayTable.get(currentID).latestValue, functionCallNode -> lineNumber));
-                }
+            toPop.emplace_back(interpreter::Popable(currentType, f.paramIDs.at(i), array));
+            if(currentType == "int"){
+                /* Update the currentID variable by emplacing back
+                 * to f.paramIDs.at(i) variable
+                 * what is found inside the variable with identifier currentID
+                 * which we got from visiting the parameter expression
+                 * this temporarily overwrites any global variable
+                 * Once the block is function block is visited we pop back these variables to clear memory
+                */
+                array ?
+                intArrayTable.insert(interpreter::Variable<std::vector<int>>("int", f.paramIDs.at(i), true, intArrayTable.get(currentID).latestValue, functionCallNode -> lineNumber))
+                      :
+                intTable.insert(interpreter::Variable<int>("int", f.paramIDs.at(i), false, intTable.get(currentID).latestValue, functionCallNode -> lineNumber));
+            }else if(currentType == "float"){
+                array ?
+                floatArrayTable.insert(interpreter::Variable<std::vector<float>>("float", f.paramIDs.at(i), true, floatArrayTable.get(currentID).latestValue, functionCallNode -> lineNumber))
+                      :
+                floatTable.insert(interpreter::Variable<float>("float", f.paramIDs.at(i), false, floatTable.get(currentID).latestValue, functionCallNode -> lineNumber));
+            }else if(currentType == "bool"){
+                array ?
+                boolArrayTable.insert(interpreter::Variable<std::vector<bool>>("bool", f.paramIDs.at(i), true, boolArrayTable.get(currentID).latestValue, functionCallNode -> lineNumber))
+                      :
+                boolTable.insert(interpreter::Variable<bool>("bool", f.paramIDs.at(i), false, boolTable.get(currentID).latestValue, functionCallNode -> lineNumber));
+            }else if(currentType == "string"){
+                array ?
+                stringArrayTable.insert(interpreter::Variable<std::vector<std::string>>("string", f.paramIDs.at(i), true, stringArrayTable.get(currentID).latestValue, functionCallNode -> lineNumber))
+                      :
+                stringTable.insert(interpreter::Variable<std::string>("string", f.paramIDs.at(i), false, stringTable.get(currentID).latestValue, functionCallNode -> lineNumber));
+            }else if(currentType == "char"){
+                array ?
+                charArrayTable.insert(interpreter::Variable<std::vector<char>>("char", f.paramIDs.at(i), true, charArrayTable.get(currentID).latestValue, functionCallNode -> lineNumber))
+                      :
+                charTable.insert(interpreter::Variable<char>("char", f.paramIDs.at(i), false, charTable.get(currentID).latestValue, functionCallNode -> lineNumber));
             }
         }
         // Ok so now we have updated the arguments, so we can call the actual function to run
@@ -800,23 +803,23 @@ namespace visitor {
         f.blockNode -> accept(this);
         function = false;
         // the function has completed its run now we pop back the variables we added
-//        for (const auto& pair : toPop){
-//            /*
-//             * Now we pop the variables
-//            */
-//            if(pair.first == "int"){
-//                intTable.pop_back(pair.second);
-//            }else if(pair.first == "float"){
-//                floatTable.pop_back(pair.second);
-//            }else if(pair.first == "bool"){
-//                boolTable.pop_back(pair.second);
-//            }else if(pair.first == "string"){
-//                stringTable.pop_back(pair.second);
-//            }else if(pair.first == "char"){
-//                charTable.pop_back(pair.second);
-//            }
-//        }
-        toPop = std::vector<std::pair<std::string, std::string>>();
+        for (const auto& pair : toPop){
+            /*
+             * Now we pop the variables
+            */
+            if(pair.type == "int"){
+                pair.array ? intArrayTable.pop_back(pair.id) : intTable.pop_back(pair.id);
+            }else if(pair.type == "float"){
+                pair.array ? floatArrayTable.pop_back(pair.id) : floatTable.pop_back(pair.id);
+            }else if(pair.type == "bool"){
+                pair.array ? boolArrayTable.pop_back(pair.id) : boolTable.pop_back(pair.id);
+            }else if(pair.type == "string"){
+                pair.array ? stringArrayTable.pop_back(pair.id) : stringTable.pop_back(pair.id);
+            }else if(pair.type == "char"){
+                pair.array ? charArrayTable.pop_back(pair.id) : charTable.pop_back(pair.id);
+            }
+        }
+        toPop = std::vector<interpreter::Popable>();
     }
     // Expressions
 
@@ -839,7 +842,7 @@ namespace visitor {
         if(! found(result)) {
             // Should never get here
             throw std::runtime_error("Function with identifier " + f.identifier + " called on line "
-                                     + std::to_string(f.lineNumber) + " has not been declared.");
+                                     + std::to_string(sFunctionCallNode->lineNumber) + " has not been declared.");
         }
         f = result->second;
         // go over the function parameters
@@ -849,38 +852,39 @@ namespace visitor {
             sFunctionCallNode -> parameters.at(i) -> accept(this);
             // This visit updates the currentID and currentType
             // store current ID so that we dont need to visit the parameters again to pop their values
-            toPop.emplace_back(std::make_pair(currentType, currentID));
-            if(!array){
-                if(currentType == "int"){
-                    /* Update the currentID variable by emplacing back
-                     * to f.paramIDs.at(i) variable
-                     * what is found inside the variable with identifier currentID
-                     * which we got from visiting the parameter expression
-                     * this temporarily overwrites any global variable
-                     * Once the block is function block is visited we pop back these variables to clear memory
-                    */
-                    intTable.insert(interpreter::Variable<int>("int", f.paramIDs.at(i), false, intTable.get(currentID).latestValue, sFunctionCallNode -> lineNumber));
-                }else if(currentType == "float"){
-                    floatTable.insert(interpreter::Variable<float>("float", f.paramIDs.at(i), false, floatTable.get(currentID).latestValue, sFunctionCallNode -> lineNumber));
-                }else if(currentType == "bool"){
-                    boolTable.insert(interpreter::Variable<bool>("bool", f.paramIDs.at(i), false, boolTable.get(currentID).latestValue, sFunctionCallNode -> lineNumber));
-                }else if(currentType == "string"){
-                    stringTable.insert(interpreter::Variable<std::string>("string", f.paramIDs.at(i), false, stringTable.get(currentID).latestValue, sFunctionCallNode -> lineNumber));
-                }else if(currentType == "char"){
-                    charTable.insert(interpreter::Variable<char>("char", f.paramIDs.at(i), false, charTable.get(currentID).latestValue, sFunctionCallNode -> lineNumber));
-                }
-            }else{
-                if(currentType == "int"){
-                    intArrayTable.insert(interpreter::Variable<std::vector<int>>("int", f.paramIDs.at(i), true, intArrayTable.get(currentID).latestValue, sFunctionCallNode -> lineNumber));
-                }else if(currentType == "float"){
-                    floatArrayTable.insert(interpreter::Variable<std::vector<float>>("float", f.paramIDs.at(i), true, floatArrayTable.get(currentID).latestValue, sFunctionCallNode -> lineNumber));
-                }else if(currentType == "bool"){
-                    boolArrayTable.insert(interpreter::Variable<std::vector<bool>>("bool", f.paramIDs.at(i), true, boolArrayTable.get(currentID).latestValue, sFunctionCallNode -> lineNumber));
-                }else if(currentType == "string"){
-                    stringArrayTable.insert(interpreter::Variable<std::vector<std::string>>("string", f.paramIDs.at(i), true, stringArrayTable.get(currentID).latestValue, sFunctionCallNode -> lineNumber));
-                }else if(currentType == "char"){
-                    charArrayTable.insert(interpreter::Variable<std::vector<char>>("char", f.paramIDs.at(i), true, charArrayTable.get(currentID).latestValue, sFunctionCallNode -> lineNumber));
-                }
+            toPop.emplace_back(interpreter::Popable(currentType, f.paramIDs.at(i), array));
+            if(currentType == "int"){
+                /* Update the currentID variable by emplacing back
+                 * to f.paramIDs.at(i) variable
+                 * what is found inside the variable with identifier currentID
+                 * which we got from visiting the parameter expression
+                 * this temporarily overwrites any global variable
+                 * Once the block is function block is visited we pop back these variables to clear memory
+                */
+                array ?
+                intArrayTable.insert(interpreter::Variable<std::vector<int>>("int", f.paramIDs.at(i), true, intArrayTable.get(currentID).latestValue, sFunctionCallNode -> lineNumber))
+                :
+                intTable.insert(interpreter::Variable<int>("int", f.paramIDs.at(i), false, intTable.get(currentID).latestValue, sFunctionCallNode -> lineNumber));
+            }else if(currentType == "float"){
+                array ?
+                floatArrayTable.insert(interpreter::Variable<std::vector<float>>("float", f.paramIDs.at(i), true, floatArrayTable.get(currentID).latestValue, sFunctionCallNode -> lineNumber))
+                :
+                floatTable.insert(interpreter::Variable<float>("float", f.paramIDs.at(i), false, floatTable.get(currentID).latestValue, sFunctionCallNode -> lineNumber));
+            }else if(currentType == "bool"){
+                array ?
+                boolArrayTable.insert(interpreter::Variable<std::vector<bool>>("bool", f.paramIDs.at(i), true, boolArrayTable.get(currentID).latestValue, sFunctionCallNode -> lineNumber))
+                :
+                boolTable.insert(interpreter::Variable<bool>("bool", f.paramIDs.at(i), false, boolTable.get(currentID).latestValue, sFunctionCallNode -> lineNumber));
+            }else if(currentType == "string"){
+                array ?
+                stringArrayTable.insert(interpreter::Variable<std::vector<std::string>>("string", f.paramIDs.at(i), true, stringArrayTable.get(currentID).latestValue, sFunctionCallNode -> lineNumber))
+                :
+                stringTable.insert(interpreter::Variable<std::string>("string", f.paramIDs.at(i), false, stringTable.get(currentID).latestValue, sFunctionCallNode -> lineNumber));
+            }else if(currentType == "char"){
+                array ?
+                charArrayTable.insert(interpreter::Variable<std::vector<char>>("char", f.paramIDs.at(i), true, charArrayTable.get(currentID).latestValue, sFunctionCallNode -> lineNumber))
+                :
+                charTable.insert(interpreter::Variable<char>("char", f.paramIDs.at(i), false, charTable.get(currentID).latestValue, sFunctionCallNode -> lineNumber));
             }
         }
         // Ok so now we have updated the arguments, so we can call the actual function to run
@@ -888,23 +892,23 @@ namespace visitor {
         f.blockNode -> accept(this);
         function = false;
         // the function has completed its run now we pop back the variables we added
-//        for (const auto& pair : toPop){
-//            /*
-//             * Now we pop the variables
-//            */
-//            if(pair.first == "int"){
-//                intTable.pop_back(pair.second);
-//            }else if(pair.first == "float"){
-//                floatTable.pop_back(pair.second);
-//            }else if(pair.first == "bool"){
-//                boolTable.pop_back(pair.second);
-//            }else if(pair.first == "string"){
-//                stringTable.pop_back(pair.second);
-//            }else if(pair.first == "char"){
-//                charTable.pop_back(pair.second);
-//            }
-//        }
-        toPop = std::vector<std::pair<std::string, std::string>>();
+        for (const auto& pair : toPop){
+            /*
+             * Now we pop the variables
+            */
+            if(pair.type == "int"){
+                pair.array ? intArrayTable.pop_back(pair.id) : intTable.pop_back(pair.id);
+            }else if(pair.type == "float"){
+                pair.array ? floatArrayTable.pop_back(pair.id) : floatTable.pop_back(pair.id);
+            }else if(pair.type == "bool"){
+                pair.array ? boolArrayTable.pop_back(pair.id) : boolTable.pop_back(pair.id);
+            }else if(pair.type == "string"){
+                pair.array ? stringArrayTable.pop_back(pair.id) : stringTable.pop_back(pair.id);
+            }else if(pair.type == "char"){
+                pair.array ? charArrayTable.pop_back(pair.id) : charTable.pop_back(pair.id);
+            }
+        }
+        toPop = std::vector<interpreter::Popable>();
     }
 
     void Interpreter::visit(parser::ASTDeclarationNode *declarationNode) {
@@ -921,7 +925,6 @@ namespace visitor {
             if(declarationNode->identifier->ilocExprNode != nullptr){
                 // get array size
                 currentType = declarationNode -> type;
-                auto _cId = currentID;
                 auto _cType = currentType;
                 declarationNode->identifier->ilocExprNode->accept(this);
                 int size;
@@ -933,7 +936,6 @@ namespace visitor {
                     throw std::runtime_error("Variable with identifier " + declarationNode->identifier->getID() + " called on line "
                                              + std::to_string(declarationNode->lineNumber) + " has not incorrect value between [].");
                 }
-                currentID = _cId;
                 currentType = _cType;
                 // amend array
                 if(currentType == "int"){
@@ -962,9 +964,8 @@ namespace visitor {
                                                         true, std::vector<char>(size), declarationNode -> lineNumber)
                     );
                 }
-                // TODO::Update THIS
                 if(function){
-                    toPop.emplace_back(std::make_pair(currentType, declarationNode -> identifier -> identifier));
+                    toPop.emplace_back(interpreter::Popable(currentType, declarationNode -> identifier -> identifier, true));
                 }
                 return;
             }else{
@@ -978,55 +979,53 @@ namespace visitor {
         // Create a variable with this information
 
         // Insert the new variable
+
         if(currentType == "int"){
+            array ? intArrayTable.insert (
+                    interpreter::Variable<std::vector<int>>(currentType, declarationNode -> identifier -> identifier, true, intArrayTable.get(currentID).latestValue, declarationNode -> lineNumber)
+            )
+            :
             intTable.insert (
                     interpreter::Variable<int>(currentType, declarationNode -> identifier -> identifier, false, intTable.get(currentID).latestValue, declarationNode -> lineNumber)
             );
         }else if(currentType == "float"){
+            array ? floatArrayTable.insert (
+                    interpreter::Variable<std::vector<float>>(currentType, declarationNode -> identifier -> identifier, true, floatArrayTable.get(currentID).latestValue, declarationNode -> lineNumber)
+            )
+            :
             floatTable.insert (
                     interpreter::Variable<float>(currentType, declarationNode -> identifier -> identifier, false, floatTable.get(currentID).latestValue, declarationNode -> lineNumber)
             );
         }else if(currentType == "bool"){
+            array ? boolArrayTable.insert (
+                    interpreter::Variable<std::vector<bool>>(currentType, declarationNode -> identifier -> identifier, true, boolArrayTable.get(currentID).latestValue, declarationNode -> lineNumber)
+            )
+            :
             boolTable.insert (
                     interpreter::Variable<bool>(currentType, declarationNode -> identifier -> identifier, false, boolTable.get(currentID).latestValue, declarationNode -> lineNumber)
             );
         }else if(currentType == "string"){
+            array ? stringArrayTable.insert (
+                    interpreter::Variable<std::vector<std::string>>(currentType, declarationNode -> identifier -> identifier, true, stringArrayTable.get(currentID).latestValue, declarationNode -> lineNumber)
+            )
+            :
             stringTable.insert (
                     interpreter::Variable<std::string>(currentType, declarationNode -> identifier -> identifier, false, stringTable.get(currentID).latestValue, declarationNode -> lineNumber)
             );
         }else if(currentType == "char"){
+            array ? charArrayTable.insert (
+                    interpreter::Variable<std::vector<char>>(currentType, declarationNode -> identifier -> identifier, true, charArrayTable.get(currentID).latestValue, declarationNode -> lineNumber)
+            )
+            :
             charTable.insert (
                     interpreter::Variable<char>(currentType, declarationNode -> identifier -> identifier, false, charTable.get(currentID).latestValue, declarationNode -> lineNumber)
             );
         }
-        if(array){
-            if(currentType == "int"){
-                intArrayTable.insert (
-                        interpreter::Variable<std::vector<int>>(currentType, declarationNode -> identifier -> identifier, true, intArrayTable.get(currentID).latestValue, declarationNode -> lineNumber)
-                );
-            }else if(currentType == "float"){
-                floatArrayTable.insert (
-                        interpreter::Variable<std::vector<float>>(currentType, declarationNode -> identifier -> identifier, true, floatArrayTable.get(currentID).latestValue, declarationNode -> lineNumber)
-                );
-            }else if(currentType == "bool"){
-                boolArrayTable.insert (
-                        interpreter::Variable<std::vector<bool>>(currentType, declarationNode -> identifier -> identifier, true, boolArrayTable.get(currentID).latestValue, declarationNode -> lineNumber)
-                );
-            }else if(currentType == "string"){
-                stringArrayTable.insert (
-                        interpreter::Variable<std::vector<std::string>>(currentType, declarationNode -> identifier -> identifier, true, stringArrayTable.get(currentID).latestValue, declarationNode -> lineNumber)
-                );
-            }else if(currentType == "char array"){
-                charArrayTable.insert (
-                        interpreter::Variable<std::vector<char>>(currentType, declarationNode -> identifier -> identifier, true, charArrayTable.get(currentID).latestValue, declarationNode -> lineNumber)
-                );
-            }
-            array = false;
-        }
 
         if(function){
-            toPop.emplace_back(std::make_pair(currentType, declarationNode -> identifier -> identifier));
+            toPop.emplace_back(interpreter::Popable(currentType, declarationNode -> identifier -> identifier, array));
         }
+        array = false;
     }
 
     void Interpreter::visit(parser::ASTAssignmentNode *assignmentNode) {
@@ -1121,7 +1120,7 @@ namespace visitor {
                     );
                 }
                 if(function){
-                    toPop.emplace_back(std::make_pair(currentType, assignmentNode -> identifier -> identifier));
+                    toPop.emplace_back(interpreter::Popable(currentType, id, true));
                 }
                 array = false;
                 return;
@@ -1131,30 +1130,29 @@ namespace visitor {
         // assigning_array cases
 
         if(assigning_array){
-
             if(currentType == "int"){
                 intArrayTable.insert (
-                        interpreter::Variable<std::vector<int>>(currentType, assignmentNode -> identifier -> identifier, true, intArrayTable.get(currentID).latestValue, assignmentNode -> lineNumber)
+                        interpreter::Variable<std::vector<int>>(currentType, id, true, intArrayTable.get(currentID).latestValue, assignmentNode -> lineNumber)
                 );
             }else if(currentType == "float"){
                 floatArrayTable.insert (
-                        interpreter::Variable<std::vector<float>>(currentType, assignmentNode -> identifier -> identifier, true, floatArrayTable.get(currentID).latestValue, assignmentNode -> lineNumber)
+                        interpreter::Variable<std::vector<float>>(currentType, id, true, floatArrayTable.get(currentID).latestValue, assignmentNode -> lineNumber)
                 );
             }else if(currentType == "bool"){
                 boolArrayTable.insert (
-                        interpreter::Variable<std::vector<bool>>(currentType, assignmentNode -> identifier -> identifier, true, boolArrayTable.get(currentID).latestValue, assignmentNode -> lineNumber)
+                        interpreter::Variable<std::vector<bool>>(currentType, id, true, boolArrayTable.get(currentID).latestValue, assignmentNode -> lineNumber)
                 );
             }else if(currentType == "string"){
                 stringArrayTable.insert (
-                        interpreter::Variable<std::vector<std::string>>(currentType, assignmentNode -> identifier -> identifier, true, stringArrayTable.get(currentID).latestValue, assignmentNode -> lineNumber)
+                        interpreter::Variable<std::vector<std::string>>(currentType, id, true, stringArrayTable.get(currentID).latestValue, assignmentNode -> lineNumber)
                 );
             }else if(currentType == "char array"){
                 charArrayTable.insert (
-                        interpreter::Variable<std::vector<char>>(currentType, assignmentNode -> identifier -> identifier, true, charArrayTable.get(currentID).latestValue, assignmentNode -> lineNumber)
+                        interpreter::Variable<std::vector<char>>(currentType, id, true, charArrayTable.get(currentID).latestValue, assignmentNode -> lineNumber)
                 );
             }
             if(function){
-                toPop.emplace_back(std::make_pair(currentType, assignmentNode -> identifier -> identifier));
+                toPop.emplace_back(interpreter::Popable(currentType, id, true));
             }
             array = false;
             return;
@@ -1188,7 +1186,7 @@ namespace visitor {
             );
         }
         if(function){
-            toPop.emplace_back(std::make_pair(currentType, assignmentNode -> identifier -> identifier));
+            toPop.emplace_back(interpreter::Popable(currentType, assignmentNode -> identifier -> identifier, false));
         }
     }
 
@@ -1288,10 +1286,10 @@ namespace visitor {
         // Update current expression
         returnNode -> exprNode -> accept(this);
         // make sure to not pop_back the returns value
-        auto save = std::make_pair(currentType, currentID);
+        auto save = interpreter::Popable(currentType, currentID, array);
         // find the return
         for (auto it = toPop.begin(); it != toPop.end(); ++it){
-            if(*it == save){
+            if(it->id == save.id){
                 toPop.erase(it);
                 if(it == toPop.end()) break;
             }
@@ -1300,7 +1298,7 @@ namespace visitor {
     }
 
     void Interpreter::visit(parser::ASTStructNode *structNode) {
-
+        std::cout << "helloo" << std::endl;
     }
     // Statements
 }

@@ -73,8 +73,8 @@ int main(int argc, char **argv) {
             "arr1[0] = 22.4;\n"
             "arr1[1] = 6.25;\n"
             "print arr1[1]; //6.25\n" //30
-            "print XGreaterY(2,3); //false\n"
             "print XGreaterY(arr1); //true\n"
+            "print XGreaterY(2,3); //false\n"
             "print Average(arr2, 4.0); //6.92\n"
             "\n"
             "tlstruct Vector{\n"
