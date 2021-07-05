@@ -169,7 +169,7 @@ int main(int argc, char **argv) {
 
         delete programNode1;
     }else if (std::string("-i") == argv[1]){
-//        std::cout << "TESTING Interpreter" <<  aasdasdstd::endl;
+//        std::cout << "TESTING Interpreter" <<  std::endl;
 
         lexer::Lexer lexer;
         lexer.extractLexemes(_program_); //argv[2]
