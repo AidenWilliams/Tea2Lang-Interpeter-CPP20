@@ -34,51 +34,51 @@ namespace visitor {
     // Expressions
     // Literal visits add a new literal variable to the 'literalTYPE' variable in the variableTable
     void Interpreter::visit(parser::ASTLiteralNode<int> *literalNode) {
-        interpreter::Variable<int> v("int", "literal", false, literalNode -> val, literalNode -> lineNumber);
+        interpreter::Variable<int> v("int", "0literal", false, literalNode -> val, literalNode -> lineNumber);
         // remove previous literal
-        intTable.pop_back("literal");
+        intTable.pop_back("0literal");
         intTable.insert(v);
         currentType = "int";
-        currentID = "literal";
+        currentID = "0literal";
         array = false;
     }
 
     void Interpreter::visit(parser::ASTLiteralNode<float> *literalNode) {
-        interpreter::Variable<float> v("float", "literal", false, literalNode -> val, literalNode -> lineNumber);
+        interpreter::Variable<float> v("float", "0literal", false, literalNode -> val, literalNode -> lineNumber);
         // remove previous literal
-        floatTable.pop_back("literal");
+        floatTable.pop_back("0literal");
         floatTable.insert(v);
         currentType = "float";
-        currentID = "literal";
+        currentID = "0literal";
         array = false;
     }
 
     void Interpreter::visit(parser::ASTLiteralNode<bool> *literalNode) {
-        interpreter::Variable<bool> v("bool", "literal", false, literalNode -> val, literalNode -> lineNumber);
+        interpreter::Variable<bool> v("bool", "0literal", false, literalNode -> val, literalNode -> lineNumber);
         // remove previous literal
-        boolTable.pop_back("literal");
+        boolTable.pop_back("0literal");
         boolTable.insert(v);
         currentType = "bool";
-        currentID = "literal";
+        currentID = "0literal";
         array = false;
     }
 
     void Interpreter::visit(parser::ASTLiteralNode<std::string> *literalNode) {
-        interpreter::Variable<std::string> v("string", "literal", false, literalNode -> val, literalNode -> lineNumber);
+        interpreter::Variable<std::string> v("string", "0literal", false, literalNode -> val, literalNode -> lineNumber);
         // remove previous literal
-        stringTable.pop_back("literal");
+        stringTable.pop_back("0literal");
         stringTable.insert(v);
         currentType = "string";
-        currentID = "literal";
+        currentID = "0literal";
     }
 
     void Interpreter::visit(parser::ASTLiteralNode<char> *literalNode) {
-        interpreter::Variable<char> v("char", "literal", false, literalNode -> val, literalNode -> lineNumber);
+        interpreter::Variable<char> v("char", "0literal", false, literalNode -> val, literalNode -> lineNumber);
         // remove previous literal
-        charTable.pop_back("literal");
+        charTable.pop_back("0literal");
         charTable.insert(v);
         currentType = "char";
-        currentID = "literal";
+        currentID = "0literal";
         array = false;
     }
 
@@ -90,7 +90,7 @@ namespace visitor {
                 arr.emplace_back(intTable.get(currentID).latestValue);
             }
             currentType = "int";
-            intArrayTable.insert(interpreter::Variable<std::vector<int>>("int", "literal", true, arr, arrayLiteralNode->lineNumber));
+            intArrayTable.insert(interpreter::Variable<std::vector<int>>("int", "0literal", true, arr, arrayLiteralNode->lineNumber));
         }else if(currentType == "float"){
             std::vector<float> arr;
 
@@ -98,7 +98,7 @@ namespace visitor {
                 item->accept(this);
                 arr.emplace_back(floatTable.get(currentID).latestValue);
             }
-            floatArrayTable.insert(interpreter::Variable<std::vector<float>>("int", "literal", true, arr, arrayLiteralNode->lineNumber));
+            floatArrayTable.insert(interpreter::Variable<std::vector<float>>("int", "0literal", true, arr, arrayLiteralNode->lineNumber));
         }else if(currentType == "bool"){
             std::vector<bool> arr;
 
@@ -106,7 +106,7 @@ namespace visitor {
                 item->accept(this);
                 arr.emplace_back(boolTable.get(currentID).latestValue);
             }
-            boolArrayTable.insert(interpreter::Variable<std::vector<bool>>("int", "literal", true, arr, arrayLiteralNode->lineNumber));
+            boolArrayTable.insert(interpreter::Variable<std::vector<bool>>("int", "0literal", true, arr, arrayLiteralNode->lineNumber));
         }else if(currentType == "string"){
             std::vector<std::string> arr;
 
@@ -114,7 +114,7 @@ namespace visitor {
                 item->accept(this);
                 arr.emplace_back(stringTable.get(currentID).latestValue);
             }
-            stringArrayTable.insert(interpreter::Variable<std::vector<std::string>>("int", "literal", true, arr, arrayLiteralNode->lineNumber));
+            stringArrayTable.insert(interpreter::Variable<std::vector<std::string>>("int", "0literal", true, arr, arrayLiteralNode->lineNumber));
         }else if(currentType == "char"){
             std::vector<char> arr;
 
@@ -122,10 +122,10 @@ namespace visitor {
                 item->accept(this);
                 arr.emplace_back(charTable.get(currentID).latestValue);
             }
-            charArrayTable.insert(interpreter::Variable<std::vector<char>>("int", "literal", true, arr, arrayLiteralNode->lineNumber));
+            charArrayTable.insert(interpreter::Variable<std::vector<char>>("int", "0literal", true, arr, arrayLiteralNode->lineNumber));
         }
         array = true;
-        currentID = "literal";
+        currentID = "0literal";
     }
 
     void Interpreter::visit(parser::ASTBinaryNode *binaryNode) {

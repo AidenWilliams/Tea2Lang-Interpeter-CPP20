@@ -235,25 +235,25 @@ namespace visitor {
         Interpreter(){
             // insert the interpreter variables these being the literal and 0CurrentVariable for each type
             intTable.insert(interpreter::Variable<int>("int", "0CurrentVariable", false, 0, 0));
-            intTable.insert(interpreter::Variable<int> ("int", "literal", false, 0, 0));
+            intTable.insert(interpreter::Variable<int> ("int", "0literal", false, 0, 0));
             intArrayTable.insert(interpreter::Variable<std::vector<int>>("int", "0CurrentVariable", true, {0}, 0));
-            intArrayTable.insert(interpreter::Variable<std::vector<int>>("int", "literal", true, {0}, 0));
+            intArrayTable.insert(interpreter::Variable<std::vector<int>>("int", "0literal", true, {0}, 0));
             floatTable.insert(interpreter::Variable<float>("float", "0CurrentVariable", false, 0.0, 0));
-            floatTable.insert(interpreter::Variable<float> ("float", "literal", false, 0.0, 0));
+            floatTable.insert(interpreter::Variable<float> ("float", "0literal", false, 0.0, 0));
             floatArrayTable.insert(interpreter::Variable<std::vector<float>>("float", "0CurrentVariable", true, {0.0}, 0));
-            floatArrayTable.insert(interpreter::Variable<std::vector<float>>("float", "literal", true, {0.0}, 0));
+            floatArrayTable.insert(interpreter::Variable<std::vector<float>>("float", "0literal", true, {0.0}, 0));
             boolTable.insert(interpreter::Variable<bool>("bool", "0CurrentVariable", false, false, 0));
-            boolTable.insert(interpreter::Variable<bool> ("bool", "literal", false, false, 0));
+            boolTable.insert(interpreter::Variable<bool> ("bool", "0literal", false, false, 0));
             boolArrayTable.insert(interpreter::Variable<std::vector<bool>>("float", "0CurrentVariable", true, {false}, 0));
-            boolArrayTable.insert(interpreter::Variable<std::vector<bool>> ("float", "literal", true, {false}, 0));
+            boolArrayTable.insert(interpreter::Variable<std::vector<bool>> ("float", "0literal", true, {false}, 0));
             stringTable.insert(interpreter::Variable<std::string>("string", "0CurrentVariable", false, "", 0));
-            stringTable.insert(interpreter::Variable<std::string> ("string", "literal", false, "", 0));
+            stringTable.insert(interpreter::Variable<std::string> ("string", "0literal", false, "", 0));
             stringArrayTable.insert(interpreter::Variable<std::vector<std::string>>("string", "0CurrentVariable", true, {""}, 0));
-            stringArrayTable.insert(interpreter::Variable<std::vector<std::string>> ("string", "literal", true, {""}, 0));
+            stringArrayTable.insert(interpreter::Variable<std::vector<std::string>> ("string", "0literal", true, {""}, 0));
             charTable.insert(interpreter::Variable<char>("char", "0CurrentVariable", false, ' ', 0));
-            charTable.insert(interpreter::Variable<char> ("char", "literal", false, ' ', 0));
+            charTable.insert(interpreter::Variable<char> ("char", "0literal", false, ' ', 0));
             charArrayTable.insert(interpreter::Variable<std::vector<char>>("char", "0CurrentVariable", true, {' '}, 0));
-            charArrayTable.insert(interpreter::Variable<std::vector<char>> ("char", "literal", true, {' '}, 0));
+            charArrayTable.insert(interpreter::Variable<std::vector<char>> ("char", "0literal", true, {' '}, 0));
             function = false;
             array = false;
             iloc = -1;
