@@ -12,7 +12,7 @@ namespace visitor {
 
     bool Interpreter::insert(const interpreter::Function& f){
         if (f.type.empty()){
-            throw FunctionTypeException();
+            throw semantic::FunctionTypeException();
         }
         auto ret = functionTable.insert (std::pair<std::pair<std::string, std::vector<std::string>>, interpreter::Function>
                                                  (             std::make_pair(f.identifier, f.paramTypes),       f));
@@ -760,7 +760,7 @@ namespace visitor {
         interpreter::Function f(functionCallNode -> identifier -> getID(), paramTypes);
         // find actual function
         auto result = find(f);
-        if(!found(result)) {
+        if(! found(result)) {
             // Should never get here
             throw std::runtime_error("Function with identifier " + f.identifier + " called on line "
                                      + std::to_string(functionCallNode->lineNumber) + " has not been declared.");

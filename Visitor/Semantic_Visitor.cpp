@@ -4,7 +4,7 @@
 
 #include "Semantic_Visitor.h"
 
-namespace visitor{
+namespace semantic{
     // Struct
     void Struct::insert(const Variable& v) {
         variables.emplace_back(v);
@@ -17,7 +17,6 @@ namespace visitor{
     }
     //Struct
     // Semantic Scope
-    //TODO: Definitely needs to be tested out
     bool Scope::insert(const Variable& v){
         if (v.type.empty()){
             throw VariableTypeException();
@@ -107,12 +106,15 @@ namespace visitor{
         }
     }
     // Semantic Scope
+}
+
+namespace visitor{
 
     // Semantic Analyses
 
     // Program
     void SemanticAnalyser::visit(parser::ASTProgramNode *programNode) {
-        scopes.emplace_back(std::make_shared<Scope>(true));
+        scopes.emplace_back(std::make_shared<semantic::Scope>(true));
         // For each statement, accept
         for(auto &statement : programNode -> statements)
             statement -> accept(this);
@@ -256,7 +258,7 @@ namespace visitor{
             // this means that the identifier of identifierNode must be a struct
             for(const auto& scope : scopes) {
                 // First find the variable (remember identifierNode->identifier is a variable of a type)
-                auto result = scope->find(Variable(parent.identifier));
+                auto result = scope->find(semantic::Variable(parent.identifier));
                 if(scope->found(result)) {
                     // we found it, now does it have a struct type?
                     if(!lexer::isStruct(result->second.type)){
@@ -266,7 +268,7 @@ namespace visitor{
                     }
                     // get the struct
                     for(const auto& _scope : scopes) {
-                        auto struct_result = _scope->find(Struct(result->second.type));
+                        auto struct_result = _scope->find(semantic::Struct(result->second.type));
                         if(_scope->found(struct_result)) {
                             // found the struct
                             // go over its variables and verify child.identifier is there
@@ -299,7 +301,7 @@ namespace visitor{
 
         // normal variable case
         // Build variable shell
-        Variable v(identifierNode->getID());
+        semantic::Variable v(identifierNode->getID());
         // Check that a variable with this identifier exists
         for(const auto& scope : scopes) {
             auto result = scope->find(v);
@@ -362,7 +364,7 @@ namespace visitor{
             // this means that the identifier of identifierNode must be a struct
             for(const auto& scope : scopes) {
                 // First find the variable (remember identifierNode->identifier is a variable of a type)
-                auto result = scope->find(Variable(parent.identifier));
+                auto result = scope->find(semantic::Variable(parent.identifier));
                 if(scope->found(result)) {
                     // we found it, now does it have a struct type?
                     if(!lexer::isStruct(result->second.type)){
@@ -372,7 +374,7 @@ namespace visitor{
                     }
                     // get the struct
                     for(const auto& _scope : scopes) {
-                        auto struct_result = _scope->find(Struct(result->second.type));
+                        auto struct_result = _scope->find(semantic::Struct(result->second.type));
                         if(_scope->found(struct_result)) {
                             // found the struct
                             // go over its functions and verify child.identifier is there
@@ -405,7 +407,7 @@ namespace visitor{
 
         // normal function case
         // now generate the function object
-        Function f(functionCallNode->identifier->getID(), paramTypes);
+        semantic::Function f(functionCallNode->identifier->getID(), paramTypes);
         // Now confirm this exists in the function table for any scope
         for(const auto& scope : scopes){
             auto result = scope->find(f);
@@ -523,7 +525,7 @@ namespace visitor{
 
     void SemanticAnalyser::visit(parser::ASTDeclarationNode *declarationNode) {
         // Generate Variable
-        Variable v(declarationNode->type, declarationNode->identifier->getID(),
+        semantic::Variable v(declarationNode->type, declarationNode->identifier->getID(),
                 declarationNode->identifier->ilocExprNode != nullptr, declarationNode->lineNumber);
         // Check current scope
         auto scope = scopes.back();
@@ -601,7 +603,7 @@ namespace visitor{
 
     void SemanticAnalyser::visit(parser::ASTBlockNode *blockNode) {
         // Create new scope
-        scopes.emplace_back(std::make_shared<Scope>());
+        scopes.emplace_back(std::make_shared<semantic::Scope>());
         // Visit each statement in the block
         for(auto &statement : blockNode -> statements)
             statement -> accept(this);
@@ -632,7 +634,7 @@ namespace visitor{
     void SemanticAnalyser::visit(parser::ASTForNode *forNode) {
         // Create new scope for loop params
         // This allows the creation of a new variable only used by the loop
-        scopes.emplace_back(std::make_shared<Scope>());
+        scopes.emplace_back(std::make_shared<semantic::Scope>());
         // First go over the declaration
         if(forNode -> declaration != nullptr )
             forNode -> declaration -> accept(this);
@@ -672,18 +674,18 @@ namespace visitor{
         }
         // Create new scope for function params
         // This allows the creation of a new variables when they are params
-        scopes.emplace_back(std::make_shared<Scope>());
+        scopes.emplace_back(std::make_shared<semantic::Scope>());
         // Generate Function
         // First get the param types vector
         std::vector<std::string> paramTypes;
         for (const auto& param : functionDeclarationNode->parameters){
             paramTypes.emplace_back(param.second);
             // While going over the types add these to the new scope // arrau or not here it is irrelevant
-            scopes.back()->insert(Variable(param.second, param.first, true, functionDeclarationNode->lineNumber));
+            scopes.back()->insert(semantic::Variable(param.second, param.first, true, functionDeclarationNode->lineNumber));
         }
         // NOTE: The scope variable is still viewing the global scope
         // now generate the function object
-        Function f(functionDeclarationNode->type, functionDeclarationNode->identifier->getID(), paramTypes, functionDeclarationNode->lineNumber);
+        semantic::Function f(functionDeclarationNode->type, functionDeclarationNode->identifier->getID(), paramTypes, functionDeclarationNode->lineNumber);
         // Try to insert f
         auto result = scope->find(f);
         // compare the found key and the actual key
@@ -725,7 +727,7 @@ namespace visitor{
         }else{
             // add this to the struct as well (if we are in a struct)
             if(!structID.empty()){
-                structScope->insertTo(Struct(structID), f);
+                structScope->insertTo(semantic::Struct(structID), f);
             }
         }
         // Close function scope
@@ -736,7 +738,7 @@ namespace visitor{
     void SemanticAnalyser::visit(parser::ASTReturnNode *returnNode) {
         // Ensure returns is false
         if(returns){
-            throw ReturnsException();
+            throw semantic::ReturnsException();
         }
         // Update current expression and update currentType
         returnNode -> exprNode -> accept(this);
@@ -748,7 +750,7 @@ namespace visitor{
         // get current scope
         auto scope = scopes.back();
         // Generate a dummy struct object
-        Struct s(structNode->identifier->getID());
+        semantic::Struct s(structNode->identifier->getID());
         // Try to insert f
         auto result = scope->find(s);
         // compare the found key and the actual key
@@ -766,7 +768,7 @@ namespace visitor{
         scope->insert(s);
         structID = s.identifier;
         structScope = scope;
-        scopes.emplace_back(std::make_shared<Scope>(true));
+        scopes.emplace_back(std::make_shared<semantic::Scope>(true));
         // Visit each statement in the block
         for(auto &statement : structNode->structBlock -> statements)
             statement -> accept(this);

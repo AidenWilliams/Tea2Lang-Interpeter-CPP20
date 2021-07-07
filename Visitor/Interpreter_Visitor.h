@@ -13,12 +13,12 @@
 #include <memory>
 #include <iostream>
 
-namespace interpreter {
+namespace interpreter{
     template <typename T>
-    class Variable : public visitor::Variable{
+    class Variable : public semantic::Variable{
     public:
         Variable(const std::string& type, const std::string& identifier, bool array, T value, unsigned int lineNumber) :
-                visitor::Variable(type, identifier, array, lineNumber),
+                semantic::Variable(type, identifier, array, lineNumber),
                 latestValue(value),
                 size(0)
                 {
@@ -26,7 +26,7 @@ namespace interpreter {
                 };
 
         explicit Variable(const std::string& identifier) :
-                visitor::Variable(identifier),
+                semantic::Variable(identifier),
                 size(0)
         {};
 
@@ -43,23 +43,23 @@ namespace interpreter {
         int size;
     };
 
-    class Function : public visitor::Function{
+    class Function : public semantic::Function{
     public:
         Function(const std::string& type, const std::string& identifier, const std::vector<std::string>& paramTypes,
                  std::vector<std::string>  paramIDs,
                  std::shared_ptr<parser::ASTBlockNode> blockNode, unsigned int lineNumber)
                  :
-                 visitor::Function(type, identifier, paramTypes, lineNumber),
+                 semantic::Function(type, identifier, paramTypes, lineNumber),
                  paramIDs(std::move(paramIDs)),
                  blockNode(std::move(blockNode))
                  {};
 
         explicit Function(const std::string& identifier, const std::vector<std::string>& paramTypes) :
-                visitor::Function(identifier, paramTypes)
+                semantic::Function(identifier, paramTypes)
         {};
 
         Function(Function const &f) :
-                visitor::Function(f.type, f.identifier, f.paramTypes, f.lineNumber),
+                semantic::Function(f.type, f.identifier, f.paramTypes, f.lineNumber),
                 paramIDs(f.paramIDs),
                 blockNode(f.blockNode)
         {};
@@ -95,7 +95,7 @@ namespace interpreter {
     template<typename Key, typename Value>
     bool Table<Key, Value>::insert(Value v) {
         if(v.type.empty()){
-            throw visitor::VariableTypeException();
+            throw semantic::VariableTypeException();
         }
         auto result = find(v);
         if(found(result)){

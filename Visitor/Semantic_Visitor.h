@@ -13,19 +13,21 @@
 #include <memory>
 #include "../Lexer/Token.h"
 
-namespace visitor {
-    class ReturnsException : public std::exception{
-        [[nodiscard]] const char* what() const noexcept override{
+namespace semantic {
+    class ReturnsException : public std::exception {
+        [[nodiscard]] const char *what() const noexcept override {
             return "Returns Design Exception";
         }
     };
-    class VariableTypeException : public std::exception{
-        [[nodiscard]] const char* what() const noexcept override{
+
+    class VariableTypeException : public std::exception {
+        [[nodiscard]] const char *what() const noexcept override {
             return "Variable Has No Type Design Exception";
         }
     };
-    class FunctionTypeException : public std::exception{
-        [[nodiscard]] const char* what() const noexcept override{
+
+    class FunctionTypeException : public std::exception {
+        [[nodiscard]] const char *what() const noexcept override {
             return "Function Has No Type Design Exception";
         }
     };
@@ -36,14 +38,13 @@ namespace visitor {
     };
 
 
-    class Variable{
+    class Variable {
     public:
         explicit Variable(std::string identifier) :
                 type(""),
                 identifier(std::move(identifier)),
-                array(),
-                lineNumber(0)
-        {};
+                lineNumber(0) {};
+
         Variable(std::string type, std::string identifier, bool array, unsigned int lineNumber) :
                 type(std::move(type)),
                 identifier(std::move(identifier)),
@@ -58,7 +59,7 @@ namespace visitor {
         unsigned int lineNumber;
     };
 
-    class Function{
+    class Function {
     public:
         Function(std::string identifier, std::vector<std::string> paramTypes) :
                 type(""),
@@ -135,8 +136,10 @@ namespace visitor {
 
         bool erase(std::_Rb_tree_iterator<std::pair<const std::pair<std::basic_string<char, std::char_traits<char>, std::allocator<char>>, std::vector<std::basic_string<char, std::char_traits<char>, std::allocator<char>>>>, Function>> result);
     };
+}
 
 
+namespace visitor {
     class SemanticAnalyser : public Visitor {
     public:
         SemanticAnalyser()
@@ -144,14 +147,14 @@ namespace visitor {
             currentType = std::string();
             structID = std::string();
             returns = false;
-            structScope = std::shared_ptr<Scope>();
+            structScope = std::shared_ptr<semantic::Scope>();
         };
         ~SemanticAnalyser() = default;
 
-        std::vector<std::shared_ptr<Scope>> scopes;
+        std::vector<std::shared_ptr<semantic::Scope>> scopes;
         std::string currentType;
         std::string structID;
-        std::shared_ptr<Scope> structScope;
+        std::shared_ptr<semantic::Scope> structScope;
         bool returns;
 
         void visit(parser::ASTProgramNode* programNode) override;
