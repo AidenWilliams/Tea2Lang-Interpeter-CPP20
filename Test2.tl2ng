@@ -1,0 +1,8 @@
+let x : char = 'y';
+let arr[3] : char = {'a', 'r', 'r'};
+
+let i : auto = 0;
+while( i < 3 ){
+	print arr[i];
+	i = i + 1;
+}

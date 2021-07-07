@@ -1,0 +1,76 @@
+auto XGreaterY(toCompare[] : float){ // 1
+    let ans : auto = false;
+    if(toCompare[0] > toCompare[1])   {
+        ans=true;
+    }
+    return ans;
+}
+
+auto XGreaterY(x : int, y : int){
+    if(x>y){ //10
+        return true;
+    }else{
+        return false;
+    }
+}
+
+float Average(toAverage[] : float , count : float){
+    let total : float = 0.0;
+    for(let i : float = 0.0; i < count; i=i+1.0){
+        total = total + toAverage[i]; //20
+    }
+    return total / count;
+    }
+
+let arr1[2] : float;
+let arr2[4] : float = {2.4, 2.8, 10.4, 12.1};
+
+arr1[0] = 22.4;
+arr1[1] = 6.25;
+print arr1[1]; //6.25 //30
+print XGreaterY(arr1); //true
+print XGreaterY(2,3); //false
+print Average(arr2, 4.0); //6.92
+
+tlstruct Vector{
+    let self : Vector;
+    let x : float = 0.0;
+    let y : float = 0.0;
+    let z : float = 0.0;
+
+    Vector Scale(s : float){ //40
+        x=x*s;
+        y=y*s;
+        z=z*s;
+        return self;//Because functions always return something
+    }
+    Vector Translate(tx : float,ty : float,tz : float){
+        x=x+tx;
+        y=y+ty;
+        z=z+tz;
+        return self;//Language does not support void //50
+    }
+}
+
+Vector Add(v1 : Vector, v2 : Vector){
+    let v3 : Vector;
+    v3.x = v1.x + v2.x;
+    v3.y = v1.y + v2.y;
+    v3.z = v1.z + v2.z;
+    return v3;
+} //60
+
+let v1 : Vector;
+v1.x=1.0;
+v1.y=2.0;
+v1.z=2.0;
+
+let v2 : Vector;
+v2.x=2.0;
+v2.y=1.2;
+v2.z=0.0; //70
+
+let v3 : Vector = Add(v1,v2);
+print v3.x;//3.0
+print v3.y;//3.2
+print v3.z;//2.0

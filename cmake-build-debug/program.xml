@@ -1,0 +1,112 @@
+<program>
+    <functionDeclaration type = "float">
+        <id>Factorial</id>
+        <param type = "float">x</param>
+        <block>
+            <if>
+                <condition>
+                    <bin op = "&gt;=">
+                        <id>
+                            x
+                        </id>
+                        <float>1.000000</float>
+                    </bin>
+                </condition>
+                <ifBlock>
+                    <block>
+                        <return>
+                            <bin op = "*">
+                                <id>
+                                    x
+                                </id>
+                                <functionEcall>
+                                    <id>Factorial</id>
+                                    <param>
+                                        <bin op = "-">
+                                            <id>
+                                                x
+                                            </id>
+                                            <float>1.000000</float>
+                                        </bin>
+                                    </param>
+                                </functionEcall>
+                            </bin>
+                        </return>
+                    </block>
+                </ifBlock>
+            <elseBlock>
+                <block>
+                    <return>
+                        <float>1.000000</float>
+                    </return>
+                </block>
+            </elseBlock>
+            </if>
+        </block>
+    </functionDeclaration>
+    <print>
+        <functionEcall>
+            <id>Factorial</id>
+            <param>
+                <float>5.000000</float>
+            </param>
+        </functionEcall>
+    </print>
+    <functionDeclaration type = "float">
+        <id>Factorial</id>
+        <param type = "float">x</param>
+        <param type = "float">toMakeAnExample</param>
+        <block>
+            <if>
+                <condition>
+                    <bin op = "&gt;=">
+                        <id>
+                            x
+                        </id>
+                        <float>1.000000</float>
+                    </bin>
+                </condition>
+                <ifBlock>
+                    <block>
+                        <return>
+                            <bin op = "*">
+                                <id>
+                                    x
+                                </id>
+                                <functionEcall>
+                                    <id>Factorial</id>
+                                    <param>
+                                        <bin op = "-">
+                                            <id>
+                                                x
+                                            </id>
+                                            <float>1.000000</float>
+                                        </bin>
+                                    </param>
+                                </functionEcall>
+                            </bin>
+                        </return>
+                    </block>
+                </ifBlock>
+            <elseBlock>
+                <block>
+                    <return>
+                        <float>1.000000</float>
+                    </return>
+                </block>
+            </elseBlock>
+            </if>
+        </block>
+    </functionDeclaration>
+    <print>
+        <functionEcall>
+            <id>Factorial</id>
+            <param>
+                <float>5.000000</float>
+            </param>
+            <param>
+                <float>1.000000</float>
+            </param>
+        </functionEcall>
+    </print>
+</program>

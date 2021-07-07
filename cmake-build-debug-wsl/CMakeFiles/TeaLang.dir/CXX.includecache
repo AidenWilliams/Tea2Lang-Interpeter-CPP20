@@ -1,0 +1,68 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/mnt/c/Users/Aiden Williams/CLionProjects/Tea2Lang-Interpeter-CPP20/Lexer/Token.h
+string
+-
+regex
+-
+utility
+-
+
+/mnt/c/Users/Aiden Williams/CLionProjects/Tea2Lang-Interpeter-CPP20/Parser/AST.h
+string
+-
+utility
+-
+vector
+-
+memory
+-
+../Visitor/Visitor.h
+/mnt/c/Users/Aiden Williams/CLionProjects/Tea2Lang-Interpeter-CPP20/Visitor/Visitor.h
+
+/mnt/c/Users/Aiden Williams/CLionProjects/Tea2Lang-Interpeter-CPP20/Visitor/Interpreter_Visitor.cpp
+Interpreter_Visitor.h
+/mnt/c/Users/Aiden Williams/CLionProjects/Tea2Lang-Interpeter-CPP20/Visitor/Interpreter_Visitor.h
+
+/mnt/c/Users/Aiden Williams/CLionProjects/Tea2Lang-Interpeter-CPP20/Visitor/Interpreter_Visitor.h
+Visitor.h
+/mnt/c/Users/Aiden Williams/CLionProjects/Tea2Lang-Interpeter-CPP20/Visitor/Visitor.h
+Semantic_Visitor.h
+/mnt/c/Users/Aiden Williams/CLionProjects/Tea2Lang-Interpeter-CPP20/Visitor/Semantic_Visitor.h
+utility
+-
+vector
+-
+map
+-
+memory
+-
+iostream
+-
+
+/mnt/c/Users/Aiden Williams/CLionProjects/Tea2Lang-Interpeter-CPP20/Visitor/Semantic_Visitor.h
+Visitor.h
+/mnt/c/Users/Aiden Williams/CLionProjects/Tea2Lang-Interpeter-CPP20/Visitor/Visitor.h
+../Parser/AST.h
+/mnt/c/Users/Aiden Williams/CLionProjects/Tea2Lang-Interpeter-CPP20/Parser/AST.h
+utility
+-
+vector
+-
+map
+-
+memory
+-
+../Lexer/Token.h
+/mnt/c/Users/Aiden Williams/CLionProjects/Tea2Lang-Interpeter-CPP20/Lexer/Token.h
+
+/mnt/c/Users/Aiden Williams/CLionProjects/Tea2Lang-Interpeter-CPP20/Visitor/Visitor.h
+string
+-
+

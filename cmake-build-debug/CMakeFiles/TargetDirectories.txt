@@ -1,0 +1,3 @@
+C:/Users/Aiden Williams/CLionProjects/Tea2Lang-Interpeter-CPP20/cmake-build-debug/CMakeFiles/TeaLang.dir
+C:/Users/Aiden Williams/CLionProjects/Tea2Lang-Interpeter-CPP20/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/Aiden Williams/CLionProjects/Tea2Lang-Interpeter-CPP20/cmake-build-debug/CMakeFiles/rebuild_cache.dir

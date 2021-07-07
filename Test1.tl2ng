@@ -1,0 +1,6 @@
+let x : auto = true;
+
+if(x){
+    let y : auto= 10.0;
+    print y;
+}

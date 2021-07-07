@@ -1,0 +1,9 @@
+// Function declaration and call - Parser fail
+
+float Factorial( x : float)
+    if (x >= 1)
+            return x * Factorial(x - 1);
+    else
+            return 1;
+
+print Factorial(5.0);

@@ -1,0 +1,460 @@
+<program>
+    <functionDeclaration type = "auto">
+        <id>XGreaterY</id>
+        <param type = "int">toCompare</param>
+        <block>
+            <declaration>
+                <id type = "auto">ans</id>
+                <bool>false</bool>
+            </declaration>
+            <if>
+                <condition>
+                    <bin op = "&gt;">
+                        <id>
+                            toCompare
+                            <int>0</int>
+                        </id>
+                        <id>
+                            toCompare
+                            <int>1</int>
+                        </id>
+                    </bin>
+                </condition>
+                <ifBlock>
+                    <block>
+                        <assign>
+                            <id>ans</id>
+                            <bool>true</bool>
+                        </assign>
+                    </block>
+                </ifBlock>
+            </if>
+            <return>
+                <id>
+                    ans
+                </id>
+            </return>
+        </block>
+    </functionDeclaration>
+    <functionDeclaration type = "auto">
+        <id>XGreaterY</id>
+        <param type = "int">x</param>
+        <param type = "int">y</param>
+        <block>
+            <if>
+                <condition>
+                    <bin op = "&gt;">
+                        <id>
+                            x
+                        </id>
+                        <id>
+                            y
+                        </id>
+                    </bin>
+                </condition>
+                <ifBlock>
+                    <block>
+                        <return>
+                            <bool>true</bool>
+                        </return>
+                    </block>
+                </ifBlock>
+            <elseBlock>
+                <block>
+                    <return>
+                        <bool>false</bool>
+                    </return>
+                </block>
+            </elseBlock>
+            </if>
+        </block>
+    </functionDeclaration>
+    <functionDeclaration type = "float">
+        <id>Average</id>
+        <param type = "float">toAverage</param>
+        <param type = "int">count</param>
+        <block>
+            <declaration>
+                <id type = "float">total</id>
+                <float>0.000000</float>
+            </declaration>
+            <for>
+                <declaration>
+                    <declaration>
+                        <id type = "int">i</id>
+                        <int>0</int>
+                    </declaration>
+                </declaration>
+                <condition>
+                    <bin op = "&lt;">
+                        <id>
+                            i
+                        </id>
+                        <id>
+                            count
+                        </id>
+                    </bin>
+                </condition>
+                <assignment>
+                    <assign>
+                        <id>i</id>
+                        <bin op = "+">
+                            <id>
+                                i
+                            </id>
+                            <int>1</int>
+                        </bin>
+                    </assign>
+                </assignment>
+                <block>
+                    <assign>
+                        <id>total</id>
+                        <bin op = "+">
+                            <id>
+                                total
+                            </id>
+                            <id>
+                                toAverage
+                                <id>
+                                    i
+                                </id>
+                            </id>
+                        </bin>
+                    </assign>
+                </block>
+            </for>
+            <return>
+                <bin op = "/">
+                    <id>
+                        total
+                    </id>
+                    <id>
+                        count
+                    </id>
+                </bin>
+            </return>
+        </block>
+    </functionDeclaration>
+    <declaration>
+        <id type = "float">arr1</id>
+    </declaration>
+    <declaration>
+        <id type = "float">arr2</id>
+        <Array>
+            <item>
+                <float>2.400000</float>
+            </item>
+            <item>
+                <float>2.800000</float>
+            </item>
+            <item>
+                <float>10.400000</float>
+            </item>
+            <item>
+                <float>12.100000</float>
+            </item>
+        </Array>
+    </declaration>
+    <assign>
+        <id>arr1</id>
+        <float>22.400000</float>
+    </assign>
+    <assign>
+        <id>arr1</id>
+        <float>6.250000</float>
+    </assign>
+    <print>
+        <id>
+            arr1
+            <int>1</int>
+        </id>
+    </print>
+    <print>
+        <functionEcall>
+            <id>XGreaterY</id>
+            <param>
+                <id>
+                    arr1
+                </id>
+            </param>
+        </functionEcall>
+    </print>
+    <print>
+        <functionEcall>
+            <id>Average</id>
+            <param>
+                <id>
+                    arr2
+                </id>
+            </param>
+        </functionEcall>
+    </print>
+    <print>
+        <functionEcall>
+            <id>XGreaterY</id>
+            <param>
+                <int>2</int>
+            </param>
+            <param>
+                <int>3</int>
+            </param>
+        </functionEcall>
+    </print>
+    <struct>
+        <id>Vector</id>
+        <structBlock>
+            <block>
+                <declaration>
+                    <id type = "float">x</id>
+                    <float>0.000000</float>
+                </declaration>
+                <declaration>
+                    <id type = "float">y</id>
+                    <float>0.000000</float>
+                </declaration>
+                <declaration>
+                    <id type = "float">z</id>
+                    <float>0.000000</float>
+                </declaration>
+                <functionDeclaration type = "int">
+                    <id>Scale</id>
+                    <param type = "float">s</param>
+                    <block>
+                        <assign>
+                            <id>x</id>
+                            <bin op = "*">
+                                <id>
+                                    x
+                                </id>
+                                <id>
+                                    s
+                                </id>
+                            </bin>
+                        </assign>
+                        <assign>
+                            <id>y</id>
+                            <bin op = "*">
+                                <id>
+                                    y
+                                </id>
+                                <id>
+                                    s
+                                </id>
+                            </bin>
+                        </assign>
+                        <assign>
+                            <id>z</id>
+                            <bin op = "*">
+                                <id>
+                                    z
+                                </id>
+                                <id>
+                                    s
+                                </id>
+                            </bin>
+                        </assign>
+                        <return>
+                            <int>0</int>
+                        </return>
+                    </block>
+                </functionDeclaration>
+                <functionDeclaration type = "int">
+                    <id>Translate</id>
+                    <param type = "float">tx</param>
+                    <param type = "float">ty</param>
+                    <param type = "float">tz</param>
+                    <block>
+                        <assign>
+                            <id>x</id>
+                            <bin op = "+">
+                                <id>
+                                    x
+                                </id>
+                                <id>
+                                    tx
+                                </id>
+                            </bin>
+                        </assign>
+                        <assign>
+                            <id>y</id>
+                            <bin op = "+">
+                                <id>
+                                    y
+                                </id>
+                                <id>
+                                    ty
+                                </id>
+                            </bin>
+                        </assign>
+                        <assign>
+                            <id>z</id>
+                            <bin op = "+">
+                                <id>
+                                    z
+                                </id>
+                                <id>
+                                    tz
+                                </id>
+                            </bin>
+                        </assign>
+                        <return>
+                            <int>0</int>
+                        </return>
+                    </block>
+                </functionDeclaration>
+            </block>
+        </structBlock>
+    </struct>
+    <functionDeclaration type = "Vector">
+        <id>Add</id>
+        <param type = "Vector">v1</param>
+        <param type = "Vector">v2</param>
+        <block>
+            <declaration>
+                <id type = "Vector">v3</id>
+            </declaration>
+            <assign>
+                <id>v3.x</id>
+                <bin op = "+">
+                    <id>
+                        v1.x
+                    </id>
+                    <id>
+                        v2.x
+                    </id>
+                </bin>
+            </assign>
+            <assign>
+                <id>v3.y</id>
+                <bin op = "+">
+                    <id>
+                        v1.y
+                    </id>
+                    <id>
+                        v2.y
+                    </id>
+                </bin>
+            </assign>
+            <assign>
+                <id>v3.z</id>
+                <bin op = "+">
+                    <id>
+                        v1.z
+                    </id>
+                    <id>
+                        v2.z
+                    </id>
+                </bin>
+            </assign>
+            <return>
+                <id>
+                    v3
+                </id>
+            </return>
+        </block>
+    </functionDeclaration>
+    <declaration>
+        <id type = "Vector">v1</id>
+    </declaration>
+    <assign>
+        <id>v1.x</id>
+        <float>1.000000</float>
+    </assign>
+    <assign>
+        <id>v1.y</id>
+        <float>2.000000</float>
+    </assign>
+    <assign>
+        <id>v1.z</id>
+        <float>2.000000</float>
+    </assign>
+    <declaration>
+        <id type = "Vector">v2</id>
+    </declaration>
+    <assign>
+        <id>v2.x</id>
+        <float>2.000000</float>
+    </assign>
+    <assign>
+        <id>v2.y</id>
+        <float>1.200000</float>
+    </assign>
+    <assign>
+        <id>v2.z</id>
+        <float>0.000000</float>
+    </assign>
+    <declaration>
+        <id type = "Vector">v3</id>
+        <functionEcall>
+            <id>Add</id>
+            <param>
+                <id>
+                    v1
+                </id>
+            </param>
+            <param>
+                <id>
+                    v2
+                </id>
+            </param>
+        </functionEcall>
+    </declaration>
+    <print>
+        <id>
+            v3.x
+        </id>
+    </print>
+    <print>
+        <id>
+            v3.y
+        </id>
+    </print>
+    <print>
+        <id>
+            v3.z
+        </id>
+    </print>
+    <functionScall>
+        <id>v3.translate</id>
+        <param>
+            <float>1.000000</float>
+        </param>
+        <param>
+            <float>1.000000</float>
+        </param>
+        <param>
+            <float>1.000000</float>
+        </param>
+    </functionScall>
+    <declaration>
+        <id type = "Vector">v4</id>
+        <functionEcall>
+            <id>Add</id>
+            <param>
+                <id>
+                    v1
+                </id>
+            </param>
+            <param>
+                <id>
+                    v3
+                </id>
+            </param>
+        </functionEcall>
+    </declaration>
+    <print>
+        <id>
+            v3.x
+        </id>
+    </print>
+    <print>
+        <id>
+            v3.y
+        </id>
+    </print>
+    <print>
+        <id>
+            v3.z
+        </id>
+    </print>
+</program>
