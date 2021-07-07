@@ -121,11 +121,10 @@ int main(int argc, char **argv) {
             "print v3.z;//2.0\n"
             "\n"
             "v3.Translate(1.0, 1.0, 1.0);\n"
-            "\n"
-            "let v4 : Vector = Add(v1, v3);\n"//80
-            "print v4.x;//5.0\n"
-            "print v4.y;//6.2\n"
-            "print v4.z;//5.0";
+            "print v3.x;//4.0\n"
+            "print v3.y;//4.2\n"
+            "print v3.z;//3.0\n"
+            "\n";
     if (std::string("-l") == argv[1]){
 //        std::cout << "TESTING LEXER" << std::endl;
         lexer::Lexer lexer;

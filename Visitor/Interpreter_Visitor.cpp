@@ -831,24 +831,6 @@ namespace visitor {
 
         f.blockNode -> accept(this);
         function = false;
-        // the function has completed its run now we pop back the variables we added
-        for (const auto& pair : toPop){
-            /*
-             * Now we pop the variables
-            */
-            if(pair.type == "int"){
-                pair.array ? intArrayTable.pop_back(pair.id) : intTable.pop_back(pair.id);
-            }else if(pair.type == "float"){
-                pair.array ? floatArrayTable.pop_back(pair.id) : floatTable.pop_back(pair.id);
-            }else if(pair.type == "bool"){
-                pair.array ? boolArrayTable.pop_back(pair.id) : boolTable.pop_back(pair.id);
-            }else if(pair.type == "string"){
-                pair.array ? stringArrayTable.pop_back(pair.id) : stringTable.pop_back(pair.id);
-            }else if(pair.type == "char"){
-                pair.array ? charArrayTable.pop_back(pair.id) : charTable.pop_back(pair.id);
-            }
-        }
-        toPop = std::vector<interpreter::Popable>();
     }
     // Expressions
 
@@ -939,24 +921,6 @@ namespace visitor {
 
         f.blockNode -> accept(this);
         function = false;
-        // the function has completed its run now we pop back the variables we added
-        for (const auto& pair : toPop){
-            /*
-             * Now we pop the variables
-            */
-            if(pair.type == "int"){
-                pair.array ? intArrayTable.pop_back(pair.id) : intTable.pop_back(pair.id);
-            }else if(pair.type == "float"){
-                pair.array ? floatArrayTable.pop_back(pair.id) : floatTable.pop_back(pair.id);
-            }else if(pair.type == "bool"){
-                pair.array ? boolArrayTable.pop_back(pair.id) : boolTable.pop_back(pair.id);
-            }else if(pair.type == "string"){
-                pair.array ? stringArrayTable.pop_back(pair.id) : stringTable.pop_back(pair.id);
-            }else if(pair.type == "char"){
-                pair.array ? charArrayTable.pop_back(pair.id) : charTable.pop_back(pair.id);
-            }
-        }
-        toPop = std::vector<interpreter::Popable>();
     }
 
     void Interpreter::visit(parser::ASTDeclarationNode *declarationNode) {
@@ -1345,40 +1309,169 @@ namespace visitor {
         returnNode -> exprNode -> accept(this);
         // make sure to not pop_back the returns value
         auto save = interpreter::Popable(currentType, currentID, array);
-        // find the return
-        for (auto it = toPop.begin(); it != toPop.end(); ++it){
-            if(lexer::isStruct(save.type)){
-                // match begin of toPop with save.id + "."
-                bool ok_so_far = false;
-                bool _struct = false;
-                bool fullstop = false;
-                if(structID.empty()) structID = currentID;
-                for(int i = 0; i < it->id.size(); ++i){
-                    if(!_struct){
-                        ok_so_far = (structID.at(i) == it->id.at(i));
-                        _struct = (i == structID.size()-1);
-                    }
-                    fullstop = '.' == it->id.at(i);
-                    if(fullstop) break;
-                }
-                if(ok_so_far && _struct && fullstop){
-                    toPop.erase(it);
-                    if(it == toPop.end()) --it; //risky
-                }
+        // Save the return
+        std::vector<interpreter::Popable> struct_saves;
+        if(save.type == "int"){
+            if(!save.array){
+                auto returnVariable = intTable.get(save.id);
+                pop();
+                intTable.pop_back(save.id);
+                intTable.insert(returnVariable);
             }else{
-                if(it->id == save.id){
-                    toPop.erase(it);
-                    if(it == toPop.end()) --it; //risky
+                auto returnVariable = intArrayTable.get(save.id);
+                pop();
+                intArrayTable.pop_back(save.id);
+                intArrayTable.insert(returnVariable);
+            }
+        }else if(save.type == "float"){
+            if(!save.array) {
+                auto returnVariable = floatTable.get(save.id);
+                pop();
+                floatTable.pop_back(save.id);
+                floatTable.insert(returnVariable);
+            }else{
+                auto returnVariable = floatArrayTable.get(save.id);
+                pop();
+                floatArrayTable.pop_back(save.id);
+                floatArrayTable.insert(returnVariable);
+            }
+        }else if(save.type == "bool"){
+            if(!save.array){
+                auto returnVariable = boolTable.get(save.id);
+                pop();
+                boolTable.pop_back(save.id);
+                boolTable.insert(returnVariable);
+            }else{
+                auto returnVariable = boolArrayTable.get(save.id);
+                pop();
+                boolArrayTable.pop_back(save.id);
+                boolArrayTable.insert(returnVariable);
+            }
+        }else if(save.type == "string"){
+            if(!save.array){
+                auto returnVariable = stringTable.get(save.id);
+                pop();
+                stringTable.pop_back(save.id);
+                stringTable.insert(returnVariable);
+            }else{
+                auto returnVariable = stringArrayTable.get(save.id);
+                pop();
+                stringArrayTable.pop_back(save.id);
+                stringArrayTable.insert(returnVariable);
+            }
+        }else if(save.type == "char"){
+            if(!save.array){
+                auto returnVariable = charTable.get(save.id);
+                pop();
+                charTable.pop_back(save.id);
+                charTable.insert(returnVariable);
+            }else{
+                auto returnVariable = charArrayTable.get(save.id);
+                pop();
+                charArrayTable.pop_back(save.id);
+                charArrayTable.insert(returnVariable);
+            }
+        }else if(lexer::isStruct(save.type)){
+            // match begin of toPop with save.id + "."
+            bool ok_so_far = false;
+            bool _struct = false;
+            bool fullstop = false;
+            bool unique = true;
+            if(structID.empty() || structID == "self") structID = currentID;
+            // get struct variables
+            for (auto & it : toPop) {
+                for (int i = 0; i < it.id.size(); ++i) {
+                    if (!_struct) {
+                        ok_so_far = (structID.at(i) == it.id.at(i));
+                        _struct = (i == structID.size() - 1);
+                    }
+                    fullstop = '.' == it.id.at(i);
+                    if (fullstop) break;
+                }
+                if (ok_so_far && _struct && fullstop) { // found
+                    // check if has already been placed in struct_saves
+                    for(auto & struct_save : struct_saves){
+                        if(struct_save.id == it.id){
+                            unique = false;
+                            break;
+                        }
+                    }
+                    if(unique){
+                        struct_saves.emplace_back(it);
+                    }
+                    unique = true;
+                }
+                _struct = false;
+            }
+            // now re insert the saved states
+            for(auto & struct_save : struct_saves){
+                if(struct_save.type == "int"){
+                    if(!struct_save.array){
+                        auto returnVariable = intTable.get(struct_save.id);
+                        pop();
+                        intTable.pop_back(struct_save.id);
+                        intTable.insert(returnVariable);
+                    }else{
+                        auto returnVariable = intArrayTable.get(struct_save.id);
+                        pop();
+                        intArrayTable.pop_back(struct_save.id);
+                        intArrayTable.insert(returnVariable);
+                    }
+                }else if(struct_save.type == "float"){
+                    if(!struct_save.array) {
+                        auto returnVariable = floatTable.get(struct_save.id);
+                        pop();
+                        floatTable.pop_back(struct_save.id);
+                        floatTable.insert(returnVariable);
+                    }else{
+                        auto returnVariable = floatArrayTable.get(struct_save.id);
+                        pop();
+                        floatArrayTable.pop_back(struct_save.id);
+                        floatArrayTable.insert(returnVariable);
+                    }
+                }else if(struct_save.type == "bool"){
+                    if(!struct_save.array){
+                        auto returnVariable = boolTable.get(struct_save.id);
+                        pop();
+                        boolTable.pop_back(struct_save.id);
+                        boolTable.insert(returnVariable);
+                    }else{
+                        auto returnVariable = boolArrayTable.get(struct_save.id);
+                        pop();
+                        boolArrayTable.pop_back(struct_save.id);
+                        boolArrayTable.insert(returnVariable);
+                    }
                 }
             }
         }
-
+        pop();
     }
 
     void Interpreter::visit(parser::ASTStructNode *structNode) {
         // visit the block to define the functions
         structTable.insert(std::pair<std::string, interpreter::Struct>
                 (std::make_pair(structNode->identifier->getID(), interpreter::Struct(structNode->identifier->getID(), structNode->structBlock))));
+    }
+
+    void Interpreter::pop() {
+        // the function has completed its run now we pop back the variables we added
+        for (const auto& pair : toPop){
+            /*
+             * Now we pop the variables
+            */
+            if(pair.type == "int"){
+                pair.array ? intArrayTable.pop_back(pair.id) : intTable.pop_back(pair.id);
+            }else if(pair.type == "float"){
+                pair.array ? floatArrayTable.pop_back(pair.id) : floatTable.pop_back(pair.id);
+            }else if(pair.type == "bool"){
+                pair.array ? boolArrayTable.pop_back(pair.id) : boolTable.pop_back(pair.id);
+            }else if(pair.type == "string"){
+                pair.array ? stringArrayTable.pop_back(pair.id) : stringTable.pop_back(pair.id);
+            }else if(pair.type == "char"){
+                pair.array ? charArrayTable.pop_back(pair.id) : charTable.pop_back(pair.id);
+            }
+        }
+        toPop = std::vector<interpreter::Popable>();
     }
     // Statements
 }

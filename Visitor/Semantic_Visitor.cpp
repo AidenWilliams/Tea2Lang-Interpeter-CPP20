@@ -455,7 +455,7 @@ namespace visitor{
             // this means that the identifier of identifierNode must be a struct
             for(const auto& scope : scopes) {
                 // First find the variable (remember identifierNode->identifier is a variable of a type)
-                auto result = scope->find(Variable(parent.identifier));
+                auto result = scope->find(semantic::Variable(parent.identifier));
                 if(scope->found(result)) {
                     // we found it, now does it have a struct type?
                     if(!lexer::isStruct(result->second.type)){
@@ -465,7 +465,7 @@ namespace visitor{
                     }
                     // get the struct
                     for(const auto& _scope : scopes) {
-                        auto struct_result = _scope->find(Struct(result->second.type));
+                        auto struct_result = _scope->find(semantic::Struct(result->second.type));
                         if(_scope->found(struct_result)) {
                             // found the struct
                             // go over its functions and verify child.identifier is there
@@ -498,7 +498,7 @@ namespace visitor{
 
         // normal function case
         // now generate the function object
-        Function f(sFunctionCallNode->identifier->getID(), paramTypes);
+        semantic::Function f(sFunctionCallNode->identifier->getID(), paramTypes);
         // Now confirm this exists in the function table for any scope
         for(const auto& scope : scopes){
             auto result = scope->find(f);
@@ -575,7 +575,7 @@ namespace visitor{
             scope->insert(v);
             // add this to the struct as well (if we are in a struct)
             if(!structID.empty()){
-                structScope->insertTo(Struct(structID), v);
+                structScope->insertTo(semantic::Struct(structID), v);
             }
         }else{
             // throw an error since type casting is not supported
@@ -711,10 +711,10 @@ namespace visitor{
             if(functionDeclarationNode->type == "auto"){
                 // remove function and re insert it with the new type
                 scope->erase(scope->find(f));
-                scope->insert(Function(currentType, functionDeclarationNode->identifier->getID(), paramTypes, functionDeclarationNode->lineNumber));
+                scope->insert(semantic::Function(currentType, functionDeclarationNode->identifier->getID(), paramTypes, functionDeclarationNode->lineNumber));
                 // add this to the struct as well (if we are in a struct)
                 if(!structID.empty()){
-                    structScope->insertTo(Struct(structID), f);
+                    structScope->insertTo(semantic::Struct(structID), f);
                 }
             }else{
                 // Check current type with the declaration type

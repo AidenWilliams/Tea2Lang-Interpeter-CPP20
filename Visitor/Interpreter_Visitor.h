@@ -31,7 +31,7 @@ namespace interpreter{
         {};
 
         Variable(Variable const &v) :
-                visitor::Variable(v.type, v.identifier, v.array, v.lineNumber),
+                semantic::Variable(v.type, v.identifier, v.array, v.lineNumber),
                 latestValue(v.latestValue),
                 values(v.values),
                 size(v.size)
@@ -263,6 +263,8 @@ namespace visitor {
         auto find(const interpreter::Function& f);
         bool insert(const interpreter::Function& f);
         bool found(std::_Rb_tree_iterator<std::pair<const std::pair<std::basic_string<char, std::char_traits<char>, std::allocator<char>>, std::vector<std::basic_string<char, std::char_traits<char>, std::allocator<char>>>>, interpreter::Function>> result);
+
+        void pop();
 
         void visit(parser::ASTProgramNode* programNode) override;
 
