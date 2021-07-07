@@ -378,7 +378,7 @@ namespace lexer {
     }
 
     TOKEN_TYPE fromState28(const std::string &s) {
-        // Can only be Closing Square
+        // Can only be FULLSTOP
         if (isFullstop(s)) return TOK_FULLSTOP;
         return TOK_INVALID;
     }

@@ -56,7 +56,6 @@ namespace semantic{
         if(!found(result)){
             throw StructInsertionException();
         }
-//        structTable[result->first].insert(v);
         auto cpy(result -> second);
         // add the new value
         cpy.insert(v);
@@ -70,7 +69,6 @@ namespace semantic{
         if(!found(result)){
             throw StructInsertionException();
         }
-//        structTable[result->first].insert(f);
         auto cpy(result -> second);
         // add the new value
         cpy.insert(f);
@@ -246,7 +244,7 @@ namespace visitor{
         }
     }
 
-    void SemanticAnalyser::visit(parser::ASTIdentifierNode *identifierNode) {//TODO::HANDLE variable[] case
+    void SemanticAnalyser::visit(parser::ASTIdentifierNode *identifierNode) {
         // There are 2 cases here
         // one where this is a normal variable (i.e. no '.')
         // the other when the identifier is referencing another variable

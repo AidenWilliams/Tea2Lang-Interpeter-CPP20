@@ -216,9 +216,6 @@ namespace visitor {
         std::string currentType;
         std::string currentID;
         std::string structID;
-        std::string returnId;
-        std::string returnType;
-        std::string self;
         std::map<std::string, interpreter::Struct> structTable;
         // variable name, struct name
         std::map<std::string, std::string> struct_variable;

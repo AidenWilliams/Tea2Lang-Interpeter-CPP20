@@ -120,10 +120,16 @@ int main(int argc, char **argv) {
             "print v3.y;//3.2\n"
             "print v3.z;//2.0\n"
             "\n"
-            "v3.Translate(1.0, 1.0, 1.0);\n"
-            "print v3.x;//4.0\n"
-            "print v3.y;//4.2\n"
-            "print v3.z;//3.0\n"
+//            "v3.Translate(1.0, 1.0, 1.0);\n"
+//            "print v3.x;//4.0\n"
+//            "print v3.y;//4.2\n"
+//            "print v3.z;//3.0\n"
+//            "let v4 : Vector = v3;\n"
+//            "print v4.x;//4.0\n"
+//            "print v4.y;//4.2\n"
+//            "print v4.z;//3.0\n"
+//            "let arrV[2] : Vector = { v1, v2 };\n"
+//            "print arrV[1].x;\n"
             "\n";
     if (std::string("-l") == argv[1]){
 //        std::cout << "TESTING LEXER" << std::endl;
